@@ -1,0 +1,654 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:textile/views/drawer/dashboard/dashboard_controller.dart';
+import 'package:textile/views/drawer/drawer.dart';
+import 'package:textile/widgets/colors.dart';
+import 'package:textile/widgets/custom_app_bar.dart';
+
+class Dashboard extends StatelessWidget {
+  const Dashboard({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.put(DashboardController());
+
+    return Scaffold(
+      key: controller.scaffoldKey,
+      appBar: CustomAppBar(onMenuPressed: controller.openDrawer),
+      drawer: const CustomDrawer(),
+      backgroundColor: AppColors.background,
+      body: const _DashboardBody(),
+    );
+  }
+}
+
+class _DashboardBody extends StatelessWidget {
+  const _DashboardBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final isNarrow = width < 900;
+        final isVeryNarrow = width < 650;
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(18),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1250),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const _Header(),
+                  const SizedBox(height: 14),
+                  _KpiGrid(
+                    crossAxisCount: isVeryNarrow ? 1 : (isNarrow ? 2 : 4),
+                    items: const [
+                      _KpiData(
+                        title: 'Textile Importers',
+                        value: '47,117',
+                        icon: Icons.check_circle,
+                        iconBg: Color(0xFF2D7373),
+                        accent: Color(0xFF2D7373),
+                      ),
+                      _KpiData(
+                        title: 'Textile Exporters',
+                        value: '1,079',
+                        subValue: '7',
+                        icon: Icons.cancel,
+                        iconBg: Color(0xFFE74C3C),
+                        accent: Color(0xFFE74C3C),
+                      ),
+                      _KpiData(
+                        title: 'Emails Verified',
+                        value: '12,480',
+                        icon: Icons.verified,
+                        iconBg: Color(0xFFF1C40F),
+                        accent: Color(0xFFF1C40F),
+                      ),
+                      _KpiData(
+                        title: 'Active Searches',
+                        value: '328',
+                        icon: Icons.shopping_cart,
+                        iconBg: Color(0xFF2ECC71),
+                        accent: Color(0xFF2ECC71),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  if (isNarrow) ...[
+                    const _MapAndCountries(),
+                    const SizedBox(height: 16),
+                    const _TopBrands(),
+                  ] else
+                    const Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(flex: 7, child: _MapAndCountries()),
+                        SizedBox(width: 16),
+                        Expanded(flex: 4, child: _TopBrands()),
+                      ],
+                    ),
+                  const SizedBox(height: 18),
+                  _SectionTitle(
+                    title: 'Quick Actions',
+                    subtitle: 'Use these to jump into common workflows.',
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      _ActionCard(
+                        icon: Icons.search,
+                        title: 'Search Importers',
+                        subtitle: 'By product specification',
+                        onTap: () => Get.snackbar('Coming soon', 'Open Search Importers'),
+                      ),
+                      _ActionCard(
+                        icon: Icons.category,
+                        title: 'Search Exporters',
+                        subtitle: 'By product specification',
+                        onTap: () => Get.snackbar('Coming soon', 'Open Search Exporters'),
+                      ),
+                      _ActionCard(
+                        icon: Icons.email,
+                        title: 'Email Importers',
+                        subtitle: 'City & Country wise',
+                        onTap: () => Get.snackbar('Coming soon', 'Open Email Importers'),
+                      ),
+                      _ActionCard(
+                        icon: Icons.folder,
+                        title: 'My Folders',
+                        subtitle: 'Saved lists and exports',
+                        onTap: () => Get.snackbar('Coming soon', 'Open Folders'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _Header extends StatelessWidget {
+  const _Header();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: const [
+          BoxShadow(color: Color(0x14000000), blurRadius: 18, offset: Offset(0, 10)),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            height: 44,
+            width: 44,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.dashboard_outlined, color: AppColors.primaryDark),
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Dashboard',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  'Overview of importers, exporters, countries and brands.',
+                  style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          FilledButton.icon(
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primaryDark,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Get.snackbar('Report', 'Dummy report action'),
+            icon: const Icon(Icons.description_outlined, size: 18),
+            label: const Text('View Report'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _KpiData {
+  final String title;
+  final String value;
+  final String? subValue;
+  final IconData icon;
+  final Color iconBg;
+  final Color accent;
+
+  const _KpiData({
+    required this.title,
+    required this.value,
+    this.subValue,
+    required this.icon,
+    required this.iconBg,
+    required this.accent,
+  });
+}
+
+class _KpiGrid extends StatelessWidget {
+  final int crossAxisCount;
+  final List<_KpiData> items;
+
+  const _KpiGrid({required this.crossAxisCount, required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      itemCount: items.length,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: crossAxisCount == 1 ? 3.2 : 2.5,
+      ),
+      itemBuilder: (context, index) => _KpiCard(data: items[index]),
+    );
+  }
+}
+
+class _KpiCard extends StatelessWidget {
+  final _KpiData data;
+  const _KpiCard({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: const [
+          BoxShadow(color: Color(0x12000000), blurRadius: 18, offset: Offset(0, 10)),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            height: 46,
+            width: 46,
+            decoration: BoxDecoration(
+              color: data.iconBg.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(data.icon, color: data.iconBg),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  data.value,
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: data.accent),
+                ),
+                if (data.subValue != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    data.subValue!,
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: data.accent),
+                  ),
+                ],
+                const SizedBox(height: 4),
+                Text(
+                  data.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: () => Get.snackbar('Report', 'Dummy report for ${data.title}'),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.primaryDark,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('View'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MapAndCountries extends StatelessWidget {
+  const _MapAndCountries();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: const [
+        Expanded(flex: 5, child: _MapCard()),
+        SizedBox(width: 16),
+        Expanded(flex: 6, child: _TopCountries()),
+      ],
+    );
+  }
+}
+
+class _MapCard extends StatelessWidget {
+  const _MapCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: const [
+          BoxShadow(color: Color(0x12000000), blurRadius: 18, offset: Offset(0, 10)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            'Search Importers on Google Map',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            height: 170,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primary.withOpacity(0.10),
+                  AppColors.primaryDark.withOpacity(0.06),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              border: Border.all(color: const Color(0xFFE9EEF2)),
+            ),
+            child: Stack(
+              children: [
+                const Positioned.fill(
+                  child: Center(
+                    child: Icon(Icons.map_outlined, size: 56, color: AppColors.primaryDark),
+                  ),
+                ),
+                Positioned(
+                  left: 12,
+                  bottom: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.92),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.location_on, size: 18, color: AppColors.primaryDark),
+                        SizedBox(width: 6),
+                        Text('Map preview', style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.primaryDark,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+            ),
+            onPressed: () => Get.snackbar('Map', 'Dummy open map'),
+            child: const Text('Open Map Search'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TopCountries extends StatelessWidget {
+  const _TopCountries();
+
+  @override
+  Widget build(BuildContext context) {
+    const countries = [
+      ('🇺🇸', 'United States'),
+      ('🇨🇳', 'China'),
+      ('🇬🇧', 'United Kingdom'),
+      ('🇩🇪', 'Germany'),
+      ('🇫🇷', 'France'),
+      ('🇮🇹', 'Italy'),
+      ('🇪🇸', 'Spain'),
+      ('🇳🇱', 'Netherlands'),
+      ('🇧🇪', 'Belgium'),
+      ('🇹🇷', 'Turkey'),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: const [
+          BoxShadow(color: Color(0x12000000), blurRadius: 18, offset: Offset(0, 10)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Top 10 Textile Importing Countries',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 250,
+            child: ListView.separated(
+              itemCount: countries.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              itemBuilder: (context, index) {
+                final item = countries[index];
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.inputBackground,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE9EEF2)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 34,
+                        width: 44,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFE9EEF2)),
+                        ),
+                        child: Text(item.$1, style: const TextStyle(fontSize: 18)),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          item.$2,
+                          style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TopBrands extends StatelessWidget {
+  const _TopBrands();
+
+  @override
+  Widget build(BuildContext context) {
+    const brands = [
+      ('Ikea', Icons.chair_alt_outlined, Color(0xFFF1C40F)),
+      ('Adidas', Icons.sports_soccer, Color(0xFF111111)),
+      ('ZARA', Icons.storefront_outlined, Color(0xFF95A5A6)),
+      ('H&M', Icons.local_mall_outlined, Color(0xFFE74C3C)),
+      ('Nike', Icons.directions_run, Color(0xFF2D7373)),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: const [
+          BoxShadow(color: Color(0x12000000), blurRadius: 18, offset: Offset(0, 10)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Top Brands',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 10),
+          ...brands.map(
+            (b) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE9EEF2)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(
+                        color: b.$3.withOpacity(0.14),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(b.$2, color: b.$3),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        b.$1,
+                        style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () => Get.snackbar('Brand', 'Dummy open ${b.$1}'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.primaryDark,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      child: const Text('View'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  const _SectionTitle({required this.title, required this.subtitle});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
+        const SizedBox(height: 2),
+        Text(subtitle, style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
+      ],
+    );
+  }
+}
+
+class _ActionCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _ActionCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        width: 290,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFE9EEF2)),
+          boxShadow: const [
+            BoxShadow(color: Color(0x0D000000), blurRadius: 16, offset: Offset(0, 10)),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              height: 44,
+              width: 44,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(icon, color: AppColors.primaryDark),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.textSecondary),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+

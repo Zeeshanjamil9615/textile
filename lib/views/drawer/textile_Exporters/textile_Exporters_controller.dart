@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:textile/views/drawer/textile_importers/buyer_model.dart';
 import 'package:textile/widgets/dummy.dart';
 
-class SearchImporterByProductSpecificationController extends GetxController {
+class TextileExportersController extends GetxController {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   
   final selectedCountry = 'Belgium'.obs;
@@ -19,8 +19,6 @@ class SearchImporterByProductSpecificationController extends GetxController {
   final buyerRankings = <String>[].obs;
   
   final isLoading = false.obs;
-
-  ValueChanged<String>? get updateProductNameFilter => null;
   
   @override
   void onInit() {

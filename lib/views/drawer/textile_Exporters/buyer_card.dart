@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/Search_Importer_By_Product_Specification_controller.dart';
-import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/buyer_model.dart';
-
+import 'package:textile/views/drawer/buyers/buyer_controller.dart';
+import 'package:textile/views/drawer/textile_importers/buyer_model.dart';
+import 'package:textile/views/drawer/textile_importers/textile_importers_controller.dart';
 
 class BuyerCard extends StatelessWidget {
   final BuyerModel buyer;
@@ -33,7 +33,18 @@ class BuyerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<SearchImporterByProductSpecificationController>();
+    // Try to find either controller - works with both BuyersController and TextileImportersController
+    dynamic controller;
+    try {
+      controller = Get.find<BuyersController>();
+    } catch (e) {
+      try {
+        controller = Get.find<TextileImportersController>();
+      } catch (e) {
+        // If neither exists, create TextileImportersController as default
+        controller = Get.put(TextileImportersController());
+      }
+    }
     
     return GestureDetector(
       onTap: () => _scrollToCard(context),
@@ -66,7 +77,14 @@ class BuyerCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               _DetailRow(icon: Icons.flag, label: 'Country', value: buyer.country),
-              
+              const SizedBox(height: 8),
+              _DetailRow(icon: Icons.category, label: 'Product Category', value: buyer.productCategory),
+              const SizedBox(height: 8),
+              _DetailRow(icon: Icons.star, label: 'Ranking', value: buyer.ranking, 
+                valueColor: _getRankingColor(buyer.ranking)),
+              const SizedBox(height: 8),
+              _DetailRow(icon: Icons.attach_money, label: 'Buyers Worth', 
+                value: '\$' + buyer.buyersWorth.toStringAsFixed(2), valueColor: Colors.green),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,

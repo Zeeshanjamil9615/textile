@@ -1,18 +1,18 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/Search_Importer_By_Product_Specification_controller.dart';
-import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/buyer_card.dart';
-import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/filter_section.dart';
+import 'package:textile/views/drawer/textile_Exporters/textile_Exporters_controller.dart';
+import 'package:textile/views/drawer/textile_Exporters/buyer_card.dart';
+import 'package:textile/views/drawer/textile_Exporters/filter_section.dart';
 
-class SearchImporterByProductSpecificationListPage extends StatefulWidget {
-  const SearchImporterByProductSpecificationListPage({Key? key}) : super(key: key);
+class ExportersListPage extends StatefulWidget {
+  const ExportersListPage({Key? key}) : super(key: key);
 
   @override
-  State<SearchImporterByProductSpecificationListPage> createState() => _SearchImporterByProductSpecificationListPageState();
+  State<ExportersListPage> createState() => _ExportersListPageState();
 }
 
-class _SearchImporterByProductSpecificationListPageState extends State<SearchImporterByProductSpecificationListPage> {
+class _ExportersListPageState extends State<ExportersListPage> {
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -23,16 +23,16 @@ class _SearchImporterByProductSpecificationListPageState extends State<SearchImp
 
   @override
   Widget build(BuildContext context) {
-    // Try to find either controller - works with both BuyersController and TextileImportersController
+    // Try to find either controller - works with both impotersController and TextileImportersController
     dynamic controller;
     try {
-      controller = Get.find<SearchImporterByProductSpecificationController>();
+      controller = Get.find<TextileExportersController>();
     } catch (e) {
       try {
-        controller = Get.find<SearchImporterByProductSpecificationController>();
+        controller = Get.find<TextileExportersController>();
       } catch (e) {
-        // If neither exists, create SearchImporterByProductSpecificationController as default
-        controller = Get.put(SearchImporterByProductSpecificationController());
+        // If neither exists, create TextileExportersController as default
+        controller = Get.put(TextileExportersController());
       }
     }
     
@@ -43,7 +43,7 @@ class _SearchImporterByProductSpecificationListPageState extends State<SearchImp
           Container(
             padding: const EdgeInsets.all(16),
             color: Colors.white,
-            child: const Text('All Buyers / Importers', 
+            child: const Text('All importers / Importers',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           ),
           const FilterSection(),

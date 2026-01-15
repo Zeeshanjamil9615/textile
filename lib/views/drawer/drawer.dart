@@ -16,12 +16,16 @@ import 'package:textile/views/drawer/add_folder/add_folder.dart';
 import 'package:textile/views/drawer/add_folder/add_folder_controller.dart';
 import 'package:textile/views/drawer/buyers/buyer_controller.dart';
 import 'package:textile/views/drawer/buyers/buyers.dart';
+import 'package:textile/views/drawer/dashboard/dashboard.dart';
+import 'package:textile/views/drawer/dashboard/dashboard_controller.dart';
 import 'package:textile/views/drawer/garment_denim/garment_denim.dart';
 import 'package:textile/views/drawer/garment_denim/garment_denim_controller.dart';
 import 'package:textile/views/drawer/garment_socks_knitted/garment_socks_knitted.dart';
 import 'package:textile/views/drawer/garment_socks_knitted/garment_socks_knitted_controller.dart';
 import 'package:textile/views/drawer/search_danim/search_danim.dart';
 import 'package:textile/views/drawer/search_danim/search_danim_controller.dart';
+import 'package:textile/views/drawer/textile_Exporters/textile_Exporters.dart';
+import 'package:textile/views/drawer/textile_Exporters/textile_Exporters_controller.dart';
 import 'package:textile/views/drawer/textile_importers/textile_importers.dart';
 import 'package:textile/views/drawer/textile_importers/textile_importers_controller.dart';
 
@@ -32,8 +36,10 @@ class CustomDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     // Check current route to determine selected item
     final currentRoute = Get.currentRoute;
+
+    final isDashboard = currentRoute.contains('Dashboard') || Get.isRegistered<DashboardController>();
     final isTextileImporters = currentRoute.contains('TextileImporters') || 
-                               (Get.isRegistered<TextileImportersController>() && !Get.isRegistered<BuyersController>());
+                               (Get.isRegistered<TextileImportersController>());
     final isBuyers = currentRoute.contains('Buyers') || Get.isRegistered<BuyersController>();
     final isGarmentSocksKnitted = currentRoute.contains('GarmentSocksKnitted') || Get.isRegistered<GarmentSocksKnittedController>();
     final isSearchGarmentImporter = currentRoute.contains('SearchGarmentImporter') || Get.isRegistered<SearchGarmentImporterByProductSpecificationController>();
@@ -46,6 +52,8 @@ class CustomDrawer extends StatelessWidget {
     final isSearchExporterByProductSpecification = currentRoute.contains('SearchExporterByProductSpecification') || Get.isRegistered<SearchExporterByProductSpecificationController>();
     
     final isAddFolder = currentRoute.contains('AddFolder') || Get.isRegistered<AddFolderController>();
+    final isTextileExporters = currentRoute.contains('TextileExporters') || Get.isRegistered<TextileExportersController>();
+
     final isUpdateData = currentRoute.contains('UpdateData') || Get.isRegistered<UpdateDataController>();
 
 
@@ -80,7 +88,12 @@ class CustomDrawer extends StatelessWidget {
                 ),
               ),
             ),
-            _DrawerItem(icon: Icons.dashboard, title: 'Dashboard', onTap: () {
+            _DrawerItem(icon: Icons.dashboard, title: 'Dashboard', 
+            isSelected: isDashboard,
+            onTap: () {
+              
+                Get.off(() => const Dashboard());
+
               Get.back();
               // TODO: Navigate to Dashboard when implemented
             }),
@@ -166,7 +179,13 @@ onTap: () {
               },
             ),
             const Divider(color: Colors.white24, height: 1),
-            _DrawerItem(icon: Icons.business_center, title: 'Textile Exporters', onTap: () => Get.back()),
+            _DrawerItem(icon: Icons.business_center, title: 'Textile Exporters',isSelected: isTextileExporters,
+            
+              onTap: () {
+                Get.back();
+                Get.off(() => const TextileExporters());
+              }
+            ),
             _DrawerItem(icon: Icons.location_city, title: 'Search Exporters by Cities', onTap: () => Get.back()),
             _DrawerItem(icon: Icons.folder_outlined, title: 'My Folders', onTap: () => Get.back()),
             _DrawerItem(icon: Icons.search_outlined, title: 'Search Exporter By Product Specification', 
