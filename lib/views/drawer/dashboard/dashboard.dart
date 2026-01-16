@@ -56,31 +56,21 @@ class _DashboardBody extends StatelessWidget {
                       _KpiData(
                         title: 'Textile Exporters',
                         value: '1,079',
-                        subValue: '7',
                         icon: Icons.cancel,
                         iconBg: Color(0xFFE74C3C),
                         accent: Color(0xFFE74C3C),
                       ),
-                      _KpiData(
-                        title: 'Emails Verified',
-                        value: '12,480',
-                        icon: Icons.verified,
-                        iconBg: Color(0xFFF1C40F),
-                        accent: Color(0xFFF1C40F),
-                      ),
-                      _KpiData(
-                        title: 'Active Searches',
-                        value: '328',
-                        icon: Icons.shopping_cart,
-                        iconBg: Color(0xFF2ECC71),
-                        accent: Color(0xFF2ECC71),
-                      ),
+                    
                     ],
                   ),
                   const SizedBox(height: 16),
                   if (isNarrow) ...[
                     const _MapAndCountries(),
                     const SizedBox(height: 16),
+
+                    _Map(),
+                    const SizedBox(height: 16),
+
                     const _TopBrands(),
                   ] else
                     const Row(
@@ -92,42 +82,6 @@ class _DashboardBody extends StatelessWidget {
                       ],
                     ),
                   const SizedBox(height: 18),
-                  _SectionTitle(
-                    title: 'Quick Actions',
-                    subtitle: 'Use these to jump into common workflows.',
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: [
-                      _ActionCard(
-                        icon: Icons.search,
-                        title: 'Search Importers',
-                        subtitle: 'By product specification',
-                        onTap: () => Get.snackbar('Coming soon', 'Open Search Importers'),
-                      ),
-                      _ActionCard(
-                        icon: Icons.category,
-                        title: 'Search Exporters',
-                        subtitle: 'By product specification',
-                        onTap: () => Get.snackbar('Coming soon', 'Open Search Exporters'),
-                      ),
-                      _ActionCard(
-                        icon: Icons.email,
-                        title: 'Email Importers',
-                        subtitle: 'City & Country wise',
-                        onTap: () => Get.snackbar('Coming soon', 'Open Email Importers'),
-                      ),
-                      _ActionCard(
-                        icon: Icons.folder,
-                        title: 'My Folders',
-                        subtitle: 'Saved lists and exports',
-                        onTap: () => Get.snackbar('Coming soon', 'Open Folders'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -314,9 +268,20 @@ class _MapAndCountries extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: const [
-        Expanded(flex: 5, child: _MapCard()),
-        SizedBox(width: 16),
         Expanded(flex: 6, child: _TopCountries()),
+      ],
+    );
+  }
+}
+class _Map extends StatelessWidget {
+  const _Map();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: const [
+        Expanded(flex: 5, child: _MapCard()),
       ],
     );
   }
@@ -650,5 +615,6 @@ class _ActionCard extends StatelessWidget {
     );
   }
 }
+
 
 

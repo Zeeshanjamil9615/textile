@@ -26,11 +26,13 @@ class _SearchImporterByProductSpecificationListPageState extends State<SearchImp
     // Try to find either controller - works with both BuyersController and TextileImportersController
     dynamic controller;
     try {
-      controller = Get.find<SearchImporterByProductSpecificationController>();
     } catch (e) {
+        controller = Get.put(SearchImporterByProductSpecificationController());
+
       try {
-        controller = Get.find<SearchImporterByProductSpecificationController>();
       } catch (e) {
+        controller = Get.put(SearchImporterByProductSpecificationController());
+
         // If neither exists, create SearchImporterByProductSpecificationController as default
         controller = Get.put(SearchImporterByProductSpecificationController());
       }

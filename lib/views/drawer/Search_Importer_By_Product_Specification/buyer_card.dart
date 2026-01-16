@@ -33,8 +33,8 @@ class BuyerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<SearchImporterByProductSpecificationController>();
-    
+    final controller = Get.put(SearchImporterByProductSpecificationController());
+
     return GestureDetector(
       onTap: () => _scrollToCard(context),
       child: Card(

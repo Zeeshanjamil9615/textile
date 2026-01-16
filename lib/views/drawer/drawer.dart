@@ -6,6 +6,8 @@ import 'package:textile/views/drawer/Email_Importers_Country_Wise/Email_Importer
 import 'package:textile/views/drawer/Email_Importers_Country_Wise/Email_Importers_Country_Wise_controller.dart';
 import 'package:textile/views/drawer/Search_Exporter_By_Product_Specification/Search_Exporter_By_Product_Specification.dart';
 import 'package:textile/views/drawer/Search_Exporter_By_Product_Specification/Search_Exporter_By_Product_Specification_controller.dart';
+import 'package:textile/views/drawer/Search_Exporters_by_Cities/Search_Exporters_by_Cities.dart';
+import 'package:textile/views/drawer/Search_Exporters_by_Cities/Search_Exporters_by_Cities_controller.dart';
 import 'package:textile/views/drawer/Search_Garment_Importer_By_Product_Specification/search_garment.dart';
 import 'package:textile/views/drawer/Search_Garment_Importer_By_Product_Specification/search_garment_controller.dart';
 import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/Search_Importer_By_Product_Specification.dart';
@@ -53,6 +55,7 @@ class CustomDrawer extends StatelessWidget {
     
     final isAddFolder = currentRoute.contains('AddFolder') || Get.isRegistered<AddFolderController>();
     final isTextileExporters = currentRoute.contains('TextileExporters') || Get.isRegistered<TextileExportersController>();
+    final isSearchExportersByCities = currentRoute.contains('SearchExportersByCities') || Get.isRegistered<SearchExportersByCitiesController>();
 
     final isUpdateData = currentRoute.contains('UpdateData') || Get.isRegistered<UpdateDataController>();
 
@@ -100,11 +103,11 @@ class CustomDrawer extends StatelessWidget {
             _DrawerItem(
               icon: Icons.business, 
               title: 'Textile Importers', 
-              isSelected: isTextileImporters && !isBuyers,
+              isSelected: isTextileImporters,
               onTap: () {
                 Get.back();
                 Get.off(() => const TextileImporters());
-              }
+          }
             ),
             _DrawerItem(
               icon: Icons.people, 
@@ -174,7 +177,7 @@ onTap: () {
               isSelected: isAddFolder,
               
               onTap: () {
-                Get.back();
+                Get.back(); 
                 Get.off(() => const AddFolderScreen());
               },
             ),
@@ -186,7 +189,13 @@ onTap: () {
                 Get.off(() => const TextileExporters());
               }
             ),
-            _DrawerItem(icon: Icons.location_city, title: 'Search Exporters by Cities', onTap: () => Get.back()),
+            _DrawerItem(icon: Icons.location_city, title: 'Search Exporters by Cities',
+            isSelected: isSearchExportersByCities,
+              onTap: () {
+                Get.back();
+                Get.off(() => const SearchExportersByCities());
+              },
+            ),
             _DrawerItem(icon: Icons.folder_outlined, title: 'My Folders', onTap: () => Get.back()),
             _DrawerItem(icon: Icons.search_outlined, title: 'Search Exporter By Product Specification', 
             isSelected: isSearchExporterByProductSpecification,

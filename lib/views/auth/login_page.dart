@@ -74,6 +74,8 @@ class LoginPage extends StatelessWidget {
                   
                   // Email Input
                   Container(
+                    height: 55,
+
                     decoration: BoxDecoration(
                       color: AppColors.inputBackground,
                       borderRadius: BorderRadius.circular(8),
@@ -81,7 +83,7 @@ class LoginPage extends StatelessWidget {
                     child: TextField(
                       controller: controller.emailController,
                       decoration: const InputDecoration(
-                        labelText: 'Email / Username',
+                        labelText: 'Email / Username',              
                         labelStyle: TextStyle(color: AppColors.textSecondary),
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.all(16),
@@ -93,6 +95,7 @@ class LoginPage extends StatelessWidget {
                   
                   // Password Input
                   Obx(() => Container(
+                    height: 55,
                     decoration: BoxDecoration(
                       color: AppColors.inputBackground,
                       borderRadius: BorderRadius.circular(8),
@@ -100,7 +103,7 @@ class LoginPage extends StatelessWidget {
                     child: TextField(
                       controller: controller.passwordController,
                       obscureText: !controller.isPasswordVisible.value,
-                      decoration: InputDecoration(
+                      decoration: InputDecoration( 
                         labelText: 'Password',
                         labelStyle: const TextStyle(color: AppColors.textSecondary),
                         border: InputBorder.none,
