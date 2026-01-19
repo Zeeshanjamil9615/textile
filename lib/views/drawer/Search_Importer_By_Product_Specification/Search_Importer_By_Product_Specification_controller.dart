@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/views/drawer/textile_importers/buyer_model.dart';
 import 'package:textile/widgets/dummy.dart';
+import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/filter_section.dart';
 
 class SearchImporterByProductSpecificationController extends GetxController {
   final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -10,6 +11,7 @@ class SearchImporterByProductSpecificationController extends GetxController {
   final selectedProductCategory = 'All'.obs;
   final selectedBuyerRanking = 'All'.obs;
   final importerNameFilter = ''.obs;
+  final productNameFilter = ''.obs;
   final entriesPerPage = 50.obs;
   
   final buyers = <BuyerModel>[].obs;
@@ -19,8 +21,6 @@ class SearchImporterByProductSpecificationController extends GetxController {
   final buyerRankings = <String>[].obs;
   
   final isLoading = false.obs;
-
-  ValueChanged<String>? get updateProductNameFilter => null;
   
   @override
   void onInit() {
@@ -56,27 +56,81 @@ class SearchImporterByProductSpecificationController extends GetxController {
   void updateCountryFilter(String? value) {
     if (value != null) {
       selectedCountry.value = value;
-      applyFilters();
     }
   }
   
   void updateProductCategoryFilter(String? value) {
     if (value != null) {
       selectedProductCategory.value = value;
-      applyFilters();
     }
   }
   
   void updateBuyerRankingFilter(String? value) {
     if (value != null) {
       selectedBuyerRanking.value = value;
-      applyFilters();
     }
   }
   
   void updateImporterNameFilter(String value) {
     importerNameFilter.value = value;
     applyFilters();
+  }
+  
+  void updateProductNameFilter(String value) {
+    productNameFilter.value = value;
+    applyFilters();
+  }
+  
+  void showFilterBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.9,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        expand: false,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Filters',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: const FilterSection(),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
   
   void updateEntriesPerPage(int? value) {

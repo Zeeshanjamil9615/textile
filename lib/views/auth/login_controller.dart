@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/buyers/buyers.dart';
+import 'package:textile/views/drawer/dashboard/dashboard.dart';
 
 class LoginController extends GetxController {
   final emailController = TextEditingController();
@@ -45,9 +45,9 @@ class LoginController extends GetxController {
     await Future.delayed(const Duration(seconds: 2));
     
     isLoading.value = false;
-    
-    // Navigate to Buyers screen after successful login
-    Get.offAll(() => const Buyers());
+
+    // Navigate to Dashboard screen after successful login
+    Get.offAll(() => const Dashboard());
     
     // Show success message
     Get.snackbar(

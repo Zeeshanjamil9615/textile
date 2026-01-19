@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/views/drawer/Search_Exporter_By_Product_Specification/Search_Exporter_By_Product_Specification_controller.dart';
 import 'package:textile/views/drawer/Search_Exporter_By_Product_Specification/buyer_card.dart';
-import 'package:textile/views/drawer/Search_Exporter_By_Product_Specification/filter_section.dart';
 import 'package:textile/widgets/colors.dart';
 
 class SearchExporterByProductSpecificationListPage extends StatefulWidget {
@@ -41,13 +40,40 @@ class _SearchExporterByProductSpecificationListPageState extends State<SearchExp
       color: const Color(0xFFF5F5F5),
       child: Column(
         children: [
-          // Container(
-          //   padding: const EdgeInsets.all(16),
-          //   color: Colors.white,
-          //   child: const Text('Products Database - Filter by Product Specification', 
-          //     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          // ),
-          const FilterSection(),
+          // Search bar at top with filter icon
+          Container(
+            padding: const EdgeInsets.all(16),
+            color: Colors.white,
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: const Color(0xFFF8F9FA),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      hintText: 'Enter product name...',
+                      prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+                    ),
+                    onChanged: controller.updateProductNameFilter,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                IconButton(
+                  icon: const Icon(Icons.filter_list, color: AppColors.primaryDark),
+                  onPressed: () => controller.showFilterBottomSheet(context),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.primaryDark.withOpacity(0.1),
+                    padding: const EdgeInsets.all(12),
+                  ),
+                ),
+              ],
+            ),
+          ),
           Obx(() => SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Container(

@@ -20,7 +20,6 @@ class FilterSection extends StatelessWidget {
         controller = Get.put(TextileExportersController());
       }
     }
-    
     return Container(
       padding: const EdgeInsets.all(16),
       color: Colors.white,

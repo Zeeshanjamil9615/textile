@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/views/drawer/buyers/buyer_controller.dart';
 import 'package:textile/views/drawer/textile_importers/textile_importers_controller.dart';
+import 'package:textile/widgets/colors.dart';
 
 class FilterSection extends StatelessWidget {
   const FilterSection({Key? key}) : super(key: key);
@@ -42,19 +43,6 @@ class FilterSection extends StatelessWidget {
             }).toList().cast<DropdownMenuItem<String>>(),
             onChanged: controller.updateCountryFilter,
           )),
-          const SizedBox(height: 16),
-          const Text('Filter by Importer Name', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          TextField(
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: const Color(0xFFF8F9FA),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: BorderSide.none),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              hintText: 'Enter importer name...',
-            ),
-            onChanged: controller.updateImporterNameFilter,
-          ),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -112,6 +100,28 @@ class FilterSection extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                controller.applyFilters();
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryDark,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              child: const Text(
+                'Apply',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
           ),
         ],
       ),

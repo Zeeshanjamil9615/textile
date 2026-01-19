@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/Search_Importer_By_Product_Specification_controller.dart';
 import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/buyer_model.dart';
+import 'package:textile/widgets/folder_selection_bottom_sheet.dart';
+import 'package:textile/views/drawer/add_folder/add_folder_controller.dart';
 
 
 class BuyerCard extends StatelessWidget {
@@ -71,7 +73,13 @@ class BuyerCard extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => controller.addBuyer(buyer.id),
+                  onPressed: () {
+                    // Ensure AddFolderController is initialized
+                    if (!Get.isRegistered<AddFolderController>()) {
+                      Get.put(AddFolderController());
+                    }
+                    showFolderSelectionBottomSheet(context);
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2D7373),
                     foregroundColor: Colors.white,
