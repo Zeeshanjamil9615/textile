@@ -1,86 +1,107 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/textile_importers/buyer_model.dart';
+import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/buyer_model.dart';
 import 'package:textile/widgets/dummy.dart';
 import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/filter_section.dart';
+import 'package:textile/views/drawer/textile_importers/buyer_model.dart'
+    as TextileImportersBuyerModel;
 
 class SearchImporterByProductSpecificationController extends GetxController {
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  
+
   final selectedCountry = 'Belgium'.obs;
   final selectedProductCategory = 'All'.obs;
   final selectedBuyerRanking = 'All'.obs;
   final importerNameFilter = ''.obs;
   final productNameFilter = ''.obs;
   final entriesPerPage = 50.obs;
-  
+
   final buyers = <BuyerModel>[].obs;
   final filteredBuyers = <BuyerModel>[].obs;
   final countries = <String>[].obs;
   final productCategories = <String>[].obs;
   final buyerRankings = <String>[].obs;
-  
+
   final isLoading = false.obs;
-  
+
   @override
   void onInit() {
     super.onInit();
     loadData();
   }
-  
+
   void loadData() {
-    buyers.value = DummyData.getBuyers();
+    // Convert DummyData buyers to local BuyerModel type
+    final dummyBuyers = DummyData.getBuyers();
+    buyers.value = dummyBuyers
+        .map(
+          (buyer) => BuyerModel(
+            id: buyer.id,
+            importerName: buyer.importerName,
+            country: buyer.country,
+            productCategory: buyer.productCategory,
+            ranking: buyer.ranking,
+            buyersWorth: buyer.buyersWorth,
+          ),
+        )
+        .toList();
+
     countries.value = DummyData.getCountries();
     productCategories.value = DummyData.getProductCategories();
     buyerRankings.value = DummyData.getBuyerRankings();
     applyFilters();
   }
-  
+
   void applyFilters() {
     filteredBuyers.value = buyers.where((buyer) {
-      bool matchesCountry = selectedCountry.value == 'Belgium' && buyer.country == 'Belgium';
-      bool matchesCategory = selectedProductCategory.value == 'All' || 
-                            buyer.productCategory.contains(selectedProductCategory.value);
-      bool matchesName = importerNameFilter.value.isEmpty || 
-                        buyer.importerName.toLowerCase().contains(importerNameFilter.value.toLowerCase());
+      bool matchesCountry =
+          selectedCountry.value == 'Belgium' && buyer.country == 'Belgium';
+      bool matchesCategory =
+          selectedProductCategory.value == 'All' ||
+          buyer.productCategory.contains(selectedProductCategory.value);
+      bool matchesName =
+          importerNameFilter.value.isEmpty ||
+          buyer.importerName.toLowerCase().contains(
+            importerNameFilter.value.toLowerCase(),
+          );
       return matchesCountry && matchesCategory && matchesName;
     }).toList();
-    
+
     if (selectedBuyerRanking.value == 'High To Low') {
       filteredBuyers.sort((a, b) => b.buyersWorth.compareTo(a.buyersWorth));
     } else if (selectedBuyerRanking.value == 'Low to High') {
       filteredBuyers.sort((a, b) => a.buyersWorth.compareTo(b.buyersWorth));
     }
   }
-  
+
   void updateCountryFilter(String? value) {
     if (value != null) {
       selectedCountry.value = value;
     }
   }
-  
+
   void updateProductCategoryFilter(String? value) {
     if (value != null) {
       selectedProductCategory.value = value;
     }
   }
-  
+
   void updateBuyerRankingFilter(String? value) {
     if (value != null) {
       selectedBuyerRanking.value = value;
     }
   }
-  
+
   void updateImporterNameFilter(String value) {
     importerNameFilter.value = value;
     applyFilters();
   }
-  
+
   void updateProductNameFilter(String value) {
     productNameFilter.value = value;
     applyFilters();
   }
-  
+
   void showFilterBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -89,9 +110,9 @@ class SearchImporterByProductSpecificationController extends GetxController {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.9,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
+        initialChildSize: 0.95,
+        // minChildSize: 0.5,
+        // maxChildSize: 0.95,
         expand: false,
         builder: (context, scrollController) => Container(
           decoration: const BoxDecoration(
@@ -132,21 +153,26 @@ class SearchImporterByProductSpecificationController extends GetxController {
       ),
     );
   }
-  
+
   void updateEntriesPerPage(int? value) {
     if (value != null) {
       entriesPerPage.value = value;
     }
   }
-  
+
   void clearCountryFilter() {
     Get.snackbar('Info', 'Filter cleared');
   }
-  
+
   void addBuyer(String buyerId) {
-    Get.snackbar('Success', 'Buyer ' + buyerId + ' added', backgroundColor: Colors.green, colorText: Colors.white);
+    Get.snackbar(
+      'Success',
+      'Buyer ' + buyerId + ' added',
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+    );
   }
-  
+
   void openDrawer() {
     scaffoldKey.currentState?.openDrawer();
   }

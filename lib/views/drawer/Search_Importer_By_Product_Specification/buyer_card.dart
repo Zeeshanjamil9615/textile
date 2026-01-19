@@ -5,14 +5,13 @@ import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/bu
 import 'package:textile/widgets/folder_selection_bottom_sheet.dart';
 import 'package:textile/views/drawer/add_folder/add_folder_controller.dart';
 
-
 class BuyerCard extends StatelessWidget {
   final BuyerModel buyer;
   final ScrollController? scrollController;
   final int? index;
-  
+
   const BuyerCard({
-    Key? key, 
+    Key? key,
     required this.buyer,
     this.scrollController,
     this.index,
@@ -35,8 +34,6 @@ class BuyerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(SearchImporterByProductSpecificationController());
-
     return GestureDetector(
       onTap: () => _scrollToCard(context),
       child: Card(
@@ -51,24 +48,42 @@ class BuyerCard extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF4A9B9B).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Text(buyer.id, 
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF4A9B9B))),
+                    child: Text(
+                      buyer.id,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF4A9B9B),
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(buyer.importerName, 
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      buyer.importerName,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              _DetailRow(icon: Icons.flag, label: 'Country', value: buyer.country),
-              
+              _DetailRow(
+                icon: Icons.flag,
+                label: 'Country',
+                value: buyer.country,
+              ),
+
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
@@ -84,9 +99,14 @@ class BuyerCard extends StatelessWidget {
                     backgroundColor: const Color(0xFF2D7373),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                   ),
-                  child: const Text('Add Buyer', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Add Buyer',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ],
@@ -95,13 +115,17 @@ class BuyerCard extends StatelessWidget {
       ),
     );
   }
-  
+
   Color _getRankingColor(String ranking) {
     switch (ranking.toLowerCase()) {
-      case 'high': return Colors.green;
-      case 'medium': return Colors.orange;
-      case 'low': return Colors.red;
-      default: return Colors.grey;
+      case 'high':
+        return Colors.green;
+      case 'medium':
+        return Colors.orange;
+      case 'low':
+        return Colors.red;
+      default:
+        return Colors.grey;
     }
   }
 }
@@ -111,8 +135,13 @@ class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
   final Color? valueColor;
-  
-  const _DetailRow({required this.icon, required this.label, required this.value, this.valueColor});
+
+  const _DetailRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -120,9 +149,23 @@ class _DetailRow extends StatelessWidget {
       children: [
         Icon(icon, size: 16, color: Colors.grey),
         const SizedBox(width: 8),
-        Text(label + ': ', style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500)),
+        Text(
+          label + ': ',
+          style: const TextStyle(
+            fontSize: 13,
+            color: Colors.grey,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         Expanded(
-          child: Text(value, style: TextStyle(fontSize: 13, color: valueColor ?? Colors.black87, fontWeight: FontWeight.w600)),
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 13,
+              color: valueColor ?? Colors.black87,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ],
     );

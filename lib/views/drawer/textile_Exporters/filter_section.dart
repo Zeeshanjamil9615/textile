@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/buyers/buyer_controller.dart';
 import 'package:textile/views/drawer/textile_Exporters/textile_Exporters_controller.dart';
 
 class FilterSection extends StatelessWidget {
@@ -11,7 +10,7 @@ class FilterSection extends StatelessWidget {
     // Try to find either controller - works with both BuyersController and TextileImportersController
     dynamic controller;
     try {
-      controller = Get.find<BuyersController>();
+      controller = Get.find<TextileExportersController>();
     } catch (e) {
       try {
         controller = Get.find<TextileExportersController>();

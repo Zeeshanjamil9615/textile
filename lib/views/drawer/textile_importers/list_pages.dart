@@ -28,7 +28,7 @@ class _impotersListPageState extends State<impotersListPage> {
     // Try to find either controller - works with both impotersController and TextileImportersController
     dynamic controller;
     try {
-      controller = Get.find<BuyersController>();
+      controller = Get.find<TextileImportersController>();
     } catch (e) {
       try {
         controller = Get.find<TextileImportersController>();
