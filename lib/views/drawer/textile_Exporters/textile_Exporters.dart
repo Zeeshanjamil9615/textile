@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 import 'package:textile/views/drawer/drawer.dart';
 import 'package:textile/views/drawer/textile_Exporters/list_pages.dart';
 import 'package:textile/views/drawer/textile_Exporters/textile_Exporters_controller.dart';
-import 'package:textile/views/drawer/textile_importers/list_pages.dart';
-import 'package:textile/views/drawer/textile_importers/textile_importers_controller.dart';
 import 'package:textile/widgets/custom_app_bar.dart';
 
 class TextileExporters extends StatelessWidget {
