@@ -160,6 +160,8 @@ class _BuyersListPageState extends State<BuyersListPage> {
               },
             )),
           ),
+        ],
+      ),
           if (loading)
             Container(
               color: Colors.black.withOpacity(0.1),

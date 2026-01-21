@@ -160,6 +160,8 @@ class _GarmnetDENIMListPageState extends State<GarmnetDENIMListPage> {
               },
             )),
           ),
+        ],
+      ),
           if (loading)
             Container(
               color: Colors.black.withOpacity(0.1),

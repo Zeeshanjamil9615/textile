@@ -159,6 +159,8 @@ class _SearchGarmentImporterByProductSpecificationListPageState extends State<Se
               },
             )),
           ),
+        ],
+      ),
           if (loading)
             Container(
               color: Colors.black.withOpacity(0.1),

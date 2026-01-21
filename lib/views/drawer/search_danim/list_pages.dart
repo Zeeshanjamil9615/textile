@@ -159,6 +159,8 @@ class _SearchdanimListPageState extends State<SearchdanimListPage> {
               },
             )),
           ),
+        ],
+      ),
           if (loading)
             Container(
               color: Colors.black.withOpacity(0.1),

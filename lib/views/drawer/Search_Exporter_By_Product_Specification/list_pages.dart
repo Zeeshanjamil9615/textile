@@ -127,6 +127,8 @@ class _SearchExporterByProductSpecificationListPageState extends State<SearchExp
               },
             )),
           ),
+        ],
+      ),
           if (loading)
             Container(
               color: Colors.black.withOpacity(0.1),
