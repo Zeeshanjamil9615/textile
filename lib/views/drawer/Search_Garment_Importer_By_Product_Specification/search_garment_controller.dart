@@ -31,11 +31,10 @@ class SearchGarmentImporterByProductSpecificationController
 
   void loadData() async {
     buyers.value = DummyData.getBuyers();
-    productCategories.value = DummyData.getProductCategories();
     buyerRankings.value = DummyData.getBuyerRankings();
 
-    // Fetch countries from API
-    await fetchCountries();
+    // Fetch dropdown data from API
+    await Future.wait([fetchCountries(), fetchProductCategories()]);
     applyFilters();
   }
 
@@ -57,10 +56,34 @@ class SearchGarmentImporterByProductSpecificationController
     }
   }
 
+  Future<void> fetchProductCategories() async {
+    try {
+      isLoading.value = true;
+      final apiService = ApiService();
+      final response = await apiService.getProductCategoriesList();
+
+      if (response.status == 200 && response.data != null) {
+        productCategories.value = response.data!;
+      } else {
+        productCategories.value = ['All'];
+      }
+    } catch (_) {
+      productCategories.value = ['All'];
+    } finally {
+      if (!productCategories.contains('All')) {
+        productCategories.insert(0, 'All');
+      }
+      if (!productCategories.contains(selectedProductCategory.value)) {
+        selectedProductCategory.value = 'All';
+      }
+      isLoading.value = false;
+    }
+  }
+
   void applyFilters() {
     filteredBuyers.value = buyers.where((buyer) {
       bool matchesCountry =
-          selectedCountry.value == 'Belgium' && buyer.country == 'Belgium';
+          selectedCountry.value == 'All' || buyer.country == selectedCountry.value;
       bool matchesCategory =
           selectedProductCategory.value == 'All' ||
           buyer.productCategory.contains(selectedProductCategory.value);

@@ -3,13 +3,12 @@ import 'package:get/get.dart';
 import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/buyer_model.dart';
 import 'package:textile/widgets/dummy.dart';
 import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/filter_section.dart';
-import 'package:textile/views/drawer/textile_importers/buyer_model.dart'
-    as TextileImportersBuyerModel;
+import 'package:textile/api_service/api_service.dart';
 
 class SearchImporterByProductSpecificationController extends GetxController {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final selectedCountry = 'Belgium'.obs;
+  final selectedCountry = 'All'.obs;
   final selectedProductCategory = 'All'.obs;
   final selectedBuyerRanking = 'All'.obs;
   final importerNameFilter = ''.obs;
@@ -30,7 +29,7 @@ class SearchImporterByProductSpecificationController extends GetxController {
     loadData();
   }
 
-  void loadData() {
+  Future<void> loadData() async {
     // Convert DummyData buyers to local BuyerModel type
     final dummyBuyers = DummyData.getBuyers();
     buyers.value = dummyBuyers
@@ -46,16 +45,61 @@ class SearchImporterByProductSpecificationController extends GetxController {
         )
         .toList();
 
-    countries.value = DummyData.getCountries();
-    productCategories.value = DummyData.getProductCategories();
     buyerRankings.value = DummyData.getBuyerRankings();
+    await Future.wait([fetchCountries(), fetchProductCategories()]);
     applyFilters();
+  }
+
+  Future<void> fetchCountries() async {
+    try {
+      isLoading.value = true;
+      final apiService = ApiService();
+      final response = await apiService.getCountriesList();
+      if (response.status == 200 && response.data != null) {
+        countries.value = response.data!;
+      } else {
+        countries.value = ['All'];
+      }
+    } catch (_) {
+      countries.value = ['All'];
+    } finally {
+      if (!countries.contains('All')) {
+        countries.insert(0, 'All');
+      }
+      if (!countries.contains(selectedCountry.value)) {
+        selectedCountry.value = 'All';
+      }
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchProductCategories() async {
+    try {
+      isLoading.value = true;
+      final apiService = ApiService();
+      final response = await apiService.getProductCategoriesList();
+      if (response.status == 200 && response.data != null) {
+        productCategories.value = response.data!;
+      } else {
+        productCategories.value = ['All'];
+      }
+    } catch (_) {
+      productCategories.value = ['All'];
+    } finally {
+      if (!productCategories.contains('All')) {
+        productCategories.insert(0, 'All');
+      }
+      if (!productCategories.contains(selectedProductCategory.value)) {
+        selectedProductCategory.value = 'All';
+      }
+      isLoading.value = false;
+    }
   }
 
   void applyFilters() {
     filteredBuyers.value = buyers.where((buyer) {
       bool matchesCountry =
-          selectedCountry.value == 'Belgium' && buyer.country == 'Belgium';
+          selectedCountry.value == 'All' || buyer.country == selectedCountry.value;
       bool matchesCategory =
           selectedProductCategory.value == 'All' ||
           buyer.productCategory.contains(selectedProductCategory.value);
@@ -77,18 +121,21 @@ class SearchImporterByProductSpecificationController extends GetxController {
   void updateCountryFilter(String? value) {
     if (value != null) {
       selectedCountry.value = value;
+      applyFilters();
     }
   }
 
   void updateProductCategoryFilter(String? value) {
     if (value != null) {
       selectedProductCategory.value = value;
+      applyFilters();
     }
   }
 
   void updateBuyerRankingFilter(String? value) {
     if (value != null) {
       selectedBuyerRanking.value = value;
+      applyFilters();
     }
   }
 
