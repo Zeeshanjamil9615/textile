@@ -38,10 +38,14 @@ class _BuyersListPageState extends State<BuyersListPage> {
       }
     }
     
-    return Container(
-      color: const Color(0xFFF5F5F5),
-      child: Column(
+    return Obx(() {
+      final bool loading = controller.isLoading.value;
+      return Stack(
         children: [
+          Container(
+            color: const Color(0xFFF5F5F5),
+            child: Column(
+              children: [
           // Search bar at top with filter icon
           Container(
             padding: const EdgeInsets.all(16),
@@ -156,8 +160,15 @@ class _BuyersListPageState extends State<BuyersListPage> {
               },
             )),
           ),
+          if (loading)
+            Container(
+              color: Colors.black.withOpacity(0.1),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
         ],
-      ),
-    );
+      );
+    });
   }
 }

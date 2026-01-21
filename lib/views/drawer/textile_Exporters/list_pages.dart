@@ -36,10 +36,14 @@ class _ExportersListPageState extends State<ExportersListPage> {
       }
     }
     
-    return Container(
-      color: const Color(0xFFF5F5F5),
-      child: Column(
+    return Obx(() {
+      final bool loading = controller.isLoading.value;
+      return Stack(
         children: [
+          Container(
+            color: const Color(0xFFF5F5F5),
+            child: Column(
+              children: [
           Container(
             padding: const EdgeInsets.all(16),
             color: Colors.white,
@@ -127,8 +131,15 @@ class _ExportersListPageState extends State<ExportersListPage> {
               },
             )),
           ),
+          if (loading)
+            Container(
+              color: Colors.black.withOpacity(0.1),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
         ],
-      ),
-    );
+      );
+    });
   }
 }
