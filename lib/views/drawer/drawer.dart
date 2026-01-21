@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/api_service/local_storage_service.dart';
 import 'package:textile/models/user_model.dart';
+import 'package:textile/views/auth/login_page.dart';
 import 'package:textile/views/drawer/Email_Importers_City_Wise/Email_Importers_City_Wise.dart';
 import 'package:textile/views/drawer/Email_Importers_City_Wise/Email_Importers_City_Wise_controller.dart';
 import 'package:textile/views/drawer/Email_Importers_Country_Wise/Email_Importers_Country_Wise.dart';
@@ -309,6 +310,16 @@ class CustomDrawer extends StatelessWidget {
               onTap: () {
                 Get.back();
                 Get.off(() => const UpdateData());
+              },
+            ),
+            _DrawerItem(
+              icon: Icons.logout,
+              title: 'Log Out',
+
+              // isSelected: isLogOut,
+              onTap: () {
+                Get.back();
+                Get.off(() => const LoginPage());
               },
             ),
           ],

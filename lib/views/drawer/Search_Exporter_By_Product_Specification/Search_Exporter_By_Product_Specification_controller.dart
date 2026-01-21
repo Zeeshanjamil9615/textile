@@ -1,123 +1,125 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/views/drawer/Search_Exporter_By_Product_Specification/buyer_model.dart';
+import 'package:textile/widgets/dummy.dart';
 import 'package:textile/views/drawer/Search_Exporter_By_Product_Specification/filter_section.dart';
+import 'package:textile/api_service/api_service.dart';
 
 class SearchExporterByProductSpecificationController extends GetxController {
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  
-  final selectedCountry = 'Albania'.obs;
-  final selectedProductCategory = 'Bed Linen / Bed Sheet'.obs;
-  final productNameFilter = ''.obs;
+
+  final selectedCountry = 'All'.obs;
+  final selectedProductCategory = 'All'.obs;
+  final selectedBuyerRanking = 'All'.obs;
+  final exporterNameFilter = ''.obs;
   final entriesPerPage = 50.obs;
-  
-  final buyers = <BuyerModel>[].obs;
-  final filteredBuyers = <BuyerModel>[].obs;
+
+  final exporters = <BuyerModel>[].obs;
+  final filteredExporters = <BuyerModel>[].obs;
   final countries = <String>[].obs;
   final productCategories = <String>[].obs;
-  
+  final buyerRankings = <String>[].obs;
+
   final isLoading = false.obs;
-  
+
   @override
   void onInit() {
     super.onInit();
     loadData();
   }
-  
-  void loadData() {
-    // Dummy products list to match the web UI
-    buyers.value = [
-      BuyerModel(
-        sr: 1,
-        productName: '100% COTTON STOCK JERSEY FITTED SHEET DYED (DETAIL AS PER INVOICE)',
-        importerName: 'RUNIS SHPK',
-        country: 'Albania',
-        productCategory: 'Bed Linen / Bed Sheet',
-      ),
-      BuyerModel(
-        sr: 2,
-        productName: '100% COTTON STOCK JERSEY FITTED SHEET DYED (UNDER EFS SRO 957)',
-        importerName: 'RUNIS SHPK',
-        country: 'Albania',
-        productCategory: 'Bed Linen / Bed Sheet',
-      ),
-      BuyerModel(
-        sr: 3,
-        productName: '100% POLYESTER JACQUARD TERRY MATTRESS COVER',
-        importerName: 'FLORIDJOR KONDI',
-        country: 'Albania',
-        productCategory: 'Bed Spreads / Comforters / Mattress Protectors',
-      ),
-      BuyerModel(
-        sr: 4,
-        productName: '100% POLYESTER JACQUARD TERRY MATTRESS COVER WHITE',
-        importerName: 'SAS HOME COLLECTION',
-        country: 'Albania',
-        productCategory: 'Bed Spreads / Comforters / Mattress Protectors',
-      ),
-      BuyerModel(
-        sr: 5,
-        productName: '50% COTTON 50% POLYESTER DYED FITTED SHEET SIZE 120X200 CM',
-        importerName: 'Nuka Homes',
-        country: 'Albania',
-        productCategory: 'Bed Linen / Bed Sheet',
-      ),
-    ];
 
-    countries.value = ['Albania', 'Belgium', 'UK', 'Germany', 'France'];
-    productCategories.value = [
-      'Bed Linen / Bed Sheet',
-      'Bed Spreads / Comforters / Mattress Protectors',
-      'Blankets',
-      'Bags',
-      'Canvas Products',
-      'Curtains',
-      'Cushion / Sofa / Chair Covers',
-      'Cleaning Clothes',
-      'Cotton Yarn Waste',
-      'Fabrics',
-      'Grey Yarn',
-      'Kitchen Aprons / Linen',
-      'Miscellaneous Products',
-      'Cotton',
-      'Sewing Thread',
-      'Sportswear / Sports Goods',
-      'Terry Products Towel / Mats / Clothes',
-      'Table Cover',
-      'Yarn',
-    ];
+  void loadData() async {
+    exporters.value = DummyData.getBuyers().cast<BuyerModel>();
+    productCategories.value = DummyData.getProductCategories();
+    buyerRankings.value = DummyData.getBuyerRankings();
+
+    // Fetch countries from API
+    await fetchCountries();
     applyFilters();
   }
-  
-  void applyFilters() {
-    filteredBuyers.value = buyers.where((buyer) {
-      final matchesCountry = buyer.country == selectedCountry.value;
-      final matchesCategory = buyer.productCategory == selectedProductCategory.value;
-      final matchesProductName = productNameFilter.value.isEmpty ||
-          buyer.productName
-              .toLowerCase()
-              .contains(productNameFilter.value.toLowerCase());
-      return matchesCountry && matchesCategory && matchesProductName;
-    }).toList();
+
+  Future<void> fetchCountries() async {
+    try {
+      isLoading.value = true;
+      final apiService = ApiService();
+      final response = await apiService.getCountriesList();
+
+      if (response.status == 200 && response.data != null) {
+        countries.value = response.data!;
+      } else {
+        countries.value = ['All'];
+      }
+    } catch (e) {
+      countries.value = ['All'];
+    } finally {
+      isLoading.value = false;
+    }
   }
-  
+
+  void applyFilters() {
+    filteredExporters.value = exporters.where((exporter) {
+      bool matchesCountry =
+          selectedCountry.value == 'All' ||
+          exporter.country == selectedCountry.value;
+      bool matchesCategory =
+          selectedProductCategory.value == 'All' ||
+          exporter.productCategory.contains(selectedProductCategory.value);
+      bool matchesName =
+          exporterNameFilter.value.isEmpty ||
+          exporter.importerName.toLowerCase().contains(
+            exporterNameFilter.value.toLowerCase(),
+          );
+      return matchesCountry && matchesCategory && matchesName;
+    }).toList();
+
+    
+  }
+
   void updateCountryFilter(String? value) {
     if (value != null) {
       selectedCountry.value = value;
-    }
-  }
-  
-  void updateProductCategoryFilter(String? value) {
-    if (value != null) {
-      selectedProductCategory.value = value;
+      applyFilters();
     }
   }
 
-  void updateProductNameFilter(String value) {
-    productNameFilter.value = value;
+  void updateProductCategoryFilter(String? value) {
+    if (value != null) {
+      selectedProductCategory.value = value;
+      applyFilters();
+    }
+  }
+
+  void updateBuyerRankingFilter(String? value) {
+    if (value != null) {
+      selectedBuyerRanking.value = value;
+      applyFilters();
+    }
+  }
+
+  void updateExporterNameFilter(String value) {
+    exporterNameFilter.value = value;
     applyFilters();
   }
-  
+
+  void updateEntriesPerPage(int? value) {
+    if (value != null) {
+      entriesPerPage.value = value;
+    }
+  }
+
+  void clearCountryFilter() {
+    Get.snackbar('Info', 'Filter cleared');
+  }
+
+  void addExporter(String exporterId) {
+    Get.snackbar(
+      'Success',
+      'Exporter $exporterId added',
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+    );
+  }
+
   void showFilterBottomSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -127,8 +129,6 @@ class SearchExporterByProductSpecificationController extends GetxController {
       ),
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.95,
-        // minChildSize: 0.5,
-        // maxChildSize: 0.95,
         expand: false,
         builder: (context, scrollController) => Container(
           decoration: const BoxDecoration(
@@ -169,28 +169,7 @@ class SearchExporterByProductSpecificationController extends GetxController {
       ),
     );
   }
-  
-  void updateEntriesPerPage(int? value) {
-    if (value != null) {
-      entriesPerPage.value = value;
-    }
-  }
-  
-  void clearCountryFilter() {
-    // Match web chip behavior: reset to defaults
-    selectedCountry.value = countries.isNotEmpty ? countries.first : 'Albania';
-    applyFilters();
-  }
-  
-  void addBuyer(int sr) {
-    Get.snackbar(
-      'Success',
-      'Added item #$sr',
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
-  }
-  
+
   void openDrawer() {
     scaffoldKey.currentState?.openDrawer();
   }

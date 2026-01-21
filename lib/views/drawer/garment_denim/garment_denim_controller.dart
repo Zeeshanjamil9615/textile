@@ -6,27 +6,27 @@ import 'package:textile/views/drawer/garment_denim/filter_section.dart';
 
 class GarmentDenimController extends GetxController {
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  
+
   final selectedCountry = 'Belgium'.obs;
   final selectedProductCategory = 'All'.obs;
   final selectedBuyerRanking = 'All'.obs;
   final importerNameFilter = ''.obs;
   final entriesPerPage = 50.obs;
-  
+
   final buyers = <BuyerModel>[].obs;
   final filteredBuyers = <BuyerModel>[].obs;
   final countries = <String>[].obs;
   final productCategories = <String>[].obs;
   final buyerRankings = <String>[].obs;
-  
+
   final isLoading = false.obs;
-  
+
   @override
   void onInit() {
     super.onInit();
     loadData();
   }
-  
+
   void loadData() {
     buyers.value = DummyData.getBuyers();
     countries.value = DummyData.getCountries();
@@ -34,62 +34,72 @@ class GarmentDenimController extends GetxController {
     buyerRankings.value = DummyData.getBuyerRankings();
     applyFilters();
   }
-  
+
   void applyFilters() {
     filteredBuyers.value = buyers.where((buyer) {
-      bool matchesCountry = selectedCountry.value == 'Belgium' && buyer.country == 'Belgium';
-      bool matchesCategory = selectedProductCategory.value == 'All' || 
-                            buyer.productCategory.contains(selectedProductCategory.value);
-      bool matchesName = importerNameFilter.value.isEmpty || 
-                        buyer.importerName.toLowerCase().contains(importerNameFilter.value.toLowerCase());
+      bool matchesCountry =
+          selectedCountry.value == 'Belgium' && buyer.country == 'Belgium';
+      bool matchesCategory =
+          selectedProductCategory.value == 'All' ||
+          buyer.productCategory.contains(selectedProductCategory.value);
+      bool matchesName =
+          importerNameFilter.value.isEmpty ||
+          buyer.importerName.toLowerCase().contains(
+            importerNameFilter.value.toLowerCase(),
+          );
       return matchesCountry && matchesCategory && matchesName;
     }).toList();
-    
+
     if (selectedBuyerRanking.value == 'High To Low') {
       filteredBuyers.sort((a, b) => b.buyersWorth.compareTo(a.buyersWorth));
     } else if (selectedBuyerRanking.value == 'Low to High') {
       filteredBuyers.sort((a, b) => a.buyersWorth.compareTo(b.buyersWorth));
     }
   }
-  
+
   void updateCountryFilter(String? value) {
     if (value != null) {
       selectedCountry.value = value;
       applyFilters();
     }
   }
-  
+
   void updateProductCategoryFilter(String? value) {
     if (value != null) {
       selectedProductCategory.value = value;
       applyFilters();
     }
   }
-  
+
   void updateBuyerRankingFilter(String? value) {
     if (value != null) {
       selectedBuyerRanking.value = value;
       applyFilters();
     }
   }
-  
+
   void updateImporterNameFilter(String value) {
     importerNameFilter.value = value;
     applyFilters();
   }
-  
+
   void updateEntriesPerPage(int? value) {
     if (value != null) {
       entriesPerPage.value = value;
     }
   }
-  
+
   void clearCountryFilter() {
     Get.snackbar('Info', 'Filter cleared');
   }
-  
+
   void addBuyer(String buyerId) {
-    Get.snackbar('Success', 'Buyer ' + buyerId + ' added', backgroundColor: Colors.green, colorText: Colors.white);
+    Get.snackbar(
+      'Success',
+      'Buyer ' + buyerId + ' added',
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+    );
   }
 
   void showFilterBottomSheet(BuildContext context) {
@@ -143,7 +153,7 @@ class GarmentDenimController extends GetxController {
       ),
     );
   }
-  
+
   void openDrawer() {
     scaffoldKey.currentState?.openDrawer();
   }

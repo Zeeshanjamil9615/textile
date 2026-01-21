@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:textile/models/api_response.dart';
 import 'package:textile/models/user_model.dart';
+import 'package:textile/models/countries_response.dart';
+import 'package:textile/models/product_categories_response.dart';
 
 class ApiService {
   // Base URL for the API
@@ -100,6 +102,138 @@ class ApiService {
     } catch (e) {
       // Handle other errors
       return ApiResponse<UserModel>(
+        status: 0,
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
+    }
+  }
+
+  // Get countries list API request
+  Future<ApiResponse<List<String>>> getCountriesList() async {
+    try {
+      final response = await _dio.post('getCountriesList');
+
+      if (response.statusCode == 200) {
+        // Parse response data
+        Map<String, dynamic> responseData;
+
+        if (response.data is String) {
+          responseData =
+              json.decode(response.data as String) as Map<String, dynamic>;
+        } else if (response.data is Map) {
+          responseData = response.data as Map<String, dynamic>;
+        } else {
+          throw Exception('Unexpected response format');
+        }
+
+        // Parse the countries response
+        final countriesResponse = CountriesResponse.fromJson(responseData);
+
+        // Extract country names and add "All" at the beginning
+        final countryNames = countriesResponse.data
+            .map((country) => country.country)
+            .toList();
+        countryNames.insert(0, 'All');
+
+        return ApiResponse<List<String>>(
+          status: countriesResponse.status,
+          message: countriesResponse.message,
+          data: countryNames,
+        );
+      } else {
+        return ApiResponse<List<String>>(
+          status: response.statusCode ?? 0,
+          message: response.statusMessage ?? 'Unknown error',
+        );
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
+
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
+      } else if (e.type == DioExceptionType.badResponse) {
+        errorMessage = e.response?.data['message'] ?? 'Server error occurred';
+      } else if (e.type == DioExceptionType.cancel) {
+        errorMessage = 'Request cancelled';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+
+      return ApiResponse<List<String>>(
+        status: e.response?.statusCode ?? 0,
+        message: errorMessage,
+      );
+    } catch (e) {
+      return ApiResponse<List<String>>(
+        status: 0,
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
+    }
+  }
+
+  // Get product categories list API request
+  Future<ApiResponse<List<String>>> getProductCategoriesList() async {
+    try {
+      final response = await _dio.post('getPCTMasterList');
+
+      if (response.statusCode == 200) {
+        // Parse response data
+        Map<String, dynamic> responseData;
+
+        if (response.data is String) {
+          responseData =
+              json.decode(response.data as String) as Map<String, dynamic>;
+        } else if (response.data is Map) {
+          responseData = response.data as Map<String, dynamic>;
+        } else {
+          throw Exception('Unexpected response format');
+        }
+
+        // Parse the product categories response
+        final categoriesResponse = ProductCategoriesResponse.fromJson(
+          responseData,
+        );
+
+        // Extract category names and add "All" at the beginning
+        final categoryNames = categoriesResponse.data
+            .map((category) => category.name)
+            .toList();
+        categoryNames.insert(0, 'All');
+
+        return ApiResponse<List<String>>(
+          status: categoriesResponse.status ? 200 : 0,
+          message: 'Product categories retrieved successfully',
+          data: categoryNames,
+        );
+      } else {
+        return ApiResponse<List<String>>(
+          status: response.statusCode ?? 0,
+          message: response.statusMessage ?? 'Unknown error',
+        );
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
+
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
+      } else if (e.type == DioExceptionType.badResponse) {
+        errorMessage = e.response?.data['message'] ?? 'Server error occurred';
+      } else if (e.type == DioExceptionType.cancel) {
+        errorMessage = 'Request cancelled';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+
+      return ApiResponse<List<String>>(
+        status: e.response?.statusCode ?? 0,
+        message: errorMessage,
+      );
+    } catch (e) {
+      return ApiResponse<List<String>>(
         status: 0,
         message: 'An unexpected error occurred: ${e.toString()}',
       );
