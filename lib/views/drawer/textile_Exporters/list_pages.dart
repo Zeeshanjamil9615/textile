@@ -132,7 +132,7 @@ class _ExportersListPageState extends State<ExportersListPage> {
             )),
           ),
         ],
-      ),
+      )),
           if (loading)
             Container(
               color: Colors.black.withOpacity(0.1),

@@ -190,7 +190,7 @@ class _SearchImporterByProductSpecificationListPageState
             ),
           ),
         ],
-      ),
+      )),
           if (loading)
             Container(
               color: Colors.black.withOpacity(0.1),

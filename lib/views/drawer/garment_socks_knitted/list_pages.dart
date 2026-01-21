@@ -160,7 +160,7 @@ class _GarmentSocksKnittedListPageState extends State<GarmentSocksKnittedListPag
             )),
           ),
         ],
-      ),
+      )),
           if (loading)
             Container(
               color: Colors.black.withOpacity(0.1),
