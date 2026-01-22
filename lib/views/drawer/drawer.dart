@@ -208,6 +208,8 @@ class CustomDrawer extends StatelessWidget {
               onTap: () {
                 Get.back();
                 Get.off(() => const GarmentSocksKnitted());
+
+                
               },
             ),
             _DrawerItem(
