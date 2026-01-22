@@ -6,6 +6,7 @@ import 'package:textile/models/countries_response.dart';
 import 'package:textile/models/product_categories_response.dart';
 import 'package:textile/models/product_category_model.dart';
 import 'package:textile/models/buyers_data_response.dart';
+import 'package:textile/models/garment_socks_knitted_response.dart';
 
 class ApiService {
   // Base URL for the API
@@ -369,6 +370,78 @@ class ApiService {
       );
     } catch (e) {
       return ApiResponse<BuyersDataResponse>(
+        status: 0,
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
+    }
+  }
+
+  // Get garment socks knitted data API request
+  Future<ApiResponse<GarmentSocksKnittedResponse>> getGarmentSocksKnittedData({
+    required String country,
+    required String filterPct,
+    required String filterBuyer,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'country': country,
+        'filter_pct': filterPct,
+        'filter_buyer': filterBuyer,
+      });
+
+      final response = await _dio.post(
+        'garmentSocksKnitted',
+        data: formData,
+      );
+
+      if (response.statusCode == 200) {
+        // Parse response data
+        Map<String, dynamic> responseData;
+
+        if (response.data is String) {
+          responseData =
+              json.decode(response.data as String) as Map<String, dynamic>;
+        } else if (response.data is Map) {
+          responseData = response.data as Map<String, dynamic>;
+        } else {
+          throw Exception('Unexpected response format');
+        }
+
+        // Parse the garment socks knitted response
+        final garmentResponse = GarmentSocksKnittedResponse.fromJson(responseData);
+
+        return ApiResponse<GarmentSocksKnittedResponse>(
+          status: garmentResponse.status,
+          message: garmentResponse.message,
+          data: garmentResponse,
+        );
+      } else {
+        return ApiResponse<GarmentSocksKnittedResponse>(
+          status: response.statusCode ?? 0,
+          message: response.statusMessage ?? 'Unknown error',
+        );
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
+
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
+      } else if (e.type == DioExceptionType.badResponse) {
+        errorMessage = e.response?.data['message'] ?? 'Server error occurred';
+      } else if (e.type == DioExceptionType.cancel) {
+        errorMessage = 'Request cancelled';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+
+      return ApiResponse<GarmentSocksKnittedResponse>(
+        status: e.response?.statusCode ?? 0,
+        message: errorMessage,
+      );
+    } catch (e) {
+      return ApiResponse<GarmentSocksKnittedResponse>(
         status: 0,
         message: 'An unexpected error occurred: ${e.toString()}',
       );

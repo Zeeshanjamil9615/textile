@@ -24,18 +24,12 @@ class _GarmentSocksKnittedListPageState extends State<GarmentSocksKnittedListPag
 
   @override
   Widget build(BuildContext context) {
-    // Try to find either controller - works with both impotersController and TextileImportersController
-    dynamic controller;
-    try {
-      controller = Get.find<GarmentSocksKnittedController>();
-    } catch (e) {
-      try {
-        controller = Get.find<GarmentSocksKnittedController>();
-      } catch (e) {
-        // If neither exists, create GarmentSocksKnittedController as default
-        controller = Get.put(GarmentSocksKnittedController());
-      }
-    }
+    final controller = Get.put(GarmentSocksKnittedController());
+    
+    // Automatically open filter sheet when screen first loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.openFilterSheetIfNeeded(context);
+    });
     
     return Obx(() {
       final bool loading = controller.isLoading.value;
@@ -145,19 +139,47 @@ class _GarmentSocksKnittedListPageState extends State<GarmentSocksKnittedListPag
             ),
           )),
           Expanded(
-            child: Obx(() => ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              itemCount: controller.filteredBuyers.length,
-              itemBuilder: (context, index) {
-                return BuyerCard(
-                  key: ValueKey(controller.filteredBuyers[index].id),
-                  buyer: controller.filteredBuyers[index],
-                  scrollController: _scrollController,
-                  index: index,
+            child: Obx(
+              () {
+                if (controller.filteredBuyers.isEmpty && !controller.isLoading.value) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.filter_list,
+                          size: 64,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          controller.hasLoadedData.value
+                              ? 'No data found'
+                              : 'Select filters and click Apply to load data',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                return ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.all(16),
+                  itemCount: controller.filteredBuyers.length,
+                  itemBuilder: (context, index) {
+                    return BuyerCard(
+                      key: ValueKey(controller.filteredBuyers[index].id),
+                      buyer: controller.filteredBuyers[index],
+                      scrollController: _scrollController,
+                      index: index,
+                    );
+                  },
                 );
               },
-            )),
+            ),
           ),
         ],
       )),

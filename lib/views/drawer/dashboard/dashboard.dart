@@ -386,14 +386,6 @@ class _ProductCard extends StatelessWidget {
               child: Icon(data.icon, color: Colors.white, size: 24),
             ),
             const SizedBox(height: 8),
-
-
-
-
-
-
-
-            
             Flexible(
               child: Text(
                 data.title,
