@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:textile/api_service/local_storage_service.dart';
 import 'package:textile/models/user_model.dart';
 import 'package:textile/views/auth/login_page.dart';
+import 'package:textile/views/drawer/Buyer_Product_Wise/Buyer_Product_Wise.dart';
+import 'package:textile/views/drawer/Buyer_Product_Wise/Buyer_Product_Wise_controller.dart';
 import 'package:textile/views/drawer/Email_Importers_City_Wise/Email_Importers_City_Wise.dart';
 import 'package:textile/views/drawer/Email_Importers_City_Wise/Email_Importers_City_Wise_controller.dart';
 import 'package:textile/views/drawer/Email_Importers_Country_Wise/Email_Importers_Country_Wise.dart';
@@ -50,9 +52,12 @@ class CustomDrawer extends StatelessWidget {
         (Get.isRegistered<TextileImportersController>());
     final isBuyers =
         currentRoute.contains('Buyers') || Get.isRegistered<BuyersController>();
+         final isBuyerProductWise =
+        currentRoute.contains('BuyerProductWise') || Get.isRegistered<BuyerProductWiseController>();
     final isGarmentSocksKnitted =
         currentRoute.contains('GarmentSocksKnitted') ||
         Get.isRegistered<GarmentSocksKnittedController>();
+        
     final isSearchGarmentImporter =
         currentRoute.contains('SearchGarmentImporter') ||
         Get.isRegistered<
@@ -183,6 +188,16 @@ class CustomDrawer extends StatelessWidget {
               onTap: () {
                 Get.back();
                 Get.off(() => const Buyers());
+              },
+            ),
+             _DrawerItem(
+              icon: Icons.checkroom,
+              title: 'Buyer Product Wise',
+              isSelected: isBuyerProductWise,
+
+              onTap: () {
+                Get.back();
+                Get.off(() => const BuyerProductWise());
               },
             ),
             _DrawerItem(

@@ -30,7 +30,7 @@ class SearchGarmentImporterByProductSpecificationController
   }
 
   void loadData() async {
-    buyers.value = DummyData.getBuyers();
+    buyers.value = DummyData.getBuyers().cast<BuyerModel>();
     buyerRankings.value = DummyData.getBuyerRankings();
 
     // Fetch dropdown data from API

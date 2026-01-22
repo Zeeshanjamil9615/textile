@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/Search_Exporter_By_Product_Specification/Search_Exporter_By_Product_Specification_controller.dart';
-import 'package:textile/views/drawer/Search_Exporter_By_Product_Specification/buyer_card.dart';
+import 'package:textile/views/drawer/Buyer_Product_Wise/Buyer_Product_Wise_controller.dart';
+import 'package:textile/views/drawer/Buyer_Product_Wise/buyer_card.dart';
 import 'package:textile/widgets/colors.dart';
 
-class SearchExporterByProductSpecificationListPage extends StatefulWidget {
-  const SearchExporterByProductSpecificationListPage({Key? key})
-    : super(key: key);
+class buyerproductwiseListPage extends StatefulWidget {
+  const buyerproductwiseListPage({Key? key}) : super(key: key);
 
   @override
-  State<SearchExporterByProductSpecificationListPage> createState() =>
-      _SearchExporterByProductSpecificationListPageState();
+  State<buyerproductwiseListPage> createState() =>
+      _buyerproductwiseListPageState();
 }
 
-class _SearchExporterByProductSpecificationListPageState
-    extends State<SearchExporterByProductSpecificationListPage> {
+class _buyerproductwiseListPageState extends State<buyerproductwiseListPage> {
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -26,17 +24,12 @@ class _SearchExporterByProductSpecificationListPageState
   @override
   Widget build(BuildContext context) {
     // Try to find either controller - works with both BuyersController and TextileExportersController
-    dynamic controller;
-    try {
-      controller = Get.put(SearchExporterByProductSpecificationController());
-    } catch (e) {
-      try {
-        controller = Get.put(SearchExporterByProductSpecificationController());
-      } catch (e) {
-        // If neither exists, create SearchExporterByProductSpecificationController as default
-        controller = Get.put(SearchExporterByProductSpecificationController());
-      }
-    }
+    final controller = Get.put(BuyerProductWiseController());
+    
+    // Automatically open filter sheet when screen first loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.openFilterSheetIfNeeded(context);
+    });
 
     return Obx(() {
       final bool loading = controller.isLoading.value;
@@ -135,21 +128,48 @@ class _SearchExporterByProductSpecificationListPageState
                     ),
                   ),
                 ),
+                // Table Header
                 Expanded(
                   child: Obx(
-                    () => ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(16),
-                      itemCount: controller.filteredExporters.length,
-                      itemBuilder: (context, index) {
-                        return BuyerCard(
-                          key: ValueKey(controller.filteredExporters[index].sr),
-                          buyer: controller.filteredExporters[index],
-                          scrollController: _scrollController,
-                          index: index,
+                    () {
+                      if (controller.filteredExporters.isEmpty && !controller.isLoading.value) {
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.filter_list,
+                                size: 64,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                controller.hasLoadedData.value
+                                    ? 'No data found'
+                                    : 'Select filters and click Apply to load data',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
                         );
-                      },
-                    ),
+                      }
+                      return ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.all(16),
+                        itemCount: controller.filteredExporters.length,
+                        itemBuilder: (context, index) {
+                          return BuyerCard(
+                            key: ValueKey(controller.filteredExporters[index].id),
+                            buyer: controller.filteredExporters[index],
+                            scrollController: _scrollController,
+                            index: index,
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
               ],

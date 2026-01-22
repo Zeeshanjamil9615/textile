@@ -4,6 +4,8 @@ import 'package:textile/models/api_response.dart';
 import 'package:textile/models/user_model.dart';
 import 'package:textile/models/countries_response.dart';
 import 'package:textile/models/product_categories_response.dart';
+import 'package:textile/models/product_category_model.dart';
+import 'package:textile/models/buyers_data_response.dart';
 
 class ApiService {
   // Base URL for the API
@@ -173,6 +175,67 @@ class ApiService {
     }
   }
 
+  // Get product categories list with full models API request
+  Future<ApiResponse<List<ProductCategoryModel>>> getProductCategoriesListWithIds() async {
+    try {
+      final response = await _dio.post('getPCTMasterList');
+
+      if (response.statusCode == 200) {
+        // Parse response data
+        Map<String, dynamic> responseData;
+
+        if (response.data is String) {
+          responseData =
+              json.decode(response.data as String) as Map<String, dynamic>;
+        } else if (response.data is Map) {
+          responseData = response.data as Map<String, dynamic>;
+        } else {
+          throw Exception('Unexpected response format');
+        }
+
+        // Parse the product categories response
+        final categoriesResponse = ProductCategoriesResponse.fromJson(
+          responseData,
+        );
+
+        return ApiResponse<List<ProductCategoryModel>>(
+          status: categoriesResponse.status ? 200 : 0,
+          message: 'Product categories retrieved successfully',
+          data: categoriesResponse.data,
+        );
+      } else {
+        return ApiResponse<List<ProductCategoryModel>>(
+          status: response.statusCode ?? 0,
+          message: response.statusMessage ?? 'Unknown error',
+        );
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
+
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
+      } else if (e.type == DioExceptionType.badResponse) {
+        errorMessage = e.response?.data['message'] ?? 'Server error occurred';
+      } else if (e.type == DioExceptionType.cancel) {
+        errorMessage = 'Request cancelled';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+
+      return ApiResponse<List<ProductCategoryModel>>(
+        status: e.response?.statusCode ?? 0,
+        message: errorMessage,
+      );
+    } catch (e) {
+      return ApiResponse<List<ProductCategoryModel>>(
+        status: 0,
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
+    }
+  }
+
   // Get product categories list API request
   Future<ApiResponse<List<String>>> getProductCategoriesList() async {
     try {
@@ -234,6 +297,78 @@ class ApiService {
       );
     } catch (e) {
       return ApiResponse<List<String>>(
+        status: 0,
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
+    }
+  }
+
+  // Get all buyers data API request
+  Future<ApiResponse<BuyersDataResponse>> getAllBuyersData({
+    required String filterCountry,
+    required String filterPct,
+    required String filterBuyer,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'filter_country': filterCountry,
+        'filter_pct': filterPct,
+        'filter_buyer': filterBuyer,
+      });
+
+      final response = await _dio.post(
+        'allBuyersData',
+        data: formData,
+      );
+
+      if (response.statusCode == 200) {
+        // Parse response data
+        Map<String, dynamic> responseData;
+
+        if (response.data is String) {
+          responseData =
+              json.decode(response.data as String) as Map<String, dynamic>;
+        } else if (response.data is Map) {
+          responseData = response.data as Map<String, dynamic>;
+        } else {
+          throw Exception('Unexpected response format');
+        }
+
+        // Parse the buyers data response
+        final buyersResponse = BuyersDataResponse.fromJson(responseData);
+
+        return ApiResponse<BuyersDataResponse>(
+          status: buyersResponse.status,
+          message: buyersResponse.message,
+          data: buyersResponse,
+        );
+      } else {
+        return ApiResponse<BuyersDataResponse>(
+          status: response.statusCode ?? 0,
+          message: response.statusMessage ?? 'Unknown error',
+        );
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
+
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
+      } else if (e.type == DioExceptionType.badResponse) {
+        errorMessage = e.response?.data['message'] ?? 'Server error occurred';
+      } else if (e.type == DioExceptionType.cancel) {
+        errorMessage = 'Request cancelled';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+
+      return ApiResponse<BuyersDataResponse>(
+        status: e.response?.statusCode ?? 0,
+        message: errorMessage,
+      );
+    } catch (e) {
+      return ApiResponse<BuyersDataResponse>(
         status: 0,
         message: 'An unexpected error occurred: ${e.toString()}',
       );

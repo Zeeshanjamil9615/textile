@@ -29,7 +29,7 @@ class GarmentDenimController extends GetxController {
   }
 
   Future<void> loadData() async {
-    buyers.value = DummyData.getBuyers();
+    buyers.value = DummyData.getBuyers().cast<BuyerModel>();
     buyerRankings.value = DummyData.getBuyerRankings();
     await Future.wait([fetchCountries(), fetchProductCategories()]);
     applyFilters();

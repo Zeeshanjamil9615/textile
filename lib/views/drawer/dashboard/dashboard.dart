@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:textile/views/drawer/Buyer_Product_Wise/Buyer_Product_Wise.dart';
 import 'package:textile/views/drawer/dashboard/dashboard_controller.dart';
 import 'package:textile/views/drawer/drawer.dart';
 import 'package:textile/widgets/colors.dart';
@@ -60,17 +61,17 @@ class _DashboardBody extends StatelessWidget {
                         iconBg: Color(0xFFE74C3C),
                         accent: Color(0xFFE74C3C),
                       ),
-                    
                     ],
                   ),
+                  const SizedBox(height: 16),
+                  // Top Products Section
+                  const _TopProducts(),
                   const SizedBox(height: 16),
                   if (isNarrow) ...[
                     const _MapAndCountries(),
                     const SizedBox(height: 16),
-
                     _Map(),
                     const SizedBox(height: 16),
-
                     const _TopBrands(),
                   ] else
                     const Row(
@@ -260,6 +261,159 @@ class _KpiCard extends StatelessWidget {
   }
 }
 
+// Top Products Section
+class _TopProducts extends StatelessWidget {
+  const _TopProducts();
+
+  @override
+  Widget build(BuildContext context) {
+    const products = [
+      _ProductData(
+        title: 'Bed Linen / Bed...',
+        icon: Icons.bed_outlined,
+      ),
+      _ProductData(
+        title: 'Bed Spreads',
+        icon: Icons.weekend_outlined,
+      ),
+      _ProductData(
+        title: 'Blankets',
+        icon: Icons.bed,
+      ),
+      _ProductData(
+        title: 'Canvas...',
+        icon: Icons.brush_outlined,
+      ),
+      _ProductData(
+        title: 'Fabrics',
+        icon: Icons.texture_outlined,
+      ),
+      _ProductData(
+        title: 'Grey Fabric',
+        icon: Icons.checkroom_outlined,
+      ),
+      _ProductData(
+        title: 'Printed Fabric',
+        icon: Icons.print_outlined,
+      ),
+      _ProductData(
+        title: 'Terry Towel',
+        icon: Icons.dry_cleaning_outlined,
+      ),
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.cardBackground,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: const [
+          BoxShadow(color: Color(0x12000000), blurRadius: 18, offset: Offset(0, 10)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Top Products',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 14),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final crossAxisCount = width < 600 ? 2 : (width < 900 ? 3 : 4);
+              
+              return GridView.builder(
+                itemCount: products.length,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.8,
+                ),
+                itemBuilder: (context, index) => _ProductCard(data: products[index]),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProductData {
+  final String title;
+  final IconData icon;
+
+  const _ProductData({
+    required this.title,
+    required this.icon,
+  });
+}
+
+class _ProductCard extends StatelessWidget {
+  final _ProductData data;
+  const _ProductCard({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        // Navigate to BuyerProductWise screen
+        Get.to(() => BuyerProductWise());
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+                padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE9EEF2)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 30,
+              width: 30,
+              decoration: BoxDecoration(
+                color: AppColors.primaryDark,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(data.icon, color: Colors.white, size: 24),
+            ),
+            const SizedBox(height: 8),
+
+
+
+
+
+
+
+            
+            Flexible(
+              child: Text(
+                data.title,
+                style: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _MapAndCountries extends StatelessWidget {
   const _MapAndCountries();
 
@@ -273,6 +427,7 @@ class _MapAndCountries extends StatelessWidget {
     );
   }
 }
+
 class _Map extends StatelessWidget {
   const _Map();
 
@@ -527,97 +682,5 @@ class _TopBrands extends StatelessWidget {
     );
   }
 }
-
-class _SectionTitle extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  const _SectionTitle({required this.title, required this.subtitle});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
-        const SizedBox(height: 2),
-        Text(subtitle, style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
-      ],
-    );
-  }
-}
-
-class _ActionCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  const _ActionCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        width: 290,
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: AppColors.cardBackground,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFE9EEF2)),
-          boxShadow: const [
-            BoxShadow(color: Color(0x0D000000), blurRadius: 16, offset: Offset(0, 10)),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              height: 44,
-              width: 44,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(icon, color: AppColors.primaryDark),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.textSecondary),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
-
-
 
 
