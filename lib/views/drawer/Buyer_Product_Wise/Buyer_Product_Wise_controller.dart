@@ -25,6 +25,8 @@ class BuyerProductWiseController extends GetxController {
   final isLoading = false.obs;
   final isFilterSheetOpen = false.obs;
   final hasLoadedData = false.obs; // Track if data has been loaded at least once
+  final hasShownInitialFilterSheet = false
+      .obs; // Prevent auto-opening the filter sheet on every rebuild
 
   @override
   void onInit() {
@@ -41,7 +43,10 @@ class BuyerProductWiseController extends GetxController {
   
   // Method to open filter sheet if data hasn't been loaded yet
   void openFilterSheetIfNeeded(BuildContext context) {
-    if (!hasLoadedData.value && !isFilterSheetOpen.value) {
+    if (!hasLoadedData.value &&
+        !isFilterSheetOpen.value &&
+        !hasShownInitialFilterSheet.value) {
+      hasShownInitialFilterSheet.value = true;
       showFilterBottomSheet(context);
     }
   }
@@ -119,14 +124,14 @@ class BuyerProductWiseController extends GetxController {
 
       if (response.status == 200 && response.data != null) {
         // Map API response to BuyerModel
-        exporters.value = response.data!.data.map((buyerData) {
+        exporters.value = response.data!.data.map((bd) {
           return BuyerModel(
-            id: buyerData.id,
-            importerName: buyerData.importer,
-            country: buyerData.country,
-            productCategory: buyerData.pct,
+            id: bd.id,
+            importerName: bd.importer,
+            country: bd.country,
+            productCategory: bd.pct,
             ranking: selectedBuyerRanking.value,
-            buyersWorth: double.tryParse(buyerData.valueFc) ?? 0.0,
+            buyersWorth: double.tryParse(bd.valueFc) ?? 0.0,
           );
         }).toList();
         
@@ -195,6 +200,33 @@ class BuyerProductWiseController extends GetxController {
         selectedProductCategoryId.value = category.id;
       }
     }
+  }
+
+  /// Used by dashboard/top products navigation to pre-select a category by id and fetch data.
+  Future<void> applyCategoryAndFetch({
+    required String pctId,
+    required String pctName,
+    String country = 'All',
+  }) async {
+    // Ensure dropdown data is available
+    if (productCategoriesWithIds.isEmpty) {
+      await fetchProductCategories();
+    }
+
+    selectedCountry.value = country;
+    selectedProductCategoryId.value = pctId;
+
+    // Try to find the name from list; fallback to provided name
+    final match = productCategoriesWithIds.firstWhere(
+      (c) => c.id == pctId,
+      orElse: () => ProductCategoryModel(id: pctId, name: pctName, condition: ''),
+    );
+    selectedProductCategory.value = match.name;
+
+    // Prevent auto-opening the filter sheet since we're programmatically applying filters
+    hasShownInitialFilterSheet.value = true;
+
+    await fetchBuyersData();
   }
 
   void updateBuyerRankingFilter(String? value) {

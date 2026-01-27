@@ -23,7 +23,7 @@ import 'package:textile/views/drawer/add_folder/add_folder.dart';
 import 'package:textile/views/drawer/add_folder/add_folder_controller.dart';
 import 'package:textile/views/drawer/buyers/buyer_controller.dart';
 import 'package:textile/views/drawer/buyers/buyers.dart';
-import 'package:textile/views/drawer/dashboard/dashboard.dart';
+import 'package:textile/views/drawer/dashboard/dashboard.dart';    
 import 'package:textile/views/drawer/dashboard/dashboard_controller.dart';
 import 'package:textile/views/drawer/garment_denim/garment_denim.dart';
 import 'package:textile/views/drawer/garment_denim/garment_denim_controller.dart';
@@ -209,7 +209,6 @@ class CustomDrawer extends StatelessWidget {
                 Get.back();
                 Get.off(() => const GarmentSocksKnitted());
 
-                
               },
             ),
             _DrawerItem(
@@ -220,7 +219,7 @@ class CustomDrawer extends StatelessWidget {
                 Get.back();
                 Get.off(
                   () => const SearchGarmentImporterByProductSpecification(),
-                );
+                );             
               },
             ),
             _DrawerItem(

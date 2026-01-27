@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/Buyer_Product_Wise/Buyer_Product_Wise.dart';
 import 'package:textile/views/drawer/dashboard/dashboard_controller.dart';
 import 'package:textile/views/drawer/drawer.dart';
 import 'package:textile/widgets/colors.dart';
@@ -28,6 +27,7 @@ class _DashboardBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<DashboardController>();
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
@@ -44,28 +44,33 @@ class _DashboardBody extends StatelessWidget {
                 children: [
                   const _Header(),
                   const SizedBox(height: 14),
-                  _KpiGrid(
-                    crossAxisCount: isVeryNarrow ? 1 : (isNarrow ? 2 : 4),
-                    items: const [
+                  Obx(() {
+                    final items = [
                       _KpiData(
                         title: 'Textile Importers',
-                        value: '47,117',
+                        value: controller.importerCount.value.toString(),
                         icon: Icons.check_circle,
-                        iconBg: Color(0xFF2D7373),
-                        accent: Color(0xFF2D7373),
+                        iconBg: const Color(0xFF2D7373),
+                        accent: const Color(0xFF2D7373),
+                        loading: controller.isLoadingCounts.value,
                       ),
                       _KpiData(
                         title: 'Textile Exporters',
-                        value: '1,079',
-                        icon: Icons.cancel,
-                        iconBg: Color(0xFFE74C3C),
-                        accent: Color(0xFFE74C3C),
+                        value: controller.exporterCount.value.toString(),
+                        icon: Icons.local_shipping_outlined,
+                        iconBg: const Color(0xFFE67E22),
+                        accent: const Color(0xFFE67E22),
+                        loading: controller.isLoadingCounts.value,
                       ),
-                    ],
-                  ),
+                    ];
+                    return _KpiGrid(
+                      crossAxisCount: isVeryNarrow ? 1 : (isNarrow ? 2 : 4),
+                      items: items,
+                    );
+                  }),
                   const SizedBox(height: 16),
                   // Top Products Section
-                  const _TopProducts(),
+                  _TopProducts(controller: controller),
                   const SizedBox(height: 16),
                   if (isNarrow) ...[
                     const _MapAndCountries(),
@@ -155,18 +160,18 @@ class _Header extends StatelessWidget {
 class _KpiData {
   final String title;
   final String value;
-  final String? subValue;
   final IconData icon;
   final Color iconBg;
   final Color accent;
+  final bool loading;
 
   const _KpiData({
     required this.title,
     required this.value,
-    this.subValue,
     required this.icon,
     required this.iconBg,
     required this.accent,
+    this.loading = false,
   });
 }
 
@@ -225,17 +230,16 @@ class _KpiCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  data.value,
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: data.accent),
-                ),
-                if (data.subValue != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    data.subValue!,
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: data.accent),
-                  ),
-                ],
+                data.loading
+                    ? const SizedBox(
+                        height: 22,
+                        width: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(
+                        data.value,
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: data.accent),
+                      ),
                 const SizedBox(height: 4),
                 Text(
                   data.title,
@@ -263,45 +267,11 @@ class _KpiCard extends StatelessWidget {
 
 // Top Products Section
 class _TopProducts extends StatelessWidget {
-  const _TopProducts();
+  final DashboardController controller;
+  const _TopProducts({required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    const products = [
-      _ProductData(
-        title: 'Bed Linen / Bed...',
-        icon: Icons.bed_outlined,
-      ),
-      _ProductData(
-        title: 'Bed Spreads',
-        icon: Icons.weekend_outlined,
-      ),
-      _ProductData(
-        title: 'Blankets',
-        icon: Icons.bed,
-      ),
-      _ProductData(
-        title: 'Canvas...',
-        icon: Icons.brush_outlined,
-      ),
-      _ProductData(
-        title: 'Fabrics',
-        icon: Icons.texture_outlined,
-      ),
-      _ProductData(
-        title: 'Grey Fabric',
-        icon: Icons.checkroom_outlined,
-      ),
-      _ProductData(
-        title: 'Printed Fabric',
-        icon: Icons.print_outlined,
-      ),
-      _ProductData(
-        title: 'Terry Towel',
-        icon: Icons.dry_cleaning_outlined,
-      ),
-    ];
-
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -319,52 +289,61 @@ class _TopProducts extends StatelessWidget {
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 14),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final width = constraints.maxWidth;
-              final crossAxisCount = width < 600 ? 2 : (width < 900 ? 3 : 4);
-              
-              return GridView.builder(
-                itemCount: products.length,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1.8,
+          Obx(() {
+            if (controller.isLoadingTopProducts.value) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(12),
+                  child: CircularProgressIndicator(strokeWidth: 2),
                 ),
-                itemBuilder: (context, index) => _ProductCard(data: products[index]),
               );
-            },
-          ),
+            }
+            if (controller.topProducts.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.all(12),
+                child: Text('No top products found'),
+              );
+            }
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+                final crossAxisCount = width < 600 ? 2 : (width < 900 ? 3 : 4);
+                return GridView.builder(
+                  itemCount: controller.topProducts.length,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 1.8,
+                  ),
+                  itemBuilder: (context, index) {
+                    final item = controller.topProducts[index];
+                    return _ProductCard(
+                      title: item.name,
+                      onTap: () => controller.goToProductWise(item),
+                    );
+                  },
+                );
+              },
+            );
+          }),
         ],
       ),
     );
   }
 }
 
-class _ProductData {
-  final String title;
-  final IconData icon;
-
-  const _ProductData({
-    required this.title,
-    required this.icon,
-  });
-}
-
 class _ProductCard extends StatelessWidget {
-  final _ProductData data;
-  const _ProductCard({required this.data});
+  final String title;
+  final VoidCallback onTap;
+  const _ProductCard({required this.title, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        // Navigate to BuyerProductWise screen
-        Get.to(() => BuyerProductWise());
-      },
+      onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
                 padding: const EdgeInsets.all(12),
@@ -383,12 +362,12 @@ class _ProductCard extends StatelessWidget {
                 color: AppColors.primaryDark,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(data.icon, color: Colors.white, size: 24),
+              child: const Icon(Icons.category, color: Colors.white, size: 24),
             ),
             const SizedBox(height: 8),
             Flexible(
               child: Text(
-                data.title,
+                title,
                 style: const TextStyle(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w700,
@@ -674,5 +653,6 @@ class _TopBrands extends StatelessWidget {
     );
   }
 }
+
 
 

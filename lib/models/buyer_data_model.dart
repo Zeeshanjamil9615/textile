@@ -69,6 +69,7 @@ class BuyerDataModel {
       unit: json['unit']?.toString() ?? '',
       unitPrice: json['unit_price']?.toString() ?? '',
       currCode: json['curr_code']?.toString() ?? '',
+      // API uses a key like "value (fc)"
       valueFc: json['value (fc)']?.toString() ?? '',
       valuePkr: json['value_pkr']?.toString() ?? '',
     );
