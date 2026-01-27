@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:textile/views/drawer/buyers/buyer_controller.dart';
-import 'package:textile/views/drawer/textile_importers/buyer_model.dart';
-import 'package:textile/views/drawer/textile_importers/textile_importers_controller.dart';
+import 'package:textile/models/garment_denim_data_model.dart';
 
 class BuyerCard extends StatelessWidget {
-  final BuyerModel buyer;
+  final GarmentDenimDataModel buyer;
   final ScrollController? scrollController;
   final int? index;
   
@@ -33,19 +30,6 @@ class BuyerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Try to find either controller - works with both BuyersController and TextileImportersController
-    dynamic controller;
-    try {
-      controller = Get.find<BuyersController>();
-    } catch (e) {
-      try {
-        controller = Get.find<TextileImportersController>();
-      } catch (e) {
-        // If neither exists, create TextileImportersController as default
-        controller = Get.put(TextileImportersController());
-      }
-    }
-    
     return GestureDetector(
       onTap: () => _scrollToCard(context),
       child: Card(
@@ -65,12 +49,12 @@ class BuyerCard extends StatelessWidget {
                       color: const Color(0xFF4A9B9B).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Text(buyer.id, 
+                    child: Text('#${buyer.ranking}', 
                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF4A9B9B))),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(buyer.importerName, 
+                    child: Text(buyer.importer, 
                       style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                   ),
                 ],
@@ -78,26 +62,17 @@ class BuyerCard extends StatelessWidget {
               const SizedBox(height: 12),
               _DetailRow(icon: Icons.flag, label: 'Country', value: buyer.country),
               const SizedBox(height: 8),
-              _DetailRow(icon: Icons.category, label: 'Product Category', value: buyer.productCategory),
+              _DetailRow(icon: Icons.category, label: 'PCT Code', value: buyer.pctCode),
               const SizedBox(height: 8),
-              _DetailRow(icon: Icons.star, label: 'Ranking', value: buyer.ranking, 
-                valueColor: _getRankingColor(buyer.ranking)),
+              _DetailRow(icon: Icons.label, label: 'PCT Name', value: buyer.pctName),
               const SizedBox(height: 8),
-             
+              _DetailRow(icon: Icons.attach_money, label: 'Score Sum', value: buyer.scoreSumFormatted),
+              const SizedBox(height: 8),
             ],
           ),
         ),
       ),
     );
-  }
-  
-  Color _getRankingColor(String ranking) {
-    switch (ranking.toLowerCase()) {
-      case 'high': return Colors.green;
-      case 'medium': return Colors.orange;
-      case 'low': return Colors.red;
-      default: return Colors.grey;
-    }
   }
 }
 

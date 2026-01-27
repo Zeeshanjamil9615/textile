@@ -1,26 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/buyers/buyer_controller.dart';
 import 'package:textile/views/drawer/garment_denim/garment_denim_controller.dart';
-import 'package:textile/views/drawer/textile_importers/textile_importers_controller.dart';
 
 class FilterSection extends StatelessWidget {
   const FilterSection({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Try to find either controller - works with both BuyersController and TextileImportersController
-    dynamic controller;
-    try {
-      controller = Get.find<GarmentDenimController>();
-    } catch (e) {
-      try {
-        controller = Get.find<GarmentDenimController>();
-      } catch (e) {
-        // If neither exists, create GarmentDenimController as default
-        controller = Get.put(GarmentDenimController());
-      }
-    }
+    final controller = Get.find<GarmentDenimController>();
     
     return Container(
       padding: const EdgeInsets.all(16),
@@ -57,63 +44,57 @@ class FilterSection extends StatelessWidget {
             onChanged: controller.updateImporterNameFilter,
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Product Category', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
-                    Obx(() => DropdownButtonFormField<String>(
-                      value: controller.selectedProductCategory.value,
-                      isExpanded: true,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: const Color(0xFFF8F9FA),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: BorderSide.none),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      ),
-                      items: controller.productCategories.map((category) {
-                        return DropdownMenuItem<String>(
-                          value: category, 
-                          child: Text(category, style: const TextStyle(fontSize: 12), overflow: TextOverflow.ellipsis),
-                        );
-                      }).toList().cast<DropdownMenuItem<String>>(),
-                      onChanged: controller.updateProductCategoryFilter,
-                    )),
-                  ],
+          const Text('Product Category', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          Obx(() => DropdownButtonFormField<String>(
+            value: controller.selectedProductCategory.value,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: const Color(0xFFF8F9FA),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: BorderSide.none),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+            items: controller.productCategories.map((category) {
+              return DropdownMenuItem<String>(
+                value: category, 
+                child: Text(category, style: const TextStyle(fontSize: 12), overflow: TextOverflow.ellipsis),
+              );
+            }).toList().cast<DropdownMenuItem<String>>(),
+            onChanged: controller.updateProductCategoryFilter,
+          )),
+          const SizedBox(height: 24),
+          // Apply Button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => controller.applyFilterAndFetch(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4A9B9B),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text('Buyer Ranking', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
-                    Obx(() => DropdownButtonFormField<String>(
-                      value: controller.selectedBuyerRanking.value,
-                      isExpanded: true,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: const Color(0xFFF8F9FA),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: BorderSide.none),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Obx(() => controller.isLoading.value
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
-                      items: controller.buyerRankings.map((ranking) {
-                        return DropdownMenuItem<String>(
-                          value: ranking, 
-                          child: Text(ranking, overflow: TextOverflow.ellipsis),
-                        );
-                      }).toList().cast<DropdownMenuItem<String>>(),
-                      onChanged: controller.updateBuyerRankingFilter,
+                    )
+                  : const Text(
+                      'Apply',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     )),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
+          const SizedBox(height: 16),
         ],
       ),
     );
