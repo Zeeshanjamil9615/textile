@@ -30,13 +30,14 @@ class _impotersListPageState extends State<impotersListPage> {
     try {
       controller = Get.find<TextileImportersController>();
     } catch (e) {
-      try {
-        controller = Get.find<TextileImportersController>();
-      } catch (e) {
-        // If neither exists, create TextileImportersController as default
-        controller = Get.put(TextileImportersController());
-      }
+      // If it doesn't exist yet, create TextileImportersController as default
+      controller = Get.put(TextileImportersController());
     }
+
+    // Automatically open filter sheet when screen first loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.openFilterSheetIfNeeded(context);
+    });
     
     return Obx(() {
       final bool loading = controller.isLoading.value;
@@ -65,7 +66,7 @@ class _impotersListPageState extends State<impotersListPage> {
                       hintText: 'Enter importer name...',
                       prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
                     ),
-                    onChanged: controller.updateImporterNameFilter,
+                    onChanged: controller.updateExporterNameFilter,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -110,7 +111,7 @@ class _impotersListPageState extends State<impotersListPage> {
                       color: const Color(0xFF4A9B9B),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Obx(() => Text('Showing ' + controller.filteredBuyers.length.toString() + ' Records',
+                    child: Obx(() => Text('Showing ' + controller.filteredExporters.length.toString() + ' Records',
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
                       overflow: TextOverflow.ellipsis,
                     )),
@@ -151,11 +152,11 @@ class _impotersListPageState extends State<impotersListPage> {
             child: Obx(() => ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.all(16),
-              itemCount: controller.filteredBuyers.length,
+              itemCount: controller.filteredExporters.length,
               itemBuilder: (context, index) {
                 return BuyerCard(
-                  key: ValueKey(controller.filteredBuyers[index].id),
-                  buyer: controller.filteredBuyers[index],
+                  key: ValueKey(controller.filteredExporters[index].id),
+                  buyer: controller.filteredExporters[index],
                   scrollController: _scrollController,
                   index: index,
                 );

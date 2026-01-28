@@ -169,6 +169,18 @@ class TextileImportersController extends GetxController {
     }
   }
 
+  /// Called from the filter bottom sheet "Apply" button to trigger the API
+  /// and close the sheet once data is loaded.
+  Future<void> applyFilterAndFetch(BuildContext context) async {
+    if (isLoading.value) return;
+
+    await fetchBuyersData();
+
+    if (context.mounted) {
+      Navigator.pop(context);
+    }
+  }
+
   void applyFilters() {
     filteredExporters.value = exporters.where((exporter) {
       bool matchesName =
