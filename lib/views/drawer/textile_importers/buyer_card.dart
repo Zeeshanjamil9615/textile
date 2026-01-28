@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/textile_importers/buyer_model.dart';
+import 'package:textile/models/textile_importers_buyer_model.dart';
 
 import 'package:textile/widgets/folder_selection_bottom_sheet.dart';
 import 'package:textile/views/drawer/add_folder/add_folder_controller.dart';
 
 class BuyerCard extends StatelessWidget {
-  final BuyerModel buyer;
+  final TextileImportersBuyerModel buyer;
   final ScrollController? scrollController;
   final int? index;
   
@@ -58,21 +58,51 @@ class BuyerCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(buyer.importerName, 
+                    child: Text(buyer.importer.isNotEmpty ? buyer.importer : 'N/A', 
                       style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              _DetailRow(icon: Icons.flag, label: 'Country', value: buyer.country),
+              _DetailRow(icon: Icons.flag, label: 'Country', value: buyer.country.isNotEmpty ? buyer.country : 'N/A'),
               const SizedBox(height: 8),
-              _DetailRow(icon: Icons.category, label: 'Product Category', value: buyer.productCategory),
+              _DetailRow(icon: Icons.business, label: 'Exporter', value: buyer.exporter.isNotEmpty ? buyer.exporter : 'N/A'),
               const SizedBox(height: 8),
-              _DetailRow(icon: Icons.star, label: 'Ranking', value: buyer.ranking, 
-                valueColor: _getRankingColor(buyer.ranking)),
+              _DetailRow(icon: Icons.description, label: 'Description', value: buyer.description.isNotEmpty ? buyer.description : 'N/A'),
               const SizedBox(height: 8),
-              _DetailRow(icon: Icons.attach_money, label: 'Buyers Worth', 
-                value: '\$' + buyer.buyersWorth.toStringAsFixed(2), valueColor: Colors.green),
+              _DetailRow(icon: Icons.category, label: 'PCT Code', value: buyer.pct.isNotEmpty ? buyer.pct : 'N/A'),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _DetailRow(icon: Icons.calendar_today, label: 'Date', value: buyer.date.isNotEmpty ? buyer.date : 'N/A'),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _DetailRow(icon: Icons.numbers, label: 'SB', value: buyer.sb.isNotEmpty ? buyer.sb : 'N/A'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: _DetailRow(icon: Icons.shopping_cart, label: 'Qty', value: buyer.qty.isNotEmpty ? '${buyer.qty} ${buyer.unit}' : 'N/A'),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _DetailRow(icon: Icons.attach_money, label: 'Value (PKR)', 
+                      value: buyer.valuePkr.isNotEmpty ? 'PKR ${buyer.valuePkr}' : 'N/A', 
+                      valueColor: Colors.green),
+                  ),
+                ],
+              ),
+              if (buyer.valueFc.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                _DetailRow(icon: Icons.currency_exchange, label: 'Value (FC)', 
+                  value: '${buyer.currCode} ${buyer.valueFc}', 
+                  valueColor: Colors.blue),
+              ],
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,

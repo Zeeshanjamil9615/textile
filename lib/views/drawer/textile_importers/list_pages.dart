@@ -110,38 +110,40 @@ class _impotersListPageState extends State<impotersListPage> {
                       color: const Color(0xFF4A9B9B),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Text('Showing ' + controller.filteredBuyers.length.toString() + ' Records',
+                    child: Obx(() => Text('Showing ' + controller.filteredBuyers.length.toString() + ' Records',
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
                       overflow: TextOverflow.ellipsis,
-                    ),
+                    )),
                   ),
                 ),
                 const SizedBox(width: 8),
-                Flexible(
-                  child: GestureDetector(
-                    onTap: controller.clearCountryFilter,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF4A9B9B),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.close, color: Colors.white, size: 16),
-                          const SizedBox(width: 4),
-                          Flexible(
-                            child: Text('FROM ' + controller.selectedCountry.value,
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
-                              overflow: TextOverflow.ellipsis,
+                Obx(() => controller.selectedCountry.value != 'All'
+                    ? Flexible(
+                        child: GestureDetector(
+                          onTap: controller.clearCountryFilter,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF4A9B9B),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.close, color: Colors.white, size: 16),
+                                const SizedBox(width: 4),
+                                Flexible(
+                                  child: Text('FROM ' + controller.selectedCountry.value,
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
+                        ),
+                      )
+                    : const SizedBox.shrink()),
               ],
             ),
           )),
