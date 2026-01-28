@@ -688,7 +688,7 @@ class ApiService {
   }
 
   // Get all buyers data for textile importers
-  Future<ApiResponse<TextileImportersResponse>> getAllBuyersData({
+  Future<ApiResponse<TextileImportersResponse>> getAllImportersData({
     required String filterCountry,
     required String filterPct,
     required String filterBuyer,

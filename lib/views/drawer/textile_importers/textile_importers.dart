@@ -16,19 +16,12 @@ class _TextileImportersState extends State<TextileImporters> {
   @override
   void initState() {
     super.initState();
-    final controller = Get.put(TextileImportersController());
-    // Auto-open filter section after the first frame is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && controller.shouldAutoOpenFilter.value) {
-        controller.shouldAutoOpenFilter.value = false;
-        controller.showFilterBottomSheet(context);
-      }
-    });
+    
   }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<TextileImportersController>();
+    final controller = Get.put(TextileImportersController());
 
     return Scaffold(
       key: controller.scaffoldKey,
