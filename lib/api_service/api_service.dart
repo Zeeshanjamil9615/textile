@@ -12,6 +12,7 @@ import 'package:textile/models/top_product_model.dart';
 import 'package:textile/models/garment_denim_response.dart';
 import 'package:textile/models/textile_importers_response.dart';
 import 'package:textile/models/apnay_folders_response.dart';
+import 'package:textile/models/folder_details_response.dart';
 
 class ApiService {
   // Base URL for the API
@@ -820,6 +821,83 @@ class ApiService {
       );
     } catch (e) {
       return ApiResponse<ApnayFoldersData>(
+        status: 0,
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Get folder details (importers/buyers in folder). Pass cs_id as user_id, folder_id from folder list.
+  Future<ApiResponse<List<FolderDetailItem>>> getFolderDetails(
+    String userId,
+    String folderId,
+  ) async {
+    try {
+      final response = await _dio.post(
+        'folderDetails',
+        data: json.encode({
+          'user_id': userId,
+          'folder_id': folderId,
+        }),
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData;
+        if (response.data is String) {
+          responseData =
+              json.decode(response.data as String) as Map<String, dynamic>;
+        } else if (response.data is Map) {
+          responseData = response.data as Map<String, dynamic>;
+        } else {
+          throw Exception('Unexpected response format');
+        }
+
+        final status = responseData['status'] as int? ?? 0;
+        final message = responseData['message'] as String? ?? '';
+        final dataList = responseData['data'];
+        if (dataList is! List) {
+          return ApiResponse<List<FolderDetailItem>>(
+            status: status,
+            message: message,
+            data: const [],
+          );
+        }
+        final list = (dataList as List)
+            .map((e) => FolderDetailItem.fromJson(
+                  Map<String, dynamic>.from(e as Map),
+                ))
+            .toList();
+        return ApiResponse<List<FolderDetailItem>>(
+          status: status,
+          message: message,
+          data: list,
+        );
+      } else {
+        return ApiResponse<List<FolderDetailItem>>(
+          status: response.statusCode ?? 0,
+          message: response.statusMessage ?? 'Unknown error',
+        );
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
+      } else if (e.type == DioExceptionType.badResponse) {
+        errorMessage = e.response?.data['message'] ?? 'Server error occurred';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+      return ApiResponse<List<FolderDetailItem>>(
+        status: e.response?.statusCode ?? 0,
+        message: errorMessage,
+      );
+    } catch (e) {
+      return ApiResponse<List<FolderDetailItem>>(
         status: 0,
         message: 'An unexpected error occurred: ${e.toString()}',
       );

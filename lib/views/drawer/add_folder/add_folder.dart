@@ -97,6 +97,7 @@ class AddFolderScreen extends StatelessWidget {
                             Get.to(
                               () => OpenFolderScreen(
                                 folderName: item.folderName,
+                                folderId: item.folderId,
                               ),
                             );
                           },
@@ -160,6 +161,7 @@ class AddFolderScreen extends StatelessWidget {
                                         Get.to(
                                           () => OpenFolderScreen(
                                             folderName: item.folderName,
+                                            folderId: item.folderId,
                                           ),
                                         );
                                       },

@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:textile/api_service/api_service.dart';
+import 'package:textile/api_service/local_storage_service.dart';
 import 'package:textile/widgets/colors.dart';
 
 class ImporterItem {
   final int sr;
+  final String id;
   final String importerName;
   final String cityCountry;
   final String narration;
 
   ImporterItem({
     required this.sr,
+    required this.id,
     required this.importerName,
     required this.cityCountry,
     required this.narration,
@@ -17,41 +21,83 @@ class ImporterItem {
 }
 
 class OpenFolderController extends GetxController {
+  final String folderId;
+  final String folderName;
+  OpenFolderController({
+    required this.folderId,
+    required this.folderName,
+  });
+
   final importers = <ImporterItem>[].obs;
+  final isLoading = false.obs;
+  final errorMessage = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
-    _loadDummyData();
+    fetchFolderDetails();
   }
 
-  void _loadDummyData() {
-    importers.assignAll([
-      ImporterItem(
-        sr: 1,
-        importerName: 'ABC Imports',
-        cityCountry: 'London / UK',
-        narration: 'Key buyer for denim products',
-      ),
-      ImporterItem(
-        sr: 2,
-        importerName: 'Textile World',
-        cityCountry: 'Paris / France',
-        narration: 'Regular sock importer',
-      ),
-      ImporterItem(
-        sr: 3,
-        importerName: 'Global Apparel',
-        cityCountry: 'Berlin / Germany',
-        narration: 'Interested in knitted garments',
-      ),
-    ]);
+  Future<void> fetchFolderDetails() async {
+    final user = await LocalStorageService.getUserData();
+    if (user == null || user.id.isEmpty) {
+      errorMessage.value = 'Please log in to view folder details.';
+      importers.clear();
+      return;
+    }
+    if (folderId.isEmpty) {
+      errorMessage.value = 'Invalid folder.';
+      importers.clear();
+      return;
+    }
+    isLoading.value = true;
+    errorMessage.value = '';
+    try {
+      final apiService = ApiService();
+      final response = await apiService.getFolderDetails(user.id, folderId);
+      if (response.status == 200 && response.data != null) {
+        importers.assignAll(
+          response.data!.asMap().entries.map((e) {
+            final f = e.value;
+            final city = f.city.trim();
+            final country = f.country.trim();
+            final cityCountry = city.isEmpty && country.isEmpty
+                ? '—'
+                : city.isEmpty
+                    ? country
+                    : country.isEmpty
+                        ? city
+                        : '$city / $country';
+            return ImporterItem(
+              sr: e.key + 1,
+              id: f.id,
+              importerName: f.name,
+              cityCountry: cityCountry,
+              narration: f.description?.trim().isEmpty ?? true
+                  ? (f.productCode?.trim().isEmpty ?? true
+                      ? '—'
+                      : f.productCode!)
+                  : f.description!,
+            );
+          }),
+        );
+      } else {
+        errorMessage.value = response.message;
+        importers.clear();
+      }
+    } catch (_) {
+      errorMessage.value = 'Failed to load folder details.';
+      importers.clear();
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void addImporter(ImporterItem item) {
     importers.add(
       ImporterItem(
         sr: importers.length + 1,
+        id: item.id,
         importerName: item.importerName,
         cityCountry: item.cityCountry,
         narration: item.narration,
@@ -68,14 +114,21 @@ class OpenFolderController extends GetxController {
 
 class OpenFolderScreen extends StatelessWidget {
   final String folderName;
+  final String folderId;
 
-  const OpenFolderScreen({Key? key, required this.folderName})
-      : super(key: key);
+  const OpenFolderScreen({
+    Key? key,
+    required this.folderName,
+    required this.folderId,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<OpenFolderController>(
-      init: OpenFolderController(),
+      init: OpenFolderController(
+        folderId: folderId,
+        folderName: folderName,
+      ),
       builder: (controller) {
         return Scaffold(
           backgroundColor: const Color(0xFFF4F6F9),
@@ -98,6 +151,21 @@ class OpenFolderScreen extends StatelessWidget {
           body: Column(
             children: [
               const SizedBox(height: 12),
+              Obx(() {
+                if (controller.errorMessage.value.isNotEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      controller.errorMessage.value,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 14,
+                      ),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              }),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
@@ -216,10 +284,17 @@ class OpenFolderScreen extends StatelessWidget {
                         ),
                       ),
                       Obx(
-                        () => ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: controller.importers.length,
+                        () {
+                          if (controller.isLoading.value) {
+                            return const Padding(
+                              padding: EdgeInsets.all(24),
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
+                          return ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: controller.importers.length,
                           separatorBuilder: (_, __) =>
                               const Divider(height: 1),
                           itemBuilder: (context, index) {
@@ -325,6 +400,8 @@ class OpenFolderScreen extends StatelessWidget {
                             );
                           },
                         ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -531,6 +608,7 @@ class OpenFolderScreen extends StatelessWidget {
                               controller.addImporter(
                                 ImporterItem(
                                   sr: 0,
+                                  id: '',
                                   importerName:
                                       importerNameController.text.trim(),
                                   cityCountry:
