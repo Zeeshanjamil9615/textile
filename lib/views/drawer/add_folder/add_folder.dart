@@ -62,13 +62,30 @@ class AddFolderScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
+              Obx(() {
+                if (controller.errorMessage.value.isNotEmpty)
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      controller.errorMessage.value,
+                      style: const TextStyle(color: Colors.red, fontSize: 14),
+                    ),
+                  );
+                return const SizedBox.shrink();
+              }),
               Expanded(
                 child: Obx(
-                  () => ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    itemCount: controller.folders.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 10),
-                    itemBuilder: (context, index) {
+                  () {
+                    if (controller.isLoading.value) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    return RefreshIndicator(
+                      onRefresh: controller.fetchFolders,
+                      child: ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        itemCount: controller.folders.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        itemBuilder: (context, index) {
                       final item = controller.folders[index];
                       return Material(
                         color: Colors.white,
