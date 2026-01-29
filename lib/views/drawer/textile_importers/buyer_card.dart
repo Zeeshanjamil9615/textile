@@ -29,7 +29,7 @@ class BuyerCard extends StatelessWidget {
           alignment: 0.1, // Position card near top (10% from top)
         );
       }
-    }
+    }         
   }
 
   @override
