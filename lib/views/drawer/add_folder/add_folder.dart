@@ -202,10 +202,10 @@ class AddFolderScreen extends StatelessWidget {
                       );
                     },
                   ),
-                ),
-              ),
-            ],
-          ),
+                );
+              },
+            ),
+        )]),
         );
       },
     );
