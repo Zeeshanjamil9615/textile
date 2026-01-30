@@ -17,7 +17,20 @@ class Dashboard extends StatelessWidget {
       appBar: CustomAppBar(onMenuPressed: controller.openDrawer),
       drawer: const CustomDrawer(),
       backgroundColor: AppColors.background,
-      body: const _DashboardBody(),
+      body: Stack(
+        children: [
+          const _DashboardBody(),
+          Obx(() {
+            if (!controller.isLoadingProductWise.value) return const SizedBox.shrink();
+            return Container(
+              color: Colors.black26,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }),
+        ],
+      ),
     );
   }
 }

@@ -13,6 +13,7 @@ class DashboardController extends GetxController {
   final topProducts = <TopProduct>[].obs;
   final isLoadingCounts = false.obs;
   final isLoadingTopProducts = false.obs;
+  final isLoadingProductWise = false.obs;
   final errorMessage = ''.obs;
 
   void openDrawer() {
@@ -84,14 +85,19 @@ class DashboardController extends GetxController {
     }
   }
 
+  /// Navigate to Buyer Product Wise with this product pre-selected: pass id to API,
+  /// do not open filter sheet, load data for the selected product.
   Future<void> goToProductWise(TopProduct product) async {
-    await Get.to(() => const BuyerProductWise());
-    if (Get.isRegistered<BuyerProductWiseController>()) {
-      final ctrl = Get.find<BuyerProductWiseController>();
+    isLoadingProductWise.value = true;
+    try {
+      final ctrl = Get.put(BuyerProductWiseController());
       await ctrl.applyCategoryAndFetch(
         pctId: product.id.toString(),
         pctName: product.name,
       );
+      Get.to(() => const BuyerProductWise());
+    } finally {
+      isLoadingProductWise.value = false;
     }
   }
 }

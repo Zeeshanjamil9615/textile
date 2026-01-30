@@ -197,6 +197,7 @@ class CustomDrawer extends StatelessWidget {
 
               onTap: () {
                 Get.back();
+                Get.delete<BuyerProductWiseController>(force: true);
                 Get.off(() => const BuyerProductWise());
               },
             ),
