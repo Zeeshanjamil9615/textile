@@ -71,7 +71,7 @@ void showFolderSelectionBottomSheet(BuildContext context) {
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    Get.to(() => OpenFolderScreen(folderName: folder.folderName));
+                    Get.to(() => OpenFolderScreen(folderName: folder.folderName, folderId: '',));
                   },
                 );
               },
