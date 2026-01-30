@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/textile_importers/buyer_model.dart';
-import 'package:textile/widgets/dummy.dart';
-import 'package:textile/views/drawer/search_danim/filter_section.dart';
 import 'package:textile/api_service/api_service.dart';
+import 'package:textile/api_service/local_storage_service.dart';
+import 'package:textile/models/filtered_denim_list_response.dart';
+import 'package:textile/views/drawer/search_danim/filter_section.dart';
 
 class SearchDanimController extends GetxController {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   final selectedCountry = 'All'.obs;
-  final selectedProductCategory = 'All'.obs;
-  final selectedBuyerRanking = 'All'.obs;
   final importerNameFilter = ''.obs;
   final entriesPerPage = 50.obs;
 
-  final buyers = <BuyerModel>[].obs;
-  final filteredBuyers = <BuyerModel>[].obs;
+  final denimList = <FilteredDenimListItem>[].obs;
+  final filteredDenimList = <FilteredDenimListItem>[].obs;
   final countries = <String>[].obs;
-  final productCategories = <String>[].obs;
-  final buyerRankings = <String>[].obs;
 
   final isLoading = false.obs;
+  final isFilterSheetOpen = false.obs;
+  final hasShownInitialFilterSheet = false.obs;
 
   @override
   void onInit() {
@@ -29,10 +27,14 @@ class SearchDanimController extends GetxController {
   }
 
   Future<void> loadData() async {
-    buyers.value = DummyData.getBuyers().cast<BuyerModel>();
-    buyerRankings.value = DummyData.getBuyerRankings();
-    await Future.wait([fetchCountries(), fetchProductCategories()]);
-    applyFilters();
+    await fetchCountries();
+  }
+
+  void openFilterSheetIfNeeded(BuildContext context) {
+    if (!isFilterSheetOpen.value && !hasShownInitialFilterSheet.value) {
+      hasShownInitialFilterSheet.value = true;
+      showFilterBottomSheet(context);
+    }
   }
 
   Future<void> fetchCountries() async {
@@ -58,68 +60,80 @@ class SearchDanimController extends GetxController {
     }
   }
 
-  Future<void> fetchProductCategories() async {
+  Future<void> fetchDenimData() async {
+    final user = await LocalStorageService.getUserData();
+    if (user == null || user.id.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please log in to load data.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+    if (selectedCountry.value == 'All' || selectedCountry.value.isEmpty) {
+      Get.snackbar(
+        'Info',
+        'Please select a country.',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      return;
+    }
     try {
       isLoading.value = true;
       final apiService = ApiService();
-      final response = await apiService.getProductCategoriesList();
+      final response = await apiService.getFilteredDenimList(
+        user.id,
+        selectedCountry.value,
+      );
       if (response.status == 200 && response.data != null) {
-        productCategories.value = response.data!;
+        denimList.value = response.data!;
+        applyFilters();
+        Get.snackbar(
+          'Success',
+          'Loaded ${denimList.length} records',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+        );
       } else {
-        productCategories.value = ['All'];
+        denimList.clear();
+        filteredDenimList.clear();
+        Get.snackbar(
+          'Error',
+          response.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
       }
-    } catch (_) {
-      productCategories.value = ['All'];
+    } catch (e) {
+      denimList.clear();
+      filteredDenimList.clear();
+      Get.snackbar(
+        'Error',
+        'Failed to load data: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
-      if (!productCategories.contains('All')) {
-        productCategories.insert(0, 'All');
-      }
-      if (!productCategories.contains(selectedProductCategory.value)) {
-        selectedProductCategory.value = 'All';
-      }
       isLoading.value = false;
     }
   }
 
   void applyFilters() {
-    filteredBuyers.value = buyers.where((buyer) {
-      bool matchesCountry =
-          selectedCountry.value == 'All' || buyer.country == selectedCountry.value;
-      bool matchesCategory =
-          selectedProductCategory.value == 'All' ||
-          buyer.productCategory.contains(selectedProductCategory.value);
-      bool matchesName =
-          importerNameFilter.value.isEmpty ||
-          buyer.importerName.toLowerCase().contains(
-            importerNameFilter.value.toLowerCase(),
-          );
-      return matchesCountry && matchesCategory && matchesName;
+    filteredDenimList.value = denimList.where((item) {
+      final matchesName = importerNameFilter.value.isEmpty ||
+          item.importer
+              .toLowerCase()
+              .contains(importerNameFilter.value.toLowerCase());
+      return matchesName;
     }).toList();
-
-    if (selectedBuyerRanking.value == 'High To Low') {
-      filteredBuyers.sort((a, b) => b.buyersWorth.compareTo(a.buyersWorth));
-    } else if (selectedBuyerRanking.value == 'Low to High') {
-      filteredBuyers.sort((a, b) => a.buyersWorth.compareTo(b.buyersWorth));
-    }
   }
 
   void updateCountryFilter(String? value) {
     if (value != null) {
       selectedCountry.value = value;
-      applyFilters();
-    }
-  }
-
-  void updateProductCategoryFilter(String? value) {
-    if (value != null) {
-      selectedProductCategory.value = value;
-      applyFilters();
-    }
-  }
-
-  void updateBuyerRankingFilter(String? value) {
-    if (value != null) {
-      selectedBuyerRanking.value = value;
       applyFilters();
     }
   }
@@ -136,19 +150,21 @@ class SearchDanimController extends GetxController {
   }
 
   void clearCountryFilter() {
-    Get.snackbar('Info', 'Filter cleared');
+    selectedCountry.value = 'All';
+    applyFilters();
   }
 
-  void addBuyer(String buyerId) {
-    Get.snackbar(
-      'Success',
-      'Buyer ' + buyerId + ' added',
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
+  /// Called from filter section Apply button: fetch data then close sheet.
+  Future<void> applyFilterAndFetch(BuildContext context) async {
+    if (isLoading.value) return;
+    await fetchDenimData();
+    if (context.mounted) {
+      Navigator.pop(context);
+    }
   }
 
   void showFilterBottomSheet(BuildContext context) {
+    isFilterSheetOpen.value = true;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -157,8 +173,6 @@ class SearchDanimController extends GetxController {
       ),
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.95,
-        // minChildSize: 0.5,
-        // maxChildSize: 0.95,
         expand: false,
         builder: (context, scrollController) => Container(
           decoration: const BoxDecoration(
@@ -181,7 +195,10 @@ class SearchDanimController extends GetxController {
                     ),
                     IconButton(
                       icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        isFilterSheetOpen.value = false;
+                        Navigator.pop(context);
+                      },
                     ),
                   ],
                 ),
@@ -197,7 +214,9 @@ class SearchDanimController extends GetxController {
           ),
         ),
       ),
-    );
+    ).then((_) {
+      isFilterSheetOpen.value = false;
+    });
   }
 
   void openDrawer() {
