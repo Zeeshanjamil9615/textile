@@ -378,7 +378,7 @@ class OpenFolderScreen extends StatelessWidget {
                                                 controller
                                                     .deleteImporter(index);
                                               },
-                                              icon: const Icon(
+                                              icon: const Icon(          
                                                 Icons.delete_outline,
                                                 color: Colors.redAccent,
                                                 size: 20,
@@ -398,7 +398,6 @@ class OpenFolderScreen extends StatelessWidget {
                                         ),
                                       ],
                                     ),
-                                 
                                   ],
                                 ),
                               );
