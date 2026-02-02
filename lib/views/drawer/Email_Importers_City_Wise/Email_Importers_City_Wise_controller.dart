@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/Email_Importers_City_Wise/buyer_model.dart';
 import 'package:textile/api_service/api_service.dart';
+import 'package:textile/views/drawer/Email_Importers_City_Wise/buyer_model.dart';
+import 'package:textile/models/importers_city_wise_response.dart';
 
 class EmailImportersCityWiseController extends GetxController {
   final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -22,153 +23,70 @@ class EmailImportersCityWiseController extends GetxController {
     loadData();
   }
 
-  void loadData() async {
-    // Load dummy city data matching the web interface
-    buyers.value = [
-      BuyerModel(
-        serialNumber: 0,
-        city: 'Beijing',
-        numberOfBuyers: 1,
-        country: 'CHINA',
-      ),
-      BuyerModel(
-        serialNumber: 1,
-        city: 'AA Almere',
-        numberOfBuyers: 1,
-        country: 'Netherlands',
-      ),
-      BuyerModel(
-        serialNumber: 2,
-        city: 'AL Amersfoort',
-        numberOfBuyers: 1,
-        country: 'Netherlands',
-      ),
-      BuyerModel(
-        serialNumber: 3,
-        city: 'Álava',
-        numberOfBuyers: 1,
-        country: 'Spain',
-      ),
-      BuyerModel(
-        serialNumber: 4,
-        city: 'Albino BG',
-        numberOfBuyers: 1,
-        country: 'Italy',
-      ),
-      BuyerModel(
-        serialNumber: 5,
-        city: 'Alicante',
-        numberOfBuyers: 1,
-        country: 'Spain',
-      ),
-      BuyerModel(
-        serialNumber: 6,
-        city: 'Athina',
-        numberOfBuyers: 1,
-        country: 'Greece',
-      ),
-      BuyerModel(
-        serialNumber: 7,
-        city: 'Baška',
-        numberOfBuyers: 1,
-        country: 'Spain',
-      ),
-      BuyerModel(
-        serialNumber: 8,
-        city: 'Biella BI',
-        numberOfBuyers: 1,
-        country: 'Italy',
-      ),
-      BuyerModel(
-        serialNumber: 9,
-        city: 'Blumenau - SC',
-        numberOfBuyers: 1,
-        country: 'Brazil',
-      ),
-      BuyerModel(
-        serialNumber: 10,
-        city: 'Branch, TX',
-        numberOfBuyers: 1,
-        country: 'United States',
-      ),
-      BuyerModel(
-        serialNumber: 11,
-        city: 'Bulgaria',
-        numberOfBuyers: 1,
-        country: 'Greece',
-      ),
-      BuyerModel(
-        serialNumber: 12,
-        city: 'London',
-        numberOfBuyers: 3,
-        country: 'United Kingdom',
-      ),
-      BuyerModel(
-        serialNumber: 13,
-        city: 'Paris',
-        numberOfBuyers: 2,
-        country: 'France',
-      ),
-      BuyerModel(
-        serialNumber: 14,
-        city: 'Berlin',
-        numberOfBuyers: 1,
-        country: 'Germany',
-      ),
-      BuyerModel(
-        serialNumber: 15,
-        city: 'Brussels',
-        numberOfBuyers: 5,
-        country: 'Belgium',
-      ),
-      BuyerModel(
-        serialNumber: 16,
-        city: 'Amsterdam',
-        numberOfBuyers: 2,
-        country: 'Netherlands',
-      ),
-      BuyerModel(
-        serialNumber: 17,
-        city: 'Madrid',
-        numberOfBuyers: 4,
-        country: 'Spain',
-      ),
-      BuyerModel(
-        serialNumber: 18,
-        city: 'Rome',
-        numberOfBuyers: 2,
-        country: 'Italy',
-      ),
-      BuyerModel(
-        serialNumber: 19,
-        city: 'Milan',
-        numberOfBuyers: 3,
-        country: 'Italy',
-      ),
-    ];
-
-    // Fetch countries from API
-    await fetchCountries();
+  Future<void> loadData() async {
+    await Future.wait([fetchCityWiseData(), fetchCountries()]);
     applyFilters();
+  }
+
+  Future<void> fetchCityWiseData() async {
+    try {
+      isLoading.value = true;
+      final apiService = ApiService();
+      final response = await apiService.importersCityWise();
+      if (response.status == 200 && response.data != null) {
+        buyers.value = response.data!
+            .map((item) => BuyerModel(
+                  serialNumber: item.id,
+                  city: item.city,
+                  numberOfBuyers: item.noOfBuyerCity,
+                  country: item.country,
+                ))
+            .toList();
+        applyFilters();
+      } else {
+        buyers.clear();
+        filteredBuyers.clear();
+        if (response.message.isNotEmpty) {
+          Get.snackbar(
+            'Error',
+            response.message,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+      }
+    } catch (e) {
+      buyers.clear();
+      filteredBuyers.clear();
+      Get.snackbar(
+        'Error',
+        'Failed to load data: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> fetchCountries() async {
     try {
-      isLoading.value = true;
       final apiService = ApiService();
       final response = await apiService.getCountriesList();
-
       if (response.status == 200 && response.data != null) {
         countries.value = response.data!;
       } else {
-        // Fallback to default if API fails
         countries.value = ['All'];
       }
-    } catch (e) {
-      // Fallback to default if error occurs
+    } catch (_) {
       countries.value = ['All'];
     } finally {
-      isLoading.value = false;
+      if (!countries.contains('All')) {
+        countries.insert(0, 'All');
+      }
+      if (!countries.contains(selectedCountry.value)) {
+        selectedCountry.value = 'All';
+      }
     }
   }
 
@@ -176,7 +94,7 @@ class EmailImportersCityWiseController extends GetxController {
     filteredBuyers.value = buyers.where((buyer) {
       bool matchesCountry =
           selectedCountry.value == 'All' ||
-          buyer.country == selectedCountry.value;
+          buyer.country.toLowerCase().contains(selectedCountry.value.toLowerCase());
       bool matchesCity =
           cityFilter.value.isEmpty ||
           buyer.city.toLowerCase().contains(cityFilter.value.toLowerCase());

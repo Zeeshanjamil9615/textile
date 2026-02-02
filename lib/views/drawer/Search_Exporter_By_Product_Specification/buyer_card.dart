@@ -104,7 +104,7 @@ class BuyerCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Importer: ',
+                    'Exporter: ',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,

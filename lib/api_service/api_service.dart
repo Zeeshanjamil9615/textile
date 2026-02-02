@@ -14,6 +14,9 @@ import 'package:textile/models/textile_importers_response.dart';
 import 'package:textile/models/apnay_folders_response.dart';
 import 'package:textile/models/folder_details_response.dart';
 import 'package:textile/models/filtered_denim_list_response.dart';
+import 'package:textile/models/textile_exporters_list_response.dart';
+import 'package:textile/models/importers_city_wise_response.dart';
+import 'package:textile/models/cyf_products_response.dart';
 
 class ApiService {
   // Base URL for the API
@@ -1053,6 +1056,228 @@ class ApiService {
       );
     } catch (e) {
       return ApiResponse<List<FilteredDenimListItem>>(
+        status: 0,
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Get textile exporters by country and product category. filter_country = selected country name, filter_pct = category id ("0" for All).
+  Future<ApiResponse<List<TextileExporterItem>>> getTextileExporters(
+    String filterCountry,
+    String filterPct,
+  ) async {
+    try {
+      final response = await _dio.post(
+        'getTextileExporters',
+        data: json.encode({
+          'filter_country': filterCountry,
+          'filter_pct': filterPct,
+        }),
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData;
+        if (response.data is String) {
+          responseData =
+              json.decode(response.data as String) as Map<String, dynamic>;
+        } else if (response.data is Map) {
+          responseData = response.data as Map<String, dynamic>;
+        } else {
+          throw Exception('Unexpected response format');
+        }
+
+        final status = responseData['status'] as int? ?? 0;
+        final message = responseData['message'] as String? ?? '';
+        final dataList = responseData['data'];
+        if (dataList is! List) {
+          return ApiResponse<List<TextileExporterItem>>(
+            status: status,
+            message: message,
+            data: const [],
+          );
+        }
+        final list = (dataList as List)
+            .map((e) => TextileExporterItem.fromJson(
+                  Map<String, dynamic>.from(e as Map),
+                ))
+            .toList();
+        return ApiResponse<List<TextileExporterItem>>(
+          status: status,
+          message: message,
+          data: list,
+        );
+      } else {
+        return ApiResponse<List<TextileExporterItem>>(
+          status: response.statusCode ?? 0,
+          message: response.statusMessage ?? 'Unknown error',
+        );
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
+      } else if (e.type == DioExceptionType.badResponse) {
+        errorMessage = e.response?.data['message'] ?? 'Server error occurred';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+      return ApiResponse<List<TextileExporterItem>>(
+        status: e.response?.statusCode ?? 0,
+        message: errorMessage,
+      );
+    } catch (e) {
+      return ApiResponse<List<TextileExporterItem>>(
+        status: 0,
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Get importers city-wise list. POST with empty body.
+  Future<ApiResponse<List<CityWiseItem>>> importersCityWise() async {
+    try {
+      final response = await _dio.post(
+        'importersCityWise',
+        data: null,
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData;
+        if (response.data is String) {
+          responseData =
+              json.decode(response.data as String) as Map<String, dynamic>;
+        } else if (response.data is Map) {
+          responseData = response.data as Map<String, dynamic>;
+        } else {
+          throw Exception('Unexpected response format');
+        }
+
+        final status = responseData['status'] as int? ?? 0;
+        final message = responseData['message'] as String? ?? '';
+        final dataList = responseData['data'];
+        if (dataList is! List) {
+          return ApiResponse<List<CityWiseItem>>(
+            status: status,
+            message: message,
+            data: const [],
+          );
+        }
+        final list = (dataList as List)
+            .map((e) => CityWiseItem.fromJson(
+                  Map<String, dynamic>.from(e as Map),
+                ))
+            .toList();
+        return ApiResponse<List<CityWiseItem>>(
+          status: status,
+          message: message,
+          data: list,
+        );
+      } else {
+        return ApiResponse<List<CityWiseItem>>(
+          status: response.statusCode ?? 0,
+          message: response.statusMessage ?? 'Unknown error',
+        );
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
+      } else if (e.type == DioExceptionType.badResponse) {
+        errorMessage = e.response?.data['message'] ?? 'Server error occurred';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+      return ApiResponse<List<CityWiseItem>>(
+        status: e.response?.statusCode ?? 0,
+        message: errorMessage,
+      );
+    } catch (e) {
+      return ApiResponse<List<CityWiseItem>>(
+        status: 0,
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Get CYF products by country and product category. filter_country = selected country name, filter_pct = category id ("0" for All).
+  Future<ApiResponse<List<CyfProductItem>>> getCyfProducts(
+    String filterPct,
+    String filterCountry,
+  ) async {
+    try {
+      final response = await _dio.post(
+        'getCyfProducts',
+        data: json.encode({
+          'filter_pct': filterPct,
+          'filter_country': filterCountry,
+        }),
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData;
+        if (response.data is String) {
+          responseData =
+              json.decode(response.data as String) as Map<String, dynamic>;
+        } else if (response.data is Map) {
+          responseData = response.data as Map<String, dynamic>;
+        } else {
+          throw Exception('Unexpected response format');
+        }
+
+        final status = responseData['status'] as int? ?? 0;
+        final message = responseData['message'] as String? ?? '';
+        final dataList = responseData['data'];
+        if (dataList is! List) {
+          return ApiResponse<List<CyfProductItem>>(
+            status: status,
+            message: message,
+            data: const [],
+          );
+        }
+        final list = (dataList as List)
+            .map((e) => CyfProductItem.fromJson(
+                  Map<String, dynamic>.from(e as Map),
+                ))
+            .toList();
+        return ApiResponse<List<CyfProductItem>>(
+          status: status,
+          message: message,
+          data: list,
+        );
+      } else {
+        return ApiResponse<List<CyfProductItem>>(
+          status: response.statusCode ?? 0,
+          message: response.statusMessage ?? 'Unknown error',
+        );
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
+      } else if (e.type == DioExceptionType.badResponse) {
+        errorMessage = e.response?.data['message'] ?? 'Server error occurred';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+      return ApiResponse<List<CyfProductItem>>(
+        status: e.response?.statusCode ?? 0,
+        message: errorMessage,
+      );
+    } catch (e) {
+      return ApiResponse<List<CyfProductItem>>(
         status: 0,
         message: 'An unexpected error occurred: ${e.toString()}',
       );

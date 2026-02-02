@@ -1,9 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/views/drawer/Email_Importers_City_Wise/Email_Importers_City_Wise_controller.dart';
 import 'package:textile/views/drawer/Email_Importers_City_Wise/buyer_card.dart';
-import 'package:textile/views/drawer/textile_importers/filter_section.dart';
 
 class CitywiseListPage extends StatefulWidget {
   const CitywiseListPage({Key? key}) : super(key: key);
@@ -36,17 +34,19 @@ class _CitywiseListPageState extends State<CitywiseListPage> {
       }
     }
     
-    return Container(
-      color: const Color(0xFFF5F5F5),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: Colors.white,
-            child: const Text('Buyers Cities', 
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          ),
-          Obx(() => Container(
+    return Stack(
+      children: [
+        Container(
+          color: const Color(0xFFF5F5F5),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                color: Colors.white,
+                child: const Text('Buyers Cities',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              ),
+              Obx(() => Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             color: Colors.white,
             child: Row(
@@ -69,7 +69,24 @@ class _CitywiseListPageState extends State<CitywiseListPage> {
                 ),
                 const Text(' entries', style: TextStyle(fontSize: 14)),
                 const Spacer(),
-                // Search field
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4A9B9B),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      'Showing ${controller.filteredBuyers.length} Records',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
                 SizedBox(
                   width: 150,
                   child: TextField(
@@ -97,22 +114,34 @@ class _CitywiseListPageState extends State<CitywiseListPage> {
             ),
           )),
           Expanded(
-            child: Obx(() => ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              itemCount: controller.filteredBuyers.length,
-              itemBuilder: (context, index) {
-                return BuyerCard(
-                  key: ValueKey(controller.filteredBuyers[index].serialNumber),
-                  buyer: controller.filteredBuyers[index],
-                  scrollController: _scrollController,
-                  index: index,
-                );
-              },
+            child: Obx(() => RefreshIndicator(
+              onRefresh: () => controller.fetchCityWiseData(),
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16),
+                itemCount: controller.filteredBuyers.length,
+                itemBuilder: (context, index) {
+                  return BuyerCard(
+                    key: ValueKey(controller.filteredBuyers[index].serialNumber),
+                    buyer: controller.filteredBuyers[index],
+                    scrollController: _scrollController,
+                    index: index,
+                  );
+                },
+              ),
             )),
           ),
-        ],
-      ),
+            ],
+          ),
+        ),
+        Obx(() {
+          if (!controller.isLoading.value) return const SizedBox.shrink();
+          return Container(
+            color: Colors.black.withOpacity(0.1),
+            child: const Center(child: CircularProgressIndicator()),
+          );
+        }),
+      ],
     );
   }
 }

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/Search_Exporter_By_Product_Specification/buyer_model.dart';
-import 'package:textile/widgets/dummy.dart';
-import 'package:textile/views/drawer/Search_Exporter_By_Product_Specification/filter_section.dart';
 import 'package:textile/api_service/api_service.dart';
+import 'package:textile/models/cyf_products_response.dart';
+import 'package:textile/models/product_category_model.dart';
+import 'package:textile/views/drawer/Search_Exporter_By_Product_Specification/buyer_model.dart';
+import 'package:textile/views/drawer/Search_Exporter_By_Product_Specification/filter_section.dart';
 
 class SearchExporterByProductSpecificationController extends GetxController {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   final selectedCountry = 'All'.obs;
   final selectedProductCategory = 'All'.obs;
-  final selectedBuyerRanking = 'All'.obs;
+  final selectedProductCategoryId = '0'.obs;
   final exporterNameFilter = ''.obs;
   final entriesPerPage = 50.obs;
 
@@ -18,9 +19,11 @@ class SearchExporterByProductSpecificationController extends GetxController {
   final filteredExporters = <BuyerModel>[].obs;
   final countries = <String>[].obs;
   final productCategories = <String>[].obs;
-  final buyerRankings = <String>[].obs;
+  final productCategoriesWithIds = <ProductCategoryModel>[].obs;
 
   final isLoading = false.obs;
+  final isFilterSheetOpen = false.obs;
+  final hasShownInitialFilterSheet = false.obs;
 
   @override
   void onInit() {
@@ -28,13 +31,16 @@ class SearchExporterByProductSpecificationController extends GetxController {
     loadData();
   }
 
-  void loadData() async {
-    exporters.value = DummyData.getBuyers().cast<BuyerModel>();
-    buyerRankings.value = DummyData.getBuyerRankings();
-
-    // Fetch dropdown data from API
+  Future<void> loadData() async {
     await Future.wait([fetchCountries(), fetchProductCategories()]);
     applyFilters();
+  }
+
+  void openFilterSheetIfNeeded(BuildContext context) {
+    if (!isFilterSheetOpen.value && !hasShownInitialFilterSheet.value) {
+      hasShownInitialFilterSheet.value = true;
+      showFilterBottomSheet(context);
+    }
   }
 
   Future<void> fetchCountries() async {
@@ -42,15 +48,20 @@ class SearchExporterByProductSpecificationController extends GetxController {
       isLoading.value = true;
       final apiService = ApiService();
       final response = await apiService.getCountriesList();
-
       if (response.status == 200 && response.data != null) {
         countries.value = response.data!;
       } else {
         countries.value = ['All'];
       }
-    } catch (e) {
+    } catch (_) {
       countries.value = ['All'];
     } finally {
+      if (!countries.contains('All')) {
+        countries.insert(0, 'All');
+      }
+      if (!countries.contains(selectedCountry.value)) {
+        selectedCountry.value = 'All';
+      }
       isLoading.value = false;
     }
   }
@@ -59,63 +70,119 @@ class SearchExporterByProductSpecificationController extends GetxController {
     try {
       isLoading.value = true;
       final apiService = ApiService();
-      final response = await apiService.getProductCategoriesList();
-
+      final response = await apiService.getProductCategoriesListWithIds();
       if (response.status == 200 && response.data != null) {
-        productCategories.value = response.data!;
+        productCategoriesWithIds.value = response.data!;
+        productCategories.value = response.data!.map((c) => c.name).toList();
+        productCategories.insert(0, 'All');
       } else {
         productCategories.value = ['All'];
+        productCategoriesWithIds.value = [];
       }
     } catch (_) {
       productCategories.value = ['All'];
+      productCategoriesWithIds.value = [];
     } finally {
       if (!productCategories.contains('All')) {
         productCategories.insert(0, 'All');
       }
       if (!productCategories.contains(selectedProductCategory.value)) {
         selectedProductCategory.value = 'All';
+        selectedProductCategoryId.value = '0';
       }
       isLoading.value = false;
     }
   }
 
+  Future<void> fetchCyfData() async {
+    if (selectedCountry.value == 'All' || selectedCountry.value.isEmpty) {
+      Get.snackbar(
+        'Info',
+        'Please select a country.',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      return;
+    }
+    try {
+      isLoading.value = true;
+      final apiService = ApiService();
+      final response = await apiService.getCyfProducts(
+        selectedProductCategoryId.value,
+        selectedCountry.value,
+      );
+      if (response.status == 200 && response.data != null) {
+        exporters.value = response.data!
+            .map((item) => BuyerModel(
+                  sr: item.sr,
+                  productName: item.productName,
+                  importerName: item.exporter,
+                  country: item.country,
+                  productCategory: selectedProductCategory.value,
+                ))
+            .toList();
+        applyFilters();
+      } else {
+        exporters.clear();
+        filteredExporters.clear();
+        if (response.message.isNotEmpty) {
+          Get.snackbar(
+            'Error',
+            response.message,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+      }
+    } catch (e) {
+      exporters.clear();
+      filteredExporters.clear();
+      Get.snackbar(
+        'Error',
+        'Failed to load data: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> applyFilterAndFetch() async {
+    await fetchCyfData();
+    Get.back();
+  }
+
   void applyFilters() {
     filteredExporters.value = exporters.where((exporter) {
-      bool matchesCountry =
-          selectedCountry.value == 'All' ||
-          exporter.country == selectedCountry.value;
-      bool matchesCategory =
-          selectedProductCategory.value == 'All' ||
-          exporter.productCategory.contains(selectedProductCategory.value);
       bool matchesName =
           exporterNameFilter.value.isEmpty ||
           exporter.importerName.toLowerCase().contains(
-            exporterNameFilter.value.toLowerCase(),
-          );
-      return matchesCountry && matchesCategory && matchesName;
+                exporterNameFilter.value.toLowerCase(),
+              ) ||
+          exporter.productName.toLowerCase().contains(
+                exporterNameFilter.value.toLowerCase(),
+              );
+      return matchesName;
     }).toList();
-
-    
   }
 
   void updateCountryFilter(String? value) {
     if (value != null) {
       selectedCountry.value = value;
-      applyFilters();
     }
   }
 
   void updateProductCategoryFilter(String? value) {
     if (value != null) {
       selectedProductCategory.value = value;
-      applyFilters();
-    }
-  }
-
-  void updateBuyerRankingFilter(String? value) {
-    if (value != null) {
-      selectedBuyerRanking.value = value;
-      applyFilters();
+      selectedProductCategoryId.value = (value == 'All')
+          ? '0'
+          : (productCategoriesWithIds
+                  .where((c) => c.name == value)
+                  .firstOrNull
+                  ?.id ??
+              '0');
     }
   }
 
@@ -131,7 +198,7 @@ class SearchExporterByProductSpecificationController extends GetxController {
   }
 
   void clearCountryFilter() {
-    Get.snackbar('Info', 'Filter cleared');
+    selectedCountry.value = 'All';
   }
 
   void addExporter(String exporterId) {
@@ -144,6 +211,7 @@ class SearchExporterByProductSpecificationController extends GetxController {
   }
 
   void showFilterBottomSheet(BuildContext context) {
+    isFilterSheetOpen.value = true;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -174,7 +242,10 @@ class SearchExporterByProductSpecificationController extends GetxController {
                     ),
                     IconButton(
                       icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        isFilterSheetOpen.value = false;
+                        Navigator.pop(context);
+                      },
                     ),
                   ],
                 ),
@@ -190,7 +261,9 @@ class SearchExporterByProductSpecificationController extends GetxController {
           ),
         ),
       ),
-    );
+    ).whenComplete(() {
+      isFilterSheetOpen.value = false;
+    });
   }
 
   void openDrawer() {

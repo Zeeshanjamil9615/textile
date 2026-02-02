@@ -25,18 +25,11 @@ class _SearchExporterByProductSpecificationListPageState
 
   @override
   Widget build(BuildContext context) {
-    // Try to find either controller - works with both BuyersController and TextileExportersController
-    dynamic controller;
-    try {
-      controller = Get.put(SearchExporterByProductSpecificationController());
-    } catch (e) {
-      try {
-        controller = Get.put(SearchExporterByProductSpecificationController());
-      } catch (e) {
-        // If neither exists, create SearchExporterByProductSpecificationController as default
-        controller = Get.put(SearchExporterByProductSpecificationController());
-      }
-    }
+    final controller = Get.find<SearchExporterByProductSpecificationController>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.openFilterSheetIfNeeded(context);
+    });
 
     return Obx(() {
       final bool loading = controller.isLoading.value;
@@ -112,22 +105,18 @@ class _SearchExporterByProductSpecificationListPageState
                                     'Showing ${controller.filteredExporters.length} Records',
                                 onClose: null,
                               ),
-                              _ChipPill(
-                                text: controller.selectedProductCategory.value,
-                                onClose: () =>
-                                    controller.updateProductCategoryFilter(
-                                      controller.productCategories.isNotEmpty
-                                          ? controller.productCategories.first
-                                          : controller
-                                                .selectedProductCategory
-                                                .value,
-                                    ),
-                              ),
-                              _ChipPill(
-                                text:
-                                    'From ${controller.selectedCountry.value}',
-                                onClose: controller.clearCountryFilter,
-                              ),
+                              if (controller.selectedProductCategory.value != 'All')
+                                _ChipPill(
+                                  text: controller.selectedProductCategory.value,
+                                  onClose: () =>
+                                      controller.updateProductCategoryFilter('All'),
+                                ),
+                              if (controller.selectedCountry.value != 'All')
+                                _ChipPill(
+                                  text:
+                                      'From ${controller.selectedCountry.value}',
+                                  onClose: controller.clearCountryFilter,
+                                ),
                             ],
                           ),
                         ],

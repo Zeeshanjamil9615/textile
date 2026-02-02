@@ -8,9 +8,8 @@ class FilterSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-        final controller = Get.put(SearchExporterByProductSpecificationController());
+    final controller = Get.find<SearchExporterByProductSpecificationController>();
 
-    
     return Container(
       padding: const EdgeInsets.all(16),
       color: Colors.white,
@@ -25,8 +24,12 @@ class FilterSection extends StatelessWidget {
             decoration: InputDecoration(
               filled: true,
               fillColor: const Color(0xFFF8F9FA),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: BorderSide.none),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
             items: controller.countries.map((country) {
               return DropdownMenuItem(value: country, child: Text(country));
@@ -68,10 +71,7 @@ class FilterSection extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                controller.applyFilters();
-                Navigator.pop(context);
-              },
+              onPressed: () => controller.applyFilterAndFetch(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryDark,
                 foregroundColor: Colors.white,

@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/textile_Exporters/buyer_model.dart';
-import 'package:textile/widgets/dummy.dart';
-import 'package:textile/views/drawer/textile_Exporters/filter_section.dart';
 import 'package:textile/api_service/api_service.dart';
+import 'package:textile/models/product_category_model.dart';
+import 'package:textile/models/textile_exporters_list_response.dart';
+import 'package:textile/views/drawer/textile_Exporters/filter_section.dart';
 
 class TextileExportersController extends GetxController {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   final selectedCountry = 'All'.obs;
   final selectedProductCategory = 'All'.obs;
-  final selectedBuyerRanking = 'All'.obs;
+  final selectedProductCategoryId = '0'.obs;
   final exporterNameFilter = ''.obs;
   final entriesPerPage = 50.obs;
 
-  final exporters = <BuyerModel>[].obs;
-  final filteredExporters = <BuyerModel>[].obs;
+  final exporters = <TextileExporterItem>[].obs;
+  final filteredExporters = <TextileExporterItem>[].obs;
   final countries = <String>[].obs;
   final productCategories = <String>[].obs;
-  final buyerRankings = <String>[].obs;
+  final productCategoriesWithIds = <ProductCategoryModel>[].obs;
 
   final isLoading = false.obs;
+  final isFilterSheetOpen = false.obs;
+  final hasShownInitialFilterSheet = false.obs;
 
   @override
   void onInit() {
@@ -28,13 +30,15 @@ class TextileExportersController extends GetxController {
     loadData();
   }
 
-  void loadData() async {
-    exporters.value = DummyData.getBuyers().cast<BuyerModel>();
-    buyerRankings.value = DummyData.getBuyerRankings();
-
-    // Fetch dropdown data from API
+  Future<void> loadData() async {
     await Future.wait([fetchCountries(), fetchProductCategories()]);
-    applyFilters();
+  }
+
+  void openFilterSheetIfNeeded(BuildContext context) {
+    if (!isFilterSheetOpen.value && !hasShownInitialFilterSheet.value) {
+      hasShownInitialFilterSheet.value = true;
+      showFilterBottomSheet(context);
+    }
   }
 
   Future<void> fetchCountries() async {
@@ -42,15 +46,20 @@ class TextileExportersController extends GetxController {
       isLoading.value = true;
       final apiService = ApiService();
       final response = await apiService.getCountriesList();
-
       if (response.status == 200 && response.data != null) {
         countries.value = response.data!;
       } else {
         countries.value = ['All'];
       }
-    } catch (e) {
+    } catch (_) {
       countries.value = ['All'];
     } finally {
+      if (!countries.contains('All')) {
+        countries.insert(0, 'All');
+      }
+      if (!countries.contains(selectedCountry.value)) {
+        selectedCountry.value = 'All';
+      }
       isLoading.value = false;
     }
   }
@@ -59,64 +68,113 @@ class TextileExportersController extends GetxController {
     try {
       isLoading.value = true;
       final apiService = ApiService();
-      final response = await apiService.getProductCategoriesList();
-
+      final response = await apiService.getProductCategoriesListWithIds();
       if (response.status == 200 && response.data != null) {
-        productCategories.value = response.data!;
+        productCategoriesWithIds.value = response.data!;
+        productCategories.value =
+            response.data!.map((c) => c.name).toList();
+        productCategories.insert(0, 'All');
       } else {
         productCategories.value = ['All'];
+        productCategoriesWithIds.value = [];
       }
     } catch (_) {
       productCategories.value = ['All'];
+      productCategoriesWithIds.value = [];
     } finally {
       if (!productCategories.contains('All')) {
         productCategories.insert(0, 'All');
       }
       if (!productCategories.contains(selectedProductCategory.value)) {
         selectedProductCategory.value = 'All';
+        selectedProductCategoryId.value = '0';
       }
       isLoading.value = false;
     }
   }
 
-  void applyFilters() {
-    filteredExporters.value = exporters.where((exporter) {
-      bool matchesCountry =
-          selectedCountry.value == 'All' ||
-          exporter.country == selectedCountry.value;
-      bool matchesCategory =
-          selectedProductCategory.value == 'All' ||
-          exporter.productCategory.contains(selectedProductCategory.value);
-      bool matchesName =
-          exporterNameFilter.value.isEmpty ||
-          exporter.importerName.toLowerCase().contains(
-            exporterNameFilter.value.toLowerCase(),
-          );
-      return matchesCountry && matchesCategory && matchesName;
-    }).toList();
-
-    if (selectedBuyerRanking.value == 'High To Low') {
-      filteredExporters.sort((a, b) => b.buyersWorth.compareTo(a.buyersWorth));
-    } else if (selectedBuyerRanking.value == 'Low to High') {
-      filteredExporters.sort((a, b) => a.buyersWorth.compareTo(b.buyersWorth));
+  Future<void> fetchExportersData() async {
+    if (selectedCountry.value == 'All' || selectedCountry.value.isEmpty) {
+      Get.snackbar(
+        'Info',
+        'Please select a country.',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      return;
     }
+    try {
+      isLoading.value = true;
+      final apiService = ApiService();
+      final response = await apiService.getTextileExporters(
+        selectedCountry.value,
+        selectedProductCategoryId.value,
+      );
+      if (response.status == 200 && response.data != null) {
+        exporters.value = response.data!;
+        applyFilters();
+        Get.snackbar(
+          'Success',
+          'Loaded ${exporters.length} records',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+        );
+      } else {
+        exporters.clear();
+        filteredExporters.clear();
+        Get.snackbar(
+          'Error',
+          response.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      exporters.clear();
+      filteredExporters.clear();
+      Get.snackbar(
+        'Error',
+        'Failed to load data: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void applyFilters() {
+    filteredExporters.value = exporters.where((item) {
+      final matchesName = exporterNameFilter.value.isEmpty ||
+          item.exporter
+              .toLowerCase()
+              .contains(exporterNameFilter.value.toLowerCase());
+      return matchesName;
+    }).toList();
   }
 
   void updateCountryFilter(String? value) {
     if (value != null) {
       selectedCountry.value = value;
+      applyFilters();
     }
   }
 
   void updateProductCategoryFilter(String? value) {
     if (value != null) {
       selectedProductCategory.value = value;
-    }
-  }
-
-  void updateBuyerRankingFilter(String? value) {
-    if (value != null) {
-      selectedBuyerRanking.value = value;
+      if (value == 'All') {
+        selectedProductCategoryId.value = '0';
+      } else {
+        final cat = productCategoriesWithIds.firstWhere(
+          (c) => c.name == value,
+          orElse: () =>
+              ProductCategoryModel(id: '0', name: value, condition: ''),
+        );
+        selectedProductCategoryId.value = cat.id;
+      }
+      applyFilters();
     }
   }
 
@@ -132,19 +190,20 @@ class TextileExportersController extends GetxController {
   }
 
   void clearCountryFilter() {
-    Get.snackbar('Info', 'Filter cleared');
+    selectedCountry.value = 'All';
+    applyFilters();
   }
 
-  void addExporter(String exporterId) {
-    Get.snackbar(
-      'Success',
-      'Exporter $exporterId added',
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
+  Future<void> applyFilterAndFetch(BuildContext context) async {
+    if (isLoading.value) return;
+    await fetchExportersData();
+    if (context.mounted) {
+      Navigator.pop(context);
+    }
   }
 
   void showFilterBottomSheet(BuildContext context) {
+    isFilterSheetOpen.value = true;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -175,7 +234,10 @@ class TextileExportersController extends GetxController {
                     ),
                     IconButton(
                       icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        isFilterSheetOpen.value = false;
+                        Navigator.pop(context);
+                      },
                     ),
                   ],
                 ),
@@ -191,7 +253,9 @@ class TextileExportersController extends GetxController {
           ),
         ),
       ),
-    );
+    ).then((_) {
+      isFilterSheetOpen.value = false;
+    });
   }
 
   void openDrawer() {
