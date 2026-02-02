@@ -8,7 +8,7 @@ class FilterSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(SearchImporterByProductSpecificationController());
+    final controller = Get.find<SearchImporterByProductSpecificationController>();
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -16,25 +16,38 @@ class FilterSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Filter by Country',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+          const Text(
+            'Filter by Country',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 8),
-          Obx(() => DropdownButtonFormField<String>(
-            value: controller.selectedCountry.value,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: const Color(0xFFF8F9FA),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: BorderSide.none),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          Obx(
+            () => DropdownButtonFormField<String>(
+              value: controller.selectedCountry.value,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: const Color(0xFFF8F9FA),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
+              items: controller.countries
+                  .map((country) => DropdownMenuItem<String>(
+                        value: country,
+                        child: Text(country),
+                      ))
+                  .toList(),
+              onChanged: controller.updateCountryFilter,
             ),
-            items: controller.countries.map((country) {
-              return DropdownMenuItem(value: country, child: Text(country));
-            }).toList(),
-            onChanged: controller.updateCountryFilter,
-          )),
+          ),
           const SizedBox(height: 16),
-          const Text('Filter by Product Specification',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+          const Text(
+            'Filter by Product Specification',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 8),
           Obx(
             () => DropdownButtonFormField<String>(
@@ -67,10 +80,7 @@ class FilterSection extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                controller.applyFilters();
-                Navigator.pop(context);
-              },
+              onPressed: () => controller.applyFilterAndFetch(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryDark,
                 foregroundColor: Colors.white,
@@ -79,9 +89,22 @@ class FilterSection extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
-              child: const Text(
-                'Apply',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              child: Obx(
+                () => controller.isLoading.value
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : const Text(
+                        'Apply',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
               ),
             ),
           ),

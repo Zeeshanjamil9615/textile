@@ -1,27 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/buyer_model.dart';
-import 'package:textile/widgets/dummy.dart';
-import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/filter_section.dart';
 import 'package:textile/api_service/api_service.dart';
+import 'package:textile/models/filtered_denim_list_response.dart';
+import 'package:textile/models/product_category_model.dart';
+import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/filter_section.dart';
 
 class SearchImporterByProductSpecificationController extends GetxController {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   final selectedCountry = 'All'.obs;
   final selectedProductCategory = 'All'.obs;
-  final selectedBuyerRanking = 'All'.obs;
+  final selectedProductCategoryId = '0'.obs;
   final importerNameFilter = ''.obs;
   final productNameFilter = ''.obs;
   final entriesPerPage = 50.obs;
 
-  final buyers = <BuyerModel>[].obs;
-  final filteredBuyers = <BuyerModel>[].obs;
+  final recordList = <FilteredDenimListItem>[].obs;
+  final filteredRecordList = <FilteredDenimListItem>[].obs;
   final countries = <String>[].obs;
   final productCategories = <String>[].obs;
-  final buyerRankings = <String>[].obs;
+  final productCategoriesWithIds = <ProductCategoryModel>[].obs;
 
   final isLoading = false.obs;
+  final isFilterSheetOpen = false.obs;
+  final hasShownInitialFilterSheet = false.obs;
 
   @override
   void onInit() {
@@ -30,24 +32,14 @@ class SearchImporterByProductSpecificationController extends GetxController {
   }
 
   Future<void> loadData() async {
-    // Convert DummyData buyers to local BuyerModel type
-    final dummyBuyers = DummyData.getBuyers();
-    buyers.value = dummyBuyers
-        .map(
-          (buyer) => BuyerModel(
-            id: buyer.id,
-            importerName: buyer.importerName,
-            country: buyer.country,
-            productCategory: buyer.productCategory,
-            ranking: buyer.ranking,
-            buyersWorth: buyer.buyersWorth,
-          ),
-        )
-        .toList();
-
-    buyerRankings.value = DummyData.getBuyerRankings();
     await Future.wait([fetchCountries(), fetchProductCategories()]);
-    applyFilters();
+  }
+
+  void openFilterSheetIfNeeded(BuildContext context) {
+    if (!isFilterSheetOpen.value && !hasShownInitialFilterSheet.value) {
+      hasShownInitialFilterSheet.value = true;
+      showFilterBottomSheet(context);
+    }
   }
 
   Future<void> fetchCountries() async {
@@ -77,45 +69,94 @@ class SearchImporterByProductSpecificationController extends GetxController {
     try {
       isLoading.value = true;
       final apiService = ApiService();
-      final response = await apiService.getProductCategoriesList();
+      final response = await apiService.getProductCategoriesListWithIds();
       if (response.status == 200 && response.data != null) {
-        productCategories.value = response.data!;
+        productCategoriesWithIds.value = response.data!;
+        productCategories.value =
+            response.data!.map((c) => c.name).toList();
+        productCategories.insert(0, 'All');
       } else {
         productCategories.value = ['All'];
+        productCategoriesWithIds.value = [];
       }
     } catch (_) {
       productCategories.value = ['All'];
+      productCategoriesWithIds.value = [];
     } finally {
       if (!productCategories.contains('All')) {
         productCategories.insert(0, 'All');
       }
       if (!productCategories.contains(selectedProductCategory.value)) {
         selectedProductCategory.value = 'All';
+        selectedProductCategoryId.value = '0';
       }
       isLoading.value = false;
     }
   }
 
-  void applyFilters() {
-    filteredBuyers.value = buyers.where((buyer) {
-      bool matchesCountry =
-          selectedCountry.value == 'All' || buyer.country == selectedCountry.value;
-      bool matchesCategory =
-          selectedProductCategory.value == 'All' ||
-          buyer.productCategory.contains(selectedProductCategory.value);
-      bool matchesName =
-          importerNameFilter.value.isEmpty ||
-          buyer.importerName.toLowerCase().contains(
-            importerNameFilter.value.toLowerCase(),
-          );
-      return matchesCountry && matchesCategory && matchesName;
-    }).toList();
-
-    if (selectedBuyerRanking.value == 'High To Low') {
-      filteredBuyers.sort((a, b) => b.buyersWorth.compareTo(a.buyersWorth));
-    } else if (selectedBuyerRanking.value == 'Low to High') {
-      filteredBuyers.sort((a, b) => a.buyersWorth.compareTo(b.buyersWorth));
+  Future<void> fetchMadeupData() async {
+    if (selectedCountry.value == 'All' || selectedCountry.value.isEmpty) {
+      Get.snackbar(
+        'Info',
+        'Please select a country.',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      return;
     }
+    try {
+      isLoading.value = true;
+      final apiService = ApiService();
+      final response = await apiService.getMadeupRecords(
+        selectedCountry.value,
+        selectedProductCategoryId.value,
+      );
+      if (response.status == 200 && response.data != null) {
+        recordList.value = response.data!;
+        applyFilters();
+        Get.snackbar(
+          'Success',
+          'Loaded ${recordList.length} records',
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+        );
+      } else {
+        recordList.clear();
+        filteredRecordList.clear();
+        Get.snackbar(
+          'Error',
+          response.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      recordList.clear();
+      filteredRecordList.clear();
+      Get.snackbar(
+        'Error',
+        'Failed to load data: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void applyFilters() {
+    filteredRecordList.value = recordList.where((item) {
+      final matchesImporter = importerNameFilter.value.isEmpty ||
+          item.importer
+              .toLowerCase()
+              .contains(importerNameFilter.value.toLowerCase());
+      final matchesProduct = productNameFilter.value.isEmpty ||
+          item.description
+              .toLowerCase()
+              .contains(productNameFilter.value.toLowerCase());
+      return matchesImporter && matchesProduct;
+    }).toList();
   }
 
   void updateCountryFilter(String? value) {
@@ -128,13 +169,16 @@ class SearchImporterByProductSpecificationController extends GetxController {
   void updateProductCategoryFilter(String? value) {
     if (value != null) {
       selectedProductCategory.value = value;
-      applyFilters();
-    }
-  }
-
-  void updateBuyerRankingFilter(String? value) {
-    if (value != null) {
-      selectedBuyerRanking.value = value;
+      if (value == 'All') {
+        selectedProductCategoryId.value = '0';
+      } else {
+        final cat = productCategoriesWithIds.firstWhere(
+          (c) => c.name == value,
+          orElse: () =>
+              ProductCategoryModel(id: '0', name: value, condition: ''),
+        );
+        selectedProductCategoryId.value = cat.id;
+      }
       applyFilters();
     }
   }
@@ -149,7 +193,27 @@ class SearchImporterByProductSpecificationController extends GetxController {
     applyFilters();
   }
 
+  void updateEntriesPerPage(int? value) {
+    if (value != null) {
+      entriesPerPage.value = value;
+    }
+  }
+
+  void clearCountryFilter() {
+    selectedCountry.value = 'All';
+    applyFilters();
+  }
+
+  Future<void> applyFilterAndFetch(BuildContext context) async {
+    if (isLoading.value) return;
+    await fetchMadeupData();
+    if (context.mounted) {
+      Navigator.pop(context);
+    }
+  }
+
   void showFilterBottomSheet(BuildContext context) {
+    isFilterSheetOpen.value = true;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -158,8 +222,6 @@ class SearchImporterByProductSpecificationController extends GetxController {
       ),
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.95,
-        // minChildSize: 0.5,
-        // maxChildSize: 0.95,
         expand: false,
         builder: (context, scrollController) => Container(
           decoration: const BoxDecoration(
@@ -182,7 +244,10 @@ class SearchImporterByProductSpecificationController extends GetxController {
                     ),
                     IconButton(
                       icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        isFilterSheetOpen.value = false;
+                        Navigator.pop(context);
+                      },
                     ),
                   ],
                 ),
@@ -198,26 +263,9 @@ class SearchImporterByProductSpecificationController extends GetxController {
           ),
         ),
       ),
-    );
-  }
-
-  void updateEntriesPerPage(int? value) {
-    if (value != null) {
-      entriesPerPage.value = value;
-    }
-  }
-
-  void clearCountryFilter() {
-    Get.snackbar('Info', 'Filter cleared');
-  }
-
-  void addBuyer(String buyerId) {
-    Get.snackbar(
-      'Success',
-      'Buyer ' + buyerId + ' added',
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    );
+    ).then((_) {
+      isFilterSheetOpen.value = false;
+    });
   }
 
   void openDrawer() {

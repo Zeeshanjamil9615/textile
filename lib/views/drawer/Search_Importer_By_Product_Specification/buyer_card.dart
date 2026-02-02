@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:textile/models/filtered_denim_list_response.dart';
 import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/Search_Importer_By_Product_Specification_controller.dart';
 import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/buyer_model.dart';
 import 'package:textile/widgets/folder_selection_bottom_sheet.dart';
@@ -168,6 +169,99 @@ class _DetailRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Card for madeup records (FilteredDenimListItem from getMadeupRecords API).
+class MadeupRecordCard extends StatelessWidget {
+  final FilteredDenimListItem item;
+  final int index;
+
+  const MadeupRecordCard({
+    Key? key,
+    required this.item,
+    required this.index,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4A9B9B).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '${index + 1}',
+                    style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF4A9B9B)),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    item.importer,
+                    style: const TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _DetailRow(
+                icon: Icons.business,
+                label: 'Importer',
+                value: item.importer),
+            const SizedBox(height: 8),
+            _DetailRow(
+                icon: Icons.flag, label: 'Country', value: item.country),
+            if (item.description.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              _DetailRow(
+                  icon: Icons.description,
+                  label: 'Description',
+                  value: item.description),
+            ],
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  if (!Get.isRegistered<AddFolderController>()) {
+                    Get.put(AddFolderController());
+                  }
+                  showFolderSelectionBottomSheet(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2D7373),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6)),
+                ),
+                child: const Text(
+                    'Add Buyer',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

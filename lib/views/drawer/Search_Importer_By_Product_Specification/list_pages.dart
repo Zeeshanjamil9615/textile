@@ -6,7 +6,7 @@ import 'package:textile/widgets/colors.dart';
 
 class SearchImporterByProductSpecificationListPage extends StatefulWidget {
   const SearchImporterByProductSpecificationListPage({Key? key})
-    : super(key: key);
+      : super(key: key);
 
   @override
   State<SearchImporterByProductSpecificationListPage> createState() =>
@@ -25,9 +25,12 @@ class _SearchImporterByProductSpecificationListPageState
 
   @override
   Widget build(BuildContext context) {
-    // Get or create the controller
     final controller =
-        Get.find<SearchImporterByProductSpecificationController>();
+        Get.put(SearchImporterByProductSpecificationController());
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.openFilterSheetIfNeeded(context);
+    });
 
     return Obx(() {
       final bool loading = controller.isLoading.value;
@@ -37,160 +40,154 @@ class _SearchImporterByProductSpecificationListPageState
             color: const Color(0xFFF5F5F5),
             child: Column(
               children: [
-          // Search bar at top with filter icon
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: Colors.white,
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: const Color(0xFFF8F9FA),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: BorderSide.none,
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  color: Colors.white,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            filled: true,
+                            fillColor: const Color(0xFFF8F9FA),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(4),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 12),
+                            hintText: 'Enter product name...',
+                            prefixIcon: const Icon(
+                              Icons.search,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          onChanged: controller.updateProductNameFilter,
+                        ),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 12,
+                      const SizedBox(width: 12),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.filter_list,
+                          color: AppColors.primaryDark,
+                        ),
+                        onPressed: () =>
+                            controller.showFilterBottomSheet(context),
+                        style: IconButton.styleFrom(
+                          backgroundColor:
+                              AppColors.primaryDark.withOpacity(0.1),
+                          padding: const EdgeInsets.all(12),
+                        ),
                       ),
-                      hintText: 'Enter product name...',
-                      prefixIcon: const Icon(
-                        Icons.search,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    onChanged: controller.updateProductNameFilter,
+                    ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                IconButton(
-                  icon: const Icon(
-                    Icons.filter_list,
-                    color: AppColors.primaryDark,
+                Obx(
+                  () => Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    color: Colors.white,
+                    child: Row(
+                      children: [
+                        const Text('Show ',
+                            style: TextStyle(fontSize: 14)),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: DropdownButton<int>(
+                            value: controller.entriesPerPage.value,
+                            underline: const SizedBox(),
+                            items: [10, 25, 50, 100]
+                                .map((val) => DropdownMenuItem<int>(
+                                      value: val,
+                                      child: Text(val.toString()),
+                                    ))
+                                .toList(),
+                            onChanged: controller.updateEntriesPerPage,
+                          ),
+                        ),
+                        const Text(' entries',
+                            style: TextStyle(fontSize: 14)),
+                        const Spacer(),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF4A9B9B),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              'Showing ${controller.filteredRecordList.length} Records',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        if (controller.selectedCountry.value != 'All')
+                          Flexible(
+                            child: GestureDetector(
+                              onTap: controller.clearCountryFilter,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF4A9B9B),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.close,
+                                        color: Colors.white, size: 16),
+                                    const SizedBox(width: 4),
+                                    Flexible(
+                                      child: Text(
+                                        'FROM ${controller.selectedCountry.value}',
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
-                  onPressed: () => controller.showFilterBottomSheet(context),
-                  style: IconButton.styleFrom(
-                    backgroundColor: AppColors.primaryDark.withOpacity(0.1),
-                    padding: const EdgeInsets.all(12),
+                ),
+                Expanded(
+                  child: Obx(
+                    () => ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: controller.filteredRecordList.length,
+                      itemBuilder: (context, index) {
+                        final item =
+                            controller.filteredRecordList[index];
+                        return MadeupRecordCard(
+                          key: ValueKey('${item.importer}_$index'),
+                          item: item,
+                          index: index,
+                        );
+                      },
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-          Obx(
-            () => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              color: Colors.white,
-              child: Row(
-                children: [
-                  const Text('Show ', style: TextStyle(fontSize: 14)),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: DropdownButton<int>(
-                      value: controller.entriesPerPage.value,
-                      underline: const SizedBox(),
-                      items: [10, 25, 50, 100].map((val) {
-                        return DropdownMenuItem(
-                          value: val,
-                          child: Text(val.toString()),
-                        );
-                      }).toList(),
-                      onChanged: controller.updateEntriesPerPage,
-                    ),
-                  ),
-                  const Text(' entries', style: TextStyle(fontSize: 14)),
-                  const Spacer(),
-                  Flexible(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF4A9B9B),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        'Showing ' +
-                            controller.filteredBuyers.length.toString() +
-                            ' Records',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: GestureDetector(
-                      onTap: controller.clearCountryFilter,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF4A9B9B),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.close,
-                              color: Colors.white,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              child: Text(
-                                'FROM ' + controller.selectedCountry.value,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Expanded(
-            child: Obx(
-              () => ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(16),
-                itemCount: controller.filteredBuyers.length,
-                itemBuilder: (context, index) {
-                  return BuyerCard(
-                    key: ValueKey(controller.filteredBuyers[index].id),
-                    buyer: controller.filteredBuyers[index],
-                    scrollController: _scrollController,
-                    index: index,
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
-      )),
           if (loading)
             Container(
               color: Colors.black.withOpacity(0.1),

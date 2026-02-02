@@ -981,4 +981,81 @@ class ApiService {
       );
     }
   }
+
+  /// Get madeup records by country and product category. filter_country = selected country name, filter_pct = category id ("0" for All).
+  Future<ApiResponse<List<FilteredDenimListItem>>> getMadeupRecords(
+    String filterCountry,
+    String filterPct,
+  ) async {
+    try {
+      final response = await _dio.post(
+        'getMadeupRecords',
+        data: json.encode({
+          'filter_country': filterCountry,
+          'filter_pct': filterPct,
+        }),
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData;
+        if (response.data is String) {
+          responseData =
+              json.decode(response.data as String) as Map<String, dynamic>;
+        } else if (response.data is Map) {
+          responseData = response.data as Map<String, dynamic>;
+        } else {
+          throw Exception('Unexpected response format');
+        }
+
+        final status = responseData['status'] as int? ?? 0;
+        final message = responseData['message'] as String? ?? '';
+        final dataList = responseData['data'];
+        if (dataList is! List) {
+          return ApiResponse<List<FilteredDenimListItem>>(
+            status: status,
+            message: message,
+            data: const [],
+          );
+        }
+        final list = (dataList as List)
+            .map((e) => FilteredDenimListItem.fromJson(
+                  Map<String, dynamic>.from(e as Map),
+                ))
+            .toList();
+        return ApiResponse<List<FilteredDenimListItem>>(
+          status: status,
+          message: message,
+          data: list,
+        );
+      } else {
+        return ApiResponse<List<FilteredDenimListItem>>(
+          status: response.statusCode ?? 0,
+          message: response.statusMessage ?? 'Unknown error',
+        );
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
+      } else if (e.type == DioExceptionType.badResponse) {
+        errorMessage = e.response?.data['message'] ?? 'Server error occurred';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+      return ApiResponse<List<FilteredDenimListItem>>(
+        status: e.response?.statusCode ?? 0,
+        message: errorMessage,
+      );
+    } catch (e) {
+      return ApiResponse<List<FilteredDenimListItem>>(
+        status: 0,
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
+    }
+  }
 }
