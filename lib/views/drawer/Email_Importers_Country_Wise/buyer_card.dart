@@ -94,33 +94,33 @@ class BuyerCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                // City with Label
-                // Row(
-                //   crossAxisAlignment: CrossAxisAlignment.start,
-                //   children: [
-                //     const Text(
-                //       'City:',
-                //       style: TextStyle(
-                //         fontSize: 14,
-                //         fontWeight: FontWeight.w600,
-                //         color: AppColors.textSecondary,
-                //       ),
-                //     ),
-                //     const SizedBox(width: 8),
-                //     Expanded(
-                //       child: Text(
-                //         buyer.city,
-                //         style: const TextStyle(
-                //           fontSize: 16,
-                //           fontWeight: FontWeight.bold,
-                //           color: AppColors.textPrimary,
-                //         ),
-                //       ),
-                //     ),
-                //   ],
-                // ),
-                // const SizedBox(height: 12),
-                // Country with Label
+                if (buyer.city.isNotEmpty) ...[
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'City:',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          buyer.city,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                ],
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
