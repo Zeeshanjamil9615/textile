@@ -24,13 +24,19 @@ class EmailImportersCountryWiseController extends GetxController {
   }
 
   Future<void> loadData() async {
-    await Future.wait([fetchCountryWiseData(), fetchCountries()]);
-    applyFilters();
+    isLoading.value = true;
+    try {
+      await Future.wait([fetchCountryWiseData(), fetchCountries()]);
+      applyFilters();
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  Future<void> fetchCountryWiseData() async {
+  /// [showLoading] when true (e.g. pull-to-refresh), this method controls isLoading. When false (initial load from loadData), caller controls it.
+  Future<void> fetchCountryWiseData({bool showLoading = false}) async {
     try {
-      isLoading.value = true;
+      if (showLoading) isLoading.value = true;
       final apiService = ApiService();
       final response = await apiService.importersCountryWise();
       if (response.status == 200 && response.data != null) {
@@ -65,7 +71,7 @@ class EmailImportersCountryWiseController extends GetxController {
         colorText: Colors.white,
       );
     } finally {
-      isLoading.value = false;
+      if (showLoading) isLoading.value = false;
     }
   }
 

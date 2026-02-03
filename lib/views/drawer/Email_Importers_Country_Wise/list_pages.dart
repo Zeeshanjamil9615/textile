@@ -115,7 +115,7 @@ class _CountrywiseListPageState extends State<CountrywiseListPage> {
                   )),
               Expanded(
                 child: Obx(() => RefreshIndicator(
-                      onRefresh: () => controller.fetchCountryWiseData(),
+                      onRefresh: () => controller.fetchCountryWiseData(showLoading: true),
                       child: ListView.builder(
                         controller: _scrollController,
                         padding: const EdgeInsets.all(16),
@@ -138,8 +138,13 @@ class _CountrywiseListPageState extends State<CountrywiseListPage> {
         Obx(() {
           if (!controller.isLoading.value) return const SizedBox.shrink();
           return Container(
-            color: Colors.black.withOpacity(0.1),
-            child: const Center(child: CircularProgressIndicator()),
+            color: Colors.black.withOpacity(0.3),
+            child: const Center(
+              child: CircularProgressIndicator(
+                color: Color(0xFF4A9B9B),
+                strokeWidth: 3,
+              ),
+            ),
           );
         }),
       ],
