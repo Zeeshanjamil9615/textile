@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/buyers/buyer_controller.dart';
-import 'package:textile/views/drawer/textile_importers/buyer_model.dart';
-import 'package:textile/views/drawer/textile_importers/textile_importers_controller.dart';
+import 'package:textile/views/drawer/Search_Garment_Importer_By_Product_Specification/buyer_model.dart';
 import 'package:textile/widgets/folder_selection_bottom_sheet.dart';
 import 'package:textile/views/drawer/add_folder/add_folder_controller.dart';
 
@@ -10,9 +8,9 @@ class BuyerCard extends StatelessWidget {
   final BuyerModel buyer;
   final ScrollController? scrollController;
   final int? index;
-  
+
   const BuyerCard({
-    Key? key, 
+    Key? key,
     required this.buyer,
     this.scrollController,
     this.index,
@@ -20,14 +18,13 @@ class BuyerCard extends StatelessWidget {
 
   void _scrollToCard(BuildContext context) {
     if (scrollController != null && index != null) {
-      // Use Scrollable.ensureVisible to scroll the card into view
       final RenderObject? renderObject = context.findRenderObject();
       if (renderObject != null) {
         Scrollable.ensureVisible(
           context,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          alignment: 0.1, // Position card near top (10% from top)
+          alignment: 0.1,
         );
       }
     }
@@ -35,19 +32,6 @@ class BuyerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Try to find either controller - works with both BuyersController and TextileImportersController
-    dynamic controller;
-    try {
-      controller = Get.find<BuyersController>();
-    } catch (e) {
-      try {
-        controller = Get.find<TextileImportersController>();
-      } catch (e) {
-        // If neither exists, create TextileImportersController as default
-        controller = Get.put(TextileImportersController());
-      }
-    }
-    
     return GestureDetector(
       onTap: () => _scrollToCard(context),
       child: Card(

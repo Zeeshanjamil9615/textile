@@ -14,9 +14,11 @@ class SearchExportersByCities extends StatelessWidget {
 
     return Scaffold(
       key: controller.scaffoldKey,
-       appBar: CustomAppBar(onMenuPressed: controller.openDrawer),
+      appBar: CustomAppBar(onMenuPressed: controller.openDrawer),
       drawer: const CustomDrawer(),
-      body: const searchExportersByCitiesListPage(),
+      body: SafeArea(
+        child: const searchExportersByCitiesListPage(),
+      ),
     );
   }
 }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/textile_importers/buyer_model.dart';
-import 'package:textile/widgets/dummy.dart';
+import 'package:textile/views/drawer/Search_Garment_Importer_By_Product_Specification/buyer_model.dart';
 import 'package:textile/views/drawer/Search_Garment_Importer_By_Product_Specification/filter_section.dart';
 import 'package:textile/api_service/api_service.dart';
 
@@ -22,6 +21,8 @@ class SearchGarmentImporterByProductSpecificationController
   final buyerRankings = <String>[].obs;
 
   final isLoading = false.obs;
+  final isFilterSheetOpen = false.obs;
+  final hasShownInitialFilterSheet = false.obs;
 
   @override
   void onInit() {
@@ -29,11 +30,16 @@ class SearchGarmentImporterByProductSpecificationController
     loadData();
   }
 
-  void loadData() async {
-    buyers.value = DummyData.getBuyers().cast<BuyerModel>();
-    buyerRankings.value = DummyData.getBuyerRankings();
+  void openFilterSheetIfNeeded(BuildContext context) {
+    if (!isFilterSheetOpen.value && !hasShownInitialFilterSheet.value) {
+      hasShownInitialFilterSheet.value = true;
+      showFilterBottomSheet(context);
+    }
+  }
 
-    // Fetch dropdown data from API
+  Future<void> loadData() async {
+    buyerRankings.value = ['All', 'High To Low', 'Low to High'];
+    buyers.value = [];
     await Future.wait([fetchCountries(), fetchProductCategories()]);
     applyFilters();
   }
@@ -135,7 +141,8 @@ class SearchGarmentImporterByProductSpecificationController
   }
 
   void clearCountryFilter() {
-    Get.snackbar('Info', 'Filter cleared');
+    selectedCountry.value = 'All';
+    applyFilters();
   }
 
   void addBuyer(String buyerId) {
@@ -148,6 +155,7 @@ class SearchGarmentImporterByProductSpecificationController
   }
 
   void showFilterBottomSheet(BuildContext context) {
+    isFilterSheetOpen.value = true;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -156,8 +164,6 @@ class SearchGarmentImporterByProductSpecificationController
       ),
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.95,
-        // minChildSize: 0.5,
-        // maxChildSize: 0.95,
         expand: false,
         builder: (context, scrollController) => Container(
           decoration: const BoxDecoration(
@@ -180,7 +186,10 @@ class SearchGarmentImporterByProductSpecificationController
                     ),
                     IconButton(
                       icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        isFilterSheetOpen.value = false;
+                        Navigator.pop(context);
+                      },
                     ),
                   ],
                 ),
@@ -196,7 +205,9 @@ class SearchGarmentImporterByProductSpecificationController
           ),
         ),
       ),
-    );
+    ).whenComplete(() {
+      isFilterSheetOpen.value = false;
+    });
   }
 
   void openDrawer() {

@@ -1,8 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/views/drawer/Search_Garment_Importer_By_Product_Specification/buyer_card.dart';
-import 'package:textile/views/drawer/Search_Garment_Importer_By_Product_Specification/filter_section.dart';
 import 'package:textile/views/drawer/Search_Garment_Importer_By_Product_Specification/search_garment_controller.dart';
 import 'package:textile/widgets/colors.dart';
 
@@ -10,10 +8,12 @@ class SearchGarmentImporterByProductSpecificationListPage extends StatefulWidget
   const SearchGarmentImporterByProductSpecificationListPage({Key? key}) : super(key: key);
 
   @override
-  State<SearchGarmentImporterByProductSpecificationListPage> createState() => _SearchGarmentImporterByProductSpecificationListPageState();
+  State<SearchGarmentImporterByProductSpecificationListPage> createState() =>
+      _SearchGarmentImporterByProductSpecificationListPageState();
 }
 
-class _SearchGarmentImporterByProductSpecificationListPageState extends State<SearchGarmentImporterByProductSpecificationListPage> {
+class _SearchGarmentImporterByProductSpecificationListPageState
+    extends State<SearchGarmentImporterByProductSpecificationListPage> {
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -24,19 +24,12 @@ class _SearchGarmentImporterByProductSpecificationListPageState extends State<Se
 
   @override
   Widget build(BuildContext context) {
-    // Try to find either controller - works with both impotersController and TextileImportersController
-    dynamic controller;
-    try {
-      controller = Get.find<SearchGarmentImporterByProductSpecificationController>();
-    } catch (e) {
-      try {
-        controller = Get.find<SearchGarmentImporterByProductSpecificationController>();
-      } catch (e) {
-        // If neither exists, create SearchGarmentImporterByProductSpecificationController as default
-        controller = Get.put(SearchGarmentImporterByProductSpecificationController());
-      }
-    }
-    
+    final controller = Get.find<SearchGarmentImporterByProductSpecificationController>();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.openFilterSheetIfNeeded(context);
+    });
+
     return Obx(() {
       final bool loading = controller.isLoading.value;
       return Stack(
