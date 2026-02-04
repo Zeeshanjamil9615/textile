@@ -1,24 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/Search_Garment_Importer_By_Product_Specification/buyer_model.dart';
-import 'package:textile/views/drawer/Search_Garment_Importer_By_Product_Specification/filter_section.dart';
 import 'package:textile/api_service/api_service.dart';
+import 'package:textile/models/buyers_with_description_response.dart';
+import 'package:textile/views/drawer/Search_Garment_Importer_By_Product_Specification/filter_section.dart';
 
 class SearchGarmentImporterByProductSpecificationController
     extends GetxController {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   final selectedCountry = 'All'.obs;
-  final selectedProductCategory = 'All'.obs;
-  final selectedBuyerRanking = 'All'.obs;
   final importerNameFilter = ''.obs;
   final entriesPerPage = 50.obs;
 
-  final buyers = <BuyerModel>[].obs;
-  final filteredBuyers = <BuyerModel>[].obs;
+  final buyers = <BuyerWithDescriptionItem>[].obs;
+  final filteredBuyers = <BuyerWithDescriptionItem>[].obs;
   final countries = <String>[].obs;
-  final productCategories = <String>[].obs;
-  final buyerRankings = <String>[].obs;
 
   final isLoading = false.obs;
   final isFilterSheetOpen = false.obs;
@@ -29,91 +25,134 @@ class SearchGarmentImporterByProductSpecificationController
     super.onInit();
     loadData();
   }
+
   void openFilterSheetIfNeeded(BuildContext context) {
     if (!isFilterSheetOpen.value && !hasShownInitialFilterSheet.value) {
       hasShownInitialFilterSheet.value = true;
       showFilterBottomSheet(context);
     }
   }
+
   Future<void> loadData() async {
-    buyerRankings.value = ['All', 'High To Low', 'Low to High'];
     buyers.value = [];
-    await Future.wait([fetchCountries()]);
+    filteredBuyers.value = [];
+    await fetchCountries();
     applyFilters();
   }
+
   Future<void> fetchCountries() async {
     try {
       isLoading.value = true;
       final apiService = ApiService();
       final response = await apiService.getCountriesList();
-
       if (response.status == 200 && response.data != null) {
         countries.value = response.data!;
       } else {
         countries.value = ['All'];
       }
-    } catch (e) {
+    } catch (_) {
       countries.value = ['All'];
+    } finally {
+      if (!countries.contains('All')) {
+        countries.insert(0, 'All');
+      }
+      if (!countries.contains(selectedCountry.value)) {
+        selectedCountry.value = 'All';
+      }
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchBuyersWithDescription() async {
+    if (selectedCountry.value == 'All' || selectedCountry.value.isEmpty) {
+      Get.snackbar(
+        'Info',
+        'Please select a country.',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      return;
+    }
+    try {
+      isLoading.value = true;
+      final apiService = ApiService();
+      final response = await apiService.getBuyersWithDescription(
+        selectedCountry.value,
+      );
+      if (response.status == 200 && response.data != null) {
+        buyers.value = response.data!;
+        applyFilters();
+      } else {
+        buyers.clear();
+        filteredBuyers.clear();
+        if (response.message.isNotEmpty) {
+          Get.snackbar(
+            'Error',
+            response.message,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+      }
+    } catch (e) {
+      buyers.clear();
+      filteredBuyers.clear();
+      Get.snackbar(
+        'Error',
+        'Failed to load data: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }
   }
+
+  Future<void> applyFilterAndFetch() async {
+    await fetchBuyersWithDescription();
+    Get.back();
+  }
+
   void applyFilters() {
-    filteredBuyers.value = buyers.where((buyer) {
-      bool matchesCountry =
-          selectedCountry.value == 'All' || buyer.country == selectedCountry.value;
-      bool matchesCategory =
-          selectedProductCategory.value == 'All' ||
-          buyer.productCategory.contains(selectedProductCategory.value);
+    filteredBuyers.value = buyers.where((item) {
       bool matchesName =
           importerNameFilter.value.isEmpty ||
-          buyer.importerName.toLowerCase().contains(
-            importerNameFilter.value.toLowerCase(),
-          );
-      return matchesCountry && matchesCategory && matchesName;
+          item.importer.toLowerCase().contains(
+                importerNameFilter.value.toLowerCase(),
+              ) ||
+          item.description.toLowerCase().contains(
+                importerNameFilter.value.toLowerCase(),
+              );
+      return matchesName;
     }).toList();
-
-    if (selectedBuyerRanking.value == 'High To Low') {
-      filteredBuyers.sort((a, b) => b.buyersWorth.compareTo(a.buyersWorth));
-    } else if (selectedBuyerRanking.value == 'Low to High') {
-      filteredBuyers.sort((a, b) => a.buyersWorth.compareTo(b.buyersWorth));
-    }
   }
+
   void updateCountryFilter(String? value) {
     if (value != null) {
       selectedCountry.value = value;
-      applyFilters();
     }
   }
-  void updateProductCategoryFilter(String? value) {
-    if (value != null) {
-      selectedProductCategory.value = value;
-      applyFilters();
-    }
-  }
-  void updateBuyerRankingFilter(String? value) {
-    if (value != null) {
-      selectedBuyerRanking.value = value;
-      applyFilters();
-    }
-  }
+
   void updateImporterNameFilter(String value) {
     importerNameFilter.value = value;
     applyFilters();
   }
+
   void updateEntriesPerPage(int? value) {
     if (value != null) {
       entriesPerPage.value = value;
     }
   }
+
   void clearCountryFilter() {
     selectedCountry.value = 'All';
     applyFilters();
   }
+
   void addBuyer(String buyerId) {
     Get.snackbar(
       'Success',
-      'Buyer ' + buyerId + ' added',
+      'Buyer $buyerId added',
       backgroundColor: Colors.green,
       colorText: Colors.white,
     );

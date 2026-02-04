@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/Search_Garment_Importer_By_Product_Specification/buyer_model.dart';
+import 'package:textile/models/buyers_with_description_response.dart';
 import 'package:textile/widgets/folder_selection_bottom_sheet.dart';
 import 'package:textile/views/drawer/add_folder/add_folder_controller.dart';
 
 class BuyerCard extends StatelessWidget {
-  final BuyerModel buyer;
+  final BuyerWithDescriptionItem buyer;
   final ScrollController? scrollController;
   final int? index;
 
@@ -51,30 +51,33 @@ class BuyerCard extends StatelessWidget {
                       color: const Color(0xFF4A9B9B).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Text(buyer.id, 
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF4A9B9B))),
+                    child: Text(
+                      '#${buyer.id}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF4A9B9B),
+                      ),
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(buyer.importerName, 
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      buyer.importer,
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
               _DetailRow(icon: Icons.flag, label: 'Country', value: buyer.country),
               const SizedBox(height: 8),
-              _DetailRow(icon: Icons.category, label: 'Product Category', value: buyer.productCategory),
-              const SizedBox(height: 8),
-              
-               _DetailRow(icon: Icons.attach_money, label: 'Buyers Worth', 
-                value: '\$' + buyer.buyersWorth.toStringAsFixed(2), valueColor: Colors.green),
+              _DetailRow(icon: Icons.description, label: 'Description', value: buyer.description),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Ensure AddFolderController is initialized
                     if (!Get.isRegistered<AddFolderController>()) {
                       Get.put(AddFolderController());
                     }
@@ -89,21 +92,11 @@ class BuyerCard extends StatelessWidget {
                   child: const Text('Add Buyer', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                 ),
               ),
-             
             ],
           ),
         ),
       ),
     );
-  }
-  
-  Color _getRankingColor(String ranking) {
-    switch (ranking.toLowerCase()) {
-      case 'high': return Colors.green;
-      case 'medium': return Colors.orange;
-      case 'low': return Colors.red;
-      default: return Colors.grey;
-    }
   }
 }
 
@@ -112,18 +105,25 @@ class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
   final Color? valueColor;
-  
+
   const _DetailRow({required this.icon, required this.label, required this.value, this.valueColor});
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(icon, size: 16, color: Colors.grey),
         const SizedBox(width: 8),
-        Text(label + ': ', style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500)),
+        Text(
+          '$label: ',
+          style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500),
+        ),
         Expanded(
-          child: Text(value, style: TextStyle(fontSize: 13, color: valueColor ?? Colors.black87, fontWeight: FontWeight.w600)),
+          child: Text(
+            value,
+            style: TextStyle(fontSize: 13, color: valueColor ?? Colors.black87, fontWeight: FontWeight.w600),
+          ),
         ),
       ],
     );

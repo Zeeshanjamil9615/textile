@@ -31,34 +31,11 @@ class FilterSection extends StatelessWidget {
             }).toList(),
             onChanged: controller.updateCountryFilter,
           )),
-        
-          const Text('Buyer Ranking', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          Obx(() => DropdownButtonFormField<String>(
-            value: controller.selectedBuyerRanking.value,
-            isExpanded: true,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: const Color(0xFFF8F9FA),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: BorderSide.none),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            ),
-            items: controller.buyerRankings.map((ranking) {
-              return DropdownMenuItem<String>(
-                value: ranking,
-                child: Text(ranking, overflow: TextOverflow.ellipsis),
-              );
-            }).toList(),
-            onChanged: controller.updateBuyerRankingFilter,
-          )),
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                controller.applyFilters();
-                Navigator.pop(context);
-              },
+              onPressed: () => controller.applyFilterAndFetch(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryDark,
                 foregroundColor: Colors.white,
