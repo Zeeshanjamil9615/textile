@@ -82,7 +82,7 @@ class _SearchGarmentImporterByProductSpecificationListPageState
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(4), 
                   ),
                   child: DropdownButton<int>(
                     value: controller.entriesPerPage.value,

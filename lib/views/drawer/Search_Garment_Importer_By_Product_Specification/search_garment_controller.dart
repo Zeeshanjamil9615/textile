@@ -29,21 +29,18 @@ class SearchGarmentImporterByProductSpecificationController
     super.onInit();
     loadData();
   }
-
   void openFilterSheetIfNeeded(BuildContext context) {
     if (!isFilterSheetOpen.value && !hasShownInitialFilterSheet.value) {
       hasShownInitialFilterSheet.value = true;
       showFilterBottomSheet(context);
     }
   }
-
   Future<void> loadData() async {
     buyerRankings.value = ['All', 'High To Low', 'Low to High'];
     buyers.value = [];
-    await Future.wait([fetchCountries(), fetchProductCategories()]);
+    await Future.wait([fetchCountries()]);
     applyFilters();
   }
-
   Future<void> fetchCountries() async {
     try {
       isLoading.value = true;
@@ -61,31 +58,6 @@ class SearchGarmentImporterByProductSpecificationController
       isLoading.value = false;
     }
   }
-
-  Future<void> fetchProductCategories() async {
-    try {
-      isLoading.value = true;
-      final apiService = ApiService();
-      final response = await apiService.getProductCategoriesList();
-
-      if (response.status == 200 && response.data != null) {
-        productCategories.value = response.data!;
-      } else {
-        productCategories.value = ['All'];
-      }
-    } catch (_) {
-      productCategories.value = ['All'];
-    } finally {
-      if (!productCategories.contains('All')) {
-        productCategories.insert(0, 'All');
-      }
-      if (!productCategories.contains(selectedProductCategory.value)) {
-        selectedProductCategory.value = 'All';
-      }
-      isLoading.value = false;
-    }
-  }
-
   void applyFilters() {
     filteredBuyers.value = buyers.where((buyer) {
       bool matchesCountry =
@@ -107,44 +79,37 @@ class SearchGarmentImporterByProductSpecificationController
       filteredBuyers.sort((a, b) => a.buyersWorth.compareTo(b.buyersWorth));
     }
   }
-
   void updateCountryFilter(String? value) {
     if (value != null) {
       selectedCountry.value = value;
       applyFilters();
     }
   }
-
   void updateProductCategoryFilter(String? value) {
     if (value != null) {
       selectedProductCategory.value = value;
       applyFilters();
     }
   }
-
   void updateBuyerRankingFilter(String? value) {
     if (value != null) {
       selectedBuyerRanking.value = value;
       applyFilters();
     }
   }
-
   void updateImporterNameFilter(String value) {
     importerNameFilter.value = value;
     applyFilters();
   }
-
   void updateEntriesPerPage(int? value) {
     if (value != null) {
       entriesPerPage.value = value;
     }
   }
-
   void clearCountryFilter() {
     selectedCountry.value = 'All';
     applyFilters();
   }
-
   void addBuyer(String buyerId) {
     Get.snackbar(
       'Success',

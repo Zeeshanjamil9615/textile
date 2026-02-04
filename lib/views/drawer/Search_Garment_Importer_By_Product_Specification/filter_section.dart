@@ -31,27 +31,7 @@ class FilterSection extends StatelessWidget {
             }).toList(),
             onChanged: controller.updateCountryFilter,
           )),
-          const SizedBox(height: 16),
-          const Text('Filter by Product Specification', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-          const SizedBox(height: 8),
-          Obx(() => DropdownButtonFormField<String>(
-            value: controller.selectedProductCategory.value,
-            isExpanded: true,
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: const Color(0xFFF8F9FA),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: BorderSide.none),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            ),
-            items: controller.productCategories.map((category) {
-              return DropdownMenuItem<String>(
-                value: category,
-                child: Text(category, overflow: TextOverflow.ellipsis),
-              );
-            }).toList(),
-            onChanged: controller.updateProductCategoryFilter,
-          )),
-          const SizedBox(height: 16),
+        
           const Text('Buyer Ranking', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           Obx(() => DropdownButtonFormField<String>(
