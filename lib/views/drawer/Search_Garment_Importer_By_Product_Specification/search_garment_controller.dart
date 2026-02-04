@@ -111,8 +111,17 @@ class SearchGarmentImporterByProductSpecificationController
   }
 
   Future<void> applyFilterAndFetch() async {
+    if (selectedCountry.value == 'All' || selectedCountry.value.isEmpty) {
+      Get.snackbar(
+        'Info',
+        'Please select a country.',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      return;
+    }
+    Get.back(); // Close filter sheet first so loader is visible on main screen
     await fetchBuyersWithDescription();
-    Get.back();
   }
 
   void applyFilters() {
