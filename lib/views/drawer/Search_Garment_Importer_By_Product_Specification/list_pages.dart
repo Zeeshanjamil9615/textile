@@ -163,9 +163,12 @@ class _SearchGarmentImporterByProductSpecificationListPageState
       )),
           if (loading)
             Container(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withOpacity(0.3),
               child: const Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator(
+                  color: Color(0xFF4A9B9B),
+                  strokeWidth: 3,
+                ),
               ),
             ),
         ],

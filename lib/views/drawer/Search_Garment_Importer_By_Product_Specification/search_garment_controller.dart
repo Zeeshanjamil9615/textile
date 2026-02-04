@@ -34,15 +34,19 @@ class SearchGarmentImporterByProductSpecificationController
   }
 
   Future<void> loadData() async {
-    buyers.value = [];
-    filteredBuyers.value = [];
-    await fetchCountries();
-    applyFilters();
+    isLoading.value = true;
+    try {
+      buyers.value = [];
+      filteredBuyers.value = [];
+      await fetchCountries();
+      applyFilters();
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> fetchCountries() async {
     try {
-      isLoading.value = true;
       final apiService = ApiService();
       final response = await apiService.getCountriesList();
       if (response.status == 200 && response.data != null) {
@@ -52,14 +56,12 @@ class SearchGarmentImporterByProductSpecificationController
       }
     } catch (_) {
       countries.value = ['All'];
-    } finally {
-      if (!countries.contains('All')) {
-        countries.insert(0, 'All');
-      }
-      if (!countries.contains(selectedCountry.value)) {
-        selectedCountry.value = 'All';
-      }
-      isLoading.value = false;
+    }
+    if (!countries.contains('All')) {
+      countries.insert(0, 'All');
+    }
+    if (!countries.contains(selectedCountry.value)) {
+      selectedCountry.value = 'All';
     }
   }
 
