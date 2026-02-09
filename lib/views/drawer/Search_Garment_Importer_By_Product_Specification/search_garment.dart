@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 import 'package:textile/views/drawer/Search_Garment_Importer_By_Product_Specification/list_pages.dart';
 import 'package:textile/views/drawer/Search_Garment_Importer_By_Product_Specification/search_garment_controller.dart';
 import 'package:textile/views/drawer/drawer.dart';
-import 'package:textile/views/drawer/garment_socks_knitted/garment_socks_knitted_controller.dart';
-import 'package:textile/views/drawer/garment_socks_knitted/list_pages.dart';
 import 'package:textile/widgets/custom_app_bar.dart';
 
 class SearchGarmentImporterByProductSpecification extends StatelessWidget {
