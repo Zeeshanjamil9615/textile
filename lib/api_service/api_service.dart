@@ -1586,7 +1586,7 @@ class ApiService {
         'getSellerDetails',
         data: json.encode({
           'seller': seller,
-          'exporting': exporting,
+          'exporting': '7xaz4',
           'blatlong': blatlong,
         }),
         options: Options(

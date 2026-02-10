@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/api_service/api_service.dart';
 import 'package:textile/models/product_category_model.dart';
+import 'package:textile/views/drawer/all_sellers/filter_section.dart';
 class BuyerModel {
   final String id; // serial number
   final String exporterName;
@@ -314,7 +315,7 @@ class AllSellersController extends GetxController {
               Expanded(
                 child: SingleChildScrollView(
                   controller: scrollController,
-                  child: const FilterSection(),
+                  child: FilterSection(),
                 ),
               ),
             ],

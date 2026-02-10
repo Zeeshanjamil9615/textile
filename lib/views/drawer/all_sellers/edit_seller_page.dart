@@ -95,13 +95,20 @@ class _EditSellerPageState extends State<EditSellerPage> {
         statusBar: _statusBar,
       );
       if (resp.status == 200) {
+        // Show clear success message before closing the screen
         Get.snackbar(
           'Success',
-          resp.message,
+          resp.message.isNotEmpty ? resp.message : 'Seller updated successfully',
           backgroundColor: Colors.green,
           colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2),
         );
-        Get.back(result: true);
+        // Give the snackbar a moment to appear, then go back
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted) {
+          Get.back(result: true);
+        }
       } else {
         Get.snackbar(
           'Error',
@@ -222,12 +229,15 @@ class _EditSellerPageState extends State<EditSellerPage> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: DropdownButtonFormField<String>(
-        value: _selectedCity.isEmpty ? null : _selectedCity,
+        // Only use the value if it exists in the list, otherwise keep it null
+        value: _cities.any((c) => c.city == _selectedCity) ? _selectedCity : null,
         items: _cities
-            .map((c) => DropdownMenuItem<String>(
-                  value: c.city,
-                  child: Text(c.city),
-                ))
+            .map(
+              (c) => DropdownMenuItem<String>(
+                value: c.city,
+                child: Text(c.city),
+              ),
+            )
             .toList(),
         onChanged: (v) {
           if (v != null) {
