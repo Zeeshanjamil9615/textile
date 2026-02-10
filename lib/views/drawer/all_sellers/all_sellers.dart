@@ -4,19 +4,19 @@ import 'package:textile/views/drawer/add_folder/add_folder_controller.dart';
 import 'package:textile/views/drawer/all_sellers/all_sellers_controller.dart';
 import 'package:textile/views/drawer/buyer_profile/buyer_profile.dart';
 import 'package:textile/views/drawer/drawer.dart';
-import 'package:textile/views/drawer/textile_importers/textile_importers_controller.dart';
+import 'package:textile/views/drawer/all_sellers/edit_seller_page.dart';
 import 'package:textile/widgets/colors.dart';
 import 'package:textile/widgets/custom_app_bar.dart';
 import 'package:textile/widgets/folder_selection_bottom_sheet.dart';
 
-class TextileImporters extends StatefulWidget {
-  const TextileImporters({Key? key}) : super(key: key);
+class allsellers extends StatefulWidget {
+  const allsellers({Key? key}) : super(key: key);
 
   @override
-  State<TextileImporters> createState() => _TextileImportersState();
+  State<allsellers> createState() => _allsellersState();
 }
 
-class _TextileImportersState extends State<TextileImporters> {
+class _allsellersState extends State<allsellers> {
   @override
   void initState() {
     super.initState();
@@ -84,17 +84,17 @@ class BuyerCard extends StatelessWidget {
                       color: const Color(0xFF4A9B9B).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Text(buyer.id, 
+                    child: Text(buyer.id,
                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF4A9B9B))),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        Get.to(() => const BuyerProfilePage(), arguments: buyer.importerName);
+                        Get.to(() => const BuyerProfilePage(), arguments: buyer.exporterName);
                       },
                       child: Text(
-                        buyer.importerName,
+                        buyer.exporterName,
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
@@ -107,25 +107,17 @@ class BuyerCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              _DetailRow(icon: Icons.flag, label: 'Country', value: buyer.country),
+              _DetailRow(icon: Icons.location_on, label: 'Address', value: buyer.address.isEmpty ? 'NA' : buyer.address),
               const SizedBox(height: 8),
               _DetailRow(icon: Icons.category, label: 'Product Category', value: buyer.productCategory),
               const SizedBox(height: 8),
-              _DetailRow(icon: Icons.star, label: 'Ranking', value: buyer.ranking, 
-                valueColor: _getRankingColor(buyer.ranking)),
-              const SizedBox(height: 8),
-              _DetailRow(icon: Icons.attach_money, label: 'Buyers Worth', 
-                value: '\$' + buyer.buyersWorth.toStringAsFixed(2), valueColor: Colors.green),
+              _DetailRow(icon: Icons.flag, label: 'Exporting Country', value: buyer.country),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Ensure AddFolderController is initialized
-                    if (!Get.isRegistered<AddFolderController>()) {
-                      Get.put(AddFolderController());
-                    }
-                    showFolderSelectionBottomSheet(context);
+                    Get.to(() => EditSellerPage(exporterName: buyer.exporterName));
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2D7373),
@@ -325,13 +317,12 @@ class _impotersListPageState extends State<impotersListPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Try to find either controller - works with both impotersController and TextileImportersController
+    // Use AllSellersController for this screen
     dynamic controller;
     try {
-      controller = Get.find<TextileImportersController>();
+      controller = Get.find<AllSellersController>();
     } catch (e) {
-      // If it doesn't exist yet, create TextileImportersController as default
-      controller = Get.put(TextileImportersController());
+      controller = Get.put(AllSellersController());
     }
 
     // Automatically open filter sheet when screen first loads

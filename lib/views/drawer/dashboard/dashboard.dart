@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/views/drawer/dashboard/dashboard_controller.dart';
 import 'package:textile/views/drawer/drawer.dart';
+import 'package:textile/views/drawer/all_sellers/all_sellers.dart';
 import 'package:textile/views/drawer/textile_importers/textile_importers.dart';
 import 'package:textile/widgets/colors.dart';
 import 'package:textile/widgets/custom_app_bar.dart';
@@ -67,6 +68,7 @@ class _DashboardBody extends StatelessWidget {
                         iconBg: const Color(0xFF2D7373),
                         accent: const Color(0xFF2D7373),
                         loading: controller.isLoadingCounts.value,
+                        onView: () => Get.to(() => const TextileImporters()),
                       ),
                       _KpiData(
                         title: 'Textile Exporters',
@@ -75,6 +77,7 @@ class _DashboardBody extends StatelessWidget {
                         iconBg: const Color(0xFFE67E22),
                         accent: const Color(0xFFE67E22),
                         loading: controller.isLoadingCounts.value,
+                        onView: () => Get.to(() => const allsellers()),
                       ),
                     ];
                     return _KpiGrid(
@@ -178,6 +181,7 @@ class _KpiData {
   final Color iconBg;
   final Color accent;
   final bool loading;
+  final VoidCallback? onView;
 
   const _KpiData({
     required this.title,
@@ -186,6 +190,7 @@ class _KpiData {
     required this.iconBg,
     required this.accent,
     this.loading = false,
+    this.onView,
   });
 }
 
@@ -266,9 +271,7 @@ class _KpiCard extends StatelessWidget {
             ),
           ),
           TextButton(
-            onPressed: (){
-              Get.to(TextileImporters());
-            },
+            onPressed: data.onView,
             style: TextButton.styleFrom(
               foregroundColor: AppColors.primaryDark,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),

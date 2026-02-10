@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/models/product_category_model.dart';
-import 'package:textile/views/drawer/textile_importers/filter_section.dart';
 import 'package:textile/api_service/api_service.dart';
+import 'package:textile/models/product_category_model.dart';
 class BuyerModel {
-  final String id;
-  final String importerName;
+  final String id; // serial number
+  final String exporterName;
   final String country;
   final String productCategory;
-  final String ranking;
-  final double buyersWorth;
+  final String address;
+  final String recordFound;
 
   BuyerModel({
     required this.id,
-    required this.importerName,
+    required this.exporterName,
     required this.country,
     required this.productCategory,
-    required this.ranking,
-    required this.buyersWorth,
+    required this.address,
+    required this.recordFound,
   });
 }
 
@@ -26,8 +25,7 @@ class AllSellersController extends GetxController {
 
   final selectedCountry = 'All'.obs;
   final selectedProductCategory = 'All'.obs;
-  final selectedProductCategoryId = 'All'.obs; // Store the ID for API
-  final selectedBuyerRanking = 'All'.obs;
+  final selectedProductCategoryId = '0'.obs; // Store the ID for API
   final exporterNameFilter = ''.obs;
   final entriesPerPage = 50.obs;
 
@@ -51,9 +49,7 @@ class AllSellersController extends GetxController {
   }
 
   void loadData() async {
-    buyerRankings.value = ['All', 'High', 'Medium', 'Low'];
-
-    // Fetch dropdown data from API
+    buyerRankings.value = ['All'];
     await Future.wait([fetchCountries(), fetchProductCategories()]);
   }
   
@@ -94,9 +90,8 @@ class AllSellersController extends GetxController {
       if (response.status == 200 && response.data != null) {
         productCategoriesWithIds.value = response.data!;
         // Also populate the string list for dropdown display
-        productCategories.value = response.data!
-            .map((category) => category.name)
-            .toList();
+        productCategories.value =
+            response.data!.map((category) => category.name).toList();
         productCategories.insert(0, 'All');
       } else {
         productCategories.value = ['All'];
@@ -111,7 +106,7 @@ class AllSellersController extends GetxController {
       }
       if (!productCategories.contains(selectedProductCategory.value)) {
         selectedProductCategory.value = 'All';
-        selectedProductCategoryId.value = 'All';
+        selectedProductCategoryId.value = '0';
       }
       isLoading.value = false;
     }
@@ -120,34 +115,25 @@ class AllSellersController extends GetxController {
   Future<void> fetchBuyersData() async {
     try {
       isLoading.value = true;
-      
-      // Get the category ID - if "All" is selected, use "All", otherwise get the ID
-      String pctId = 'All';
-      if (selectedProductCategory.value != 'All') {
-        final category = productCategoriesWithIds.firstWhere(
-          (cat) => cat.name == selectedProductCategory.value,
-          orElse: () => ProductCategoryModel(id: 'All', name: 'All', condition: ''),
-        );
-        pctId = category.id;
-      }
-
       final apiService = ApiService();
-      final response = await apiService.getAllBuyersData(
-        filterCountry: selectedCountry.value,
-        filterPct: pctId,
-        filterBuyer: selectedBuyerRanking.value,
+      // If "All" country is selected, default to Pakistan as in example
+      final country =
+          selectedCountry.value == 'All' ? 'Pakistan' : selectedCountry.value;
+
+      final response = await apiService.getTextileNewExporters(
+        country,
+        selectedProductCategoryId.value,
       );
 
       if (response.status == 200 && response.data != null) {
-        // Map API response to BuyerModel
-        exporters.value = response.data!.data.map((bd) {
+        exporters.value = response.data!.map((item) {
           return BuyerModel(
-            id: bd.id,
-            importerName: bd.importer,
-            country: bd.country,
-            productCategory: bd.pct,
-            ranking: selectedBuyerRanking.value,
-            buyersWorth: double.tryParse(bd.valueFc) ?? 0.0,
+            id: item.sr.toString(),
+            exporterName: item.exporter,
+            country: item.country,
+            productCategory: item.productCategory,
+            address: item.address,
+            recordFound: item.recordFound,
           );
         }).toList();
         
@@ -200,7 +186,7 @@ class AllSellersController extends GetxController {
     filteredExporters.value = exporters.where((exporter) {
       bool matchesName =
           exporterNameFilter.value.isEmpty ||
-          exporter.importerName.toLowerCase().contains(
+          exporter.exporterName.toLowerCase().contains(
             exporterNameFilter.value.toLowerCase(),
           );
       return matchesName;
@@ -219,11 +205,11 @@ class AllSellersController extends GetxController {
       selectedProductCategory.value = value;
       // Update the ID as well
       if (value == 'All') {
-        selectedProductCategoryId.value = 'All';
+        selectedProductCategoryId.value = '0';
       } else {
         final category = productCategoriesWithIds.firstWhere(
           (cat) => cat.name == value,
-          orElse: () => ProductCategoryModel(id: 'All', name: 'All', condition: ''),
+          orElse: () => ProductCategoryModel(id: '0', name: value, condition: ''),
         );
         selectedProductCategoryId.value = category.id;
       }
@@ -236,7 +222,6 @@ class AllSellersController extends GetxController {
     required String pctName,
     String country = 'All',
   }) async {
-    // Ensure dropdown data is available
     if (productCategoriesWithIds.isEmpty) {
       await fetchProductCategories();
     }
@@ -258,10 +243,7 @@ class AllSellersController extends GetxController {
   }
 
   void updateBuyerRankingFilter(String? value) {
-    if (value != null) {
-      selectedBuyerRanking.value = value;
-      applyFilters();
-    }
+    // Ranking filter not used for this screen; keep for compatibility.
   }
 
   void updateExporterNameFilter(String value) {
