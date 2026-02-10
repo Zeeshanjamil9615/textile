@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/views/drawer/dashboard/dashboard_controller.dart';
 import 'package:textile/views/drawer/drawer.dart';
+import 'package:textile/views/drawer/textile_importers/textile_importers.dart';
 import 'package:textile/widgets/colors.dart';
 import 'package:textile/widgets/custom_app_bar.dart';
 
@@ -213,6 +214,7 @@ class _KpiGrid extends StatelessWidget {
 
 class _KpiCard extends StatelessWidget {
   final _KpiData data;
+
   const _KpiCard({required this.data});
 
   @override
@@ -264,7 +266,9 @@ class _KpiCard extends StatelessWidget {
             ),
           ),
           TextButton(
-            onPressed: () => Get.snackbar('Report', 'Dummy report for ${data.title}'),
+            onPressed: (){
+              Get.to(TextileImporters());
+            },
             style: TextButton.styleFrom(
               foregroundColor: AppColors.primaryDark,
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
