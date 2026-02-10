@@ -1439,7 +1439,7 @@ class ApiService {
         'getBuyerDetails',
         data: json.encode({
           'buyer': buyer,
-          'importing': importing,
+          'importing': "7xaz4",
           'blatlong': blatlong,
         }),
         options: Options(
