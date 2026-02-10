@@ -19,6 +19,7 @@ import 'package:textile/models/importers_city_wise_response.dart';
 import 'package:textile/models/importers_country_wise_response.dart';
 import 'package:textile/models/cyf_products_response.dart';
 import 'package:textile/models/buyers_with_description_response.dart';
+import 'package:textile/models/buyer_details_response.dart';
 
 class ApiService {
   // Base URL for the API
@@ -1421,6 +1422,73 @@ class ApiService {
       );
     } catch (e) {
       return ApiResponse<List<BuyerWithDescriptionItem>>(
+        status: 0,
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Get buyer details by buyer name. POST JSON: buyer, importing (cs_id), blatlong.
+  Future<ApiResponse<BuyerDetailsResponse>> getBuyerDetails({
+    required String buyer,
+    required String importing,
+    String blatlong = '',
+  }) async {
+    try {
+      final response = await _dio.post(
+        'getBuyerDetails',
+        data: json.encode({
+          'buyer': buyer,
+          'importing': importing,
+          'blatlong': blatlong,
+        }),
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData;
+        if (response.data is String) {
+          responseData =
+              json.decode(response.data as String) as Map<String, dynamic>;
+        } else if (response.data is Map) {
+          responseData = response.data as Map<String, dynamic>;
+        } else {
+          throw Exception('Unexpected response format');
+        }
+
+        final status = responseData['status'] as int? ?? 0;
+        final message = responseData['message'] as String? ?? '';
+        final details = BuyerDetailsResponse.fromJson(responseData);
+        return ApiResponse<BuyerDetailsResponse>(
+          status: status,
+          message: message,
+          data: details,
+        );
+      } else {
+        return ApiResponse<BuyerDetailsResponse>(
+          status: response.statusCode ?? 0,
+          message: response.statusMessage ?? 'Unknown error',
+        );
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
+      } else if (e.type == DioExceptionType.badResponse) {
+        errorMessage = e.response?.data['message'] ?? 'Server error occurred';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+      return ApiResponse<BuyerDetailsResponse>(
+        status: e.response?.statusCode ?? 0,
+        message: errorMessage,
+      );
+    } catch (e) {
+      return ApiResponse<BuyerDetailsResponse>(
         status: 0,
         message: 'An unexpected error occurred: ${e.toString()}',
       );

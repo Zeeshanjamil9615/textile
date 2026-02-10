@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/views/drawer/textile_importers/buyer_model.dart' show BuyerModel;
-
+import 'package:textile/views/drawer/buyer_profile/buyer_profile.dart';
 import 'package:textile/widgets/folder_selection_bottom_sheet.dart';
 import 'package:textile/views/drawer/add_folder/add_folder_controller.dart';
 
@@ -58,8 +58,20 @@ class BuyerCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(buyer.importerName, 
-                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                    child: GestureDetector(
+                      onTap: () {
+                        Get.to(() => const BuyerProfilePage(), arguments: buyer.importerName);
+                      },
+                      child: Text(
+                        buyer.importerName,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2D7373),
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
