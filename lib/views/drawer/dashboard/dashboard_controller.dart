@@ -17,7 +17,7 @@ class DashboardController extends GetxController {
   final errorMessage = ''.obs;
 
   void openDrawer() {
-    scaffoldKey.currentState?.openDrawer();
+    scaffoldKey.currentState?.openDrawer();        
   }
 
   @override
@@ -33,7 +33,7 @@ class DashboardController extends GetxController {
       fetchTopProducts(),
     ]);
   }
-
+ 
   Future<void> fetchImporterCount() async {
     try {
       isLoadingCounts.value = true;

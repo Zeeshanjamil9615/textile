@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:textile/views/drawer/profile/profile_page.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final VoidCallback onMenuPressed;
@@ -33,7 +35,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       actions: [
         // const Icon(Icons.flag, color: Colors.white, size: 20),
-        IconButton(icon: const Icon(Icons.grid_view, color: Colors.white), onPressed: () {}),
+        IconButton(
+          icon: const Icon(Icons.person, color: Colors.white),
+          onPressed: () {
+            Get.to(() => const ProfilePage());
+          },
+        ),
         // IconButton(icon: const Icon(Icons.shopping_cart, color: Colors.white), onPressed: () {}),
         // IconButton(icon: const Icon(Icons.dark_mode, color: Colors.white), onPressed: () {}),
         Stack(

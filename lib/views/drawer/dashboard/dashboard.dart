@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:textile/views/drawer/dashboard/dashboard_controller.dart';
 import 'package:textile/views/drawer/drawer.dart';
 import 'package:textile/views/drawer/all_sellers/all_sellers.dart';
@@ -9,11 +11,9 @@ import 'package:textile/widgets/custom_app_bar.dart';
 
 class Dashboard extends StatelessWidget {
   const Dashboard({Key? key}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(DashboardController());
-
     return Scaffold(
       key: controller.scaffoldKey,
       appBar: CustomAppBar(onMenuPressed: controller.openDrawer),
@@ -36,10 +36,8 @@ class Dashboard extends StatelessWidget {
     );
   }
 }
-
 class _DashboardBody extends StatelessWidget {
   const _DashboardBody();
-
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<DashboardController>();
@@ -285,6 +283,25 @@ class _KpiCard extends StatelessWidget {
   }
 }
 
+// Helper function to get icon for product
+IconData _getProductIcon(String productName) {
+  final name = productName.toLowerCase();
+  if (name.contains('bed linen') || name.contains('bed sheet') || name.contains('blanket')) {
+    return Icons.hotel_rounded;
+  } else if (name.contains('bed spread')) {
+    return Icons.layers;
+  } else if (name.contains('canvas')) {
+    return Icons.layers;
+  } else if (name.contains('fabric') && !name.contains('print')) {
+    return FontAwesomeIcons.tshirt;
+  } else if (name.contains('print')) {
+    return Icons.print;
+  } else if (name.contains('towel')) {
+    return FontAwesomeIcons.bath;
+  }
+  return Icons.category; // Default icon           
+}
+
 // Top Products Section
 class _TopProducts extends StatelessWidget {
   final DashboardController controller;
@@ -342,6 +359,7 @@ class _TopProducts extends StatelessWidget {
                     final item = controller.topProducts[index];
                     return _ProductCard(
                       title: item.name,
+                      icon: _getProductIcon(item.name),
                       onTap: () => controller.goToProductWise(item),
                     );
                   },
@@ -357,8 +375,13 @@ class _TopProducts extends StatelessWidget {
 
 class _ProductCard extends StatelessWidget {
   final String title;
+  final IconData icon;
   final VoidCallback onTap;
-  const _ProductCard({required this.title, required this.onTap});
+  const _ProductCard({
+    required this.title,
+    required this.icon,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -366,7 +389,7 @@ class _ProductCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-                padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -382,7 +405,7 @@ class _ProductCard extends StatelessWidget {
                 color: AppColors.primaryDark,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.category, color: Colors.white, size: 24),
+              child: Icon(icon, color: Colors.white, size: 24),
             ),
             const SizedBox(height: 8),
             Flexible(
@@ -433,8 +456,25 @@ class _Map extends StatelessWidget {
   }
 }
 
-class _MapCard extends StatelessWidget {
+class _MapCard extends StatefulWidget {
   const _MapCard();
+
+  @override
+  State<_MapCard> createState() => _MapCardState();
+}
+
+class _MapCardState extends State<_MapCard> {
+  GoogleMapController? _mapController;
+  static final CameraPosition _initialPosition = CameraPosition(
+    target: const LatLng(37.7749, -122.4194), // Default to San Francisco
+    zoom: 10,
+  );
+
+  @override
+  void dispose() {
+    _mapController?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -459,22 +499,21 @@ class _MapCard extends StatelessWidget {
             height: 170,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.primary.withOpacity(0.10),
-                  AppColors.primaryDark.withOpacity(0.06),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
               border: Border.all(color: const Color(0xFFE9EEF2)),
             ),
+            clipBehavior: Clip.antiAlias,
             child: Stack(
               children: [
-                const Positioned.fill(
-                  child: Center(
-                    child: Icon(Icons.map_outlined, size: 56, color: AppColors.primaryDark),
-                  ),
+                GoogleMap(
+                  initialCameraPosition: _initialPosition,
+                  mapType: MapType.normal,
+                  zoomControlsEnabled: false,
+                  zoomGesturesEnabled: true,
+                  scrollGesturesEnabled: true,
+                  myLocationButtonEnabled: false,
+                  onMapCreated: (GoogleMapController controller) {
+                    _mapController = controller;
+                  },
                 ),
                 Positioned(
                   left: 12,
@@ -524,12 +563,12 @@ class _TopCountries extends StatelessWidget {
       ('🇨🇳', 'China'),
       ('🇬🇧', 'United Kingdom'),
       ('🇩🇪', 'Germany'),
-      ('🇫🇷', 'France'),
-      ('🇮🇹', 'Italy'),
-      ('🇪🇸', 'Spain'),
-      ('🇳🇱', 'Netherlands'),
-      ('🇧🇪', 'Belgium'),
-      ('🇹🇷', 'Turkey'),
+      ('🇯🇵', 'Japan'),
+      ('🇦🇺', 'Australia'),
+      ('🇦🇪', 'United Arab Emirates'),
+      ('🇧🇩', 'Bangladesh'),
+      ('🇧🇷', 'Brazil'),
+      ('🇨🇦', 'Canada'),
     ];
 
     return Container(

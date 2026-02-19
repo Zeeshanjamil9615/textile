@@ -100,28 +100,32 @@ class CustomDrawer extends StatelessWidget {
     return Drawer(
       child: Container(
         color: const Color(0xFF2D7373),
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              color: const Color(0xFF4A9B9B),
-              child: SafeArea(
-                child: FutureBuilder<UserModel?>(
-                  future: LocalStorageService.getUserData(),
-                  builder: (context, snapshot) {
-                    // Default values
-                    String userName = 'ADMIN';
-                    String userEmail = 'admin@textile.com';
+        child: FutureBuilder<UserModel?>(
+          future: LocalStorageService.getUserData(),
+          builder: (context, snapshot) {
+            // Default values
+            String userName = 'ADMIN';
+            String userEmail = 'admin@textile.com';
+            UserModel? user = snapshot.data;
 
-                    // If data is loaded, use real user data
-                    if (snapshot.hasData && snapshot.data != null) {
-                      final user = snapshot.data!;
-                      userName = user.fullName.toUpperCase();
-                      userEmail = user.email;
-                    }
+            // If data is loaded, use real user data
+            if (snapshot.hasData && user != null) {
+              userName = user.fullName.toUpperCase();
+              userEmail = user.email;
+            }
 
-                    return Row(
+            // Helper: if we don't have user data yet, keep previous behaviour (show all)
+            bool can(String code) =>
+                user == null ? true : user.hasPermission(code);
+
+            return ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  color: const Color(0xFF4A9B9B),
+                  child: SafeArea(
+                    child: Row(
                       children: [
                         const CircleAvatar(
                           radius: 30,
@@ -156,190 +160,202 @@ class CustomDrawer extends StatelessWidget {
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                ),
+                _DrawerItem(
+                  icon: Icons.dashboard,
+                  title: 'Dashboard',
+                  isSelected: isDashboard,
+                  onTap: () {
+                    Get.off(() => const Dashboard());
+                    Get.back();
+                  },
+                ),
+                if (can('1AB'))
+                  _DrawerItem(
+                    icon: Icons.business,
+                    title: 'Textile Importers',
+                    isSelected: isTextileImporters,
+                    onTap: () {
+                      Get.back();
+                      Get.off(() => const TextileImporters());
+                    },
+                  ),
+                if (can('1AB'))
+                  _DrawerItem(
+                    icon: Icons.people,
+                    title: 'Buyers',
+                    isSelected: isBuyers,
+                    onTap: () {
+                      Get.back();
+                      Get.off(() => const Buyers());
+                    },
+                  ),
+                if (can('9MDDB'))
+                  _DrawerItem(
+                    icon: Icons.checkroom,
+                    title: 'Buyer Product Wise',
+                    isSelected: isBuyerProductWise,
+                    onTap: () {
+                      Get.back();
+                      Get.delete<BuyerProductWiseController>(force: true);
+                      Get.off(() => const BuyerProductWise());
+                    },
+                  ),
+                if (can('14GSK'))
+                  _DrawerItem(
+                    icon: Icons.checkroom,
+                    title: 'Garment Socks Knitted',
+                    isSelected: isGarmentSocksKnitted,
+                    onTap: () {
+                      Get.back();
+                      Get.off(() => const GarmentSocksKnitted());
+                    },
+                  ),
+                // No explicit code in sample for this screen – keep always visible
+                _DrawerItem(
+                  icon: Icons.search,
+                  title: 'Search Garment Importer By Product Specification',
+                  isSelected: isSearchGarmentImporter,
+                  onTap: () {
+                    Get.back();
+                    Get.off(
+                      () =>
+                          const SearchGarmentImporterByProductSpecification(),
                     );
                   },
                 ),
-              ),
-            ),
-            _DrawerItem(
-              icon: Icons.dashboard,
-              title: 'Dashboard',
-              isSelected: isDashboard,
-              onTap: () {
-                Get.off(() => const Dashboard());
-
-                Get.back();
-                // TODO: Navigate to Dashboard when implemented
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.business,
-              title: 'Textile Importers',
-              isSelected: isTextileImporters,
-              onTap: () {
-                Get.back();
-                Get.off(() => const TextileImporters());
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.people,
-              title: 'Buyers',
-              isSelected: isBuyers,
-              onTap: () {
-                Get.back();
-                Get.off(() => const Buyers());
-              },
-            ),
-             _DrawerItem(
-              icon: Icons.checkroom,
-              title: 'Buyer Product Wise',
-              isSelected: isBuyerProductWise,
-
-              onTap: () {
-                Get.back();
-                Get.delete<BuyerProductWiseController>(force: true);
-                Get.off(() => const BuyerProductWise());
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.checkroom,
-              title: 'Garment Socks Knitted',
-              isSelected: isGarmentSocksKnitted,
-
-              onTap: () {
-                Get.back();
-                Get.off(() => const GarmentSocksKnitted());
-
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.search,
-              title: 'Search Garment Importer By Product Specification',
-              isSelected: isSearchGarmentImporter,
-              onTap: () {
-                Get.back();
-                Get.off(
-                  () => const SearchGarmentImporterByProductSpecification(),
-                );             
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.inventory,
-              title: 'Garment Denim',
-              isSelected: isGarmentDanim,
-
-              onTap: () {
-                Get.back();
-                Get.off(() => const GarmentDenim());
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.search,
-              title: 'Search Denim Importer By Product Specification',
-              isSelected: isSearchDanim,
-              onTap: () {
-                Get.back();
-                Get.off(() => const SearchDanim());
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.email,
-              title: 'Email Importers City Wise',
-              isSelected: isEmailImportersCityWise,
-              onTap: () {
-                Get.back();
-                Get.off(() => const EmailImportersCityWise());
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.flag,
-              title: 'Email Importers Country Wise',
-              isSelected: isEmailImportersCountryWise,
-
-              onTap: () {
-                Get.back();
-                Get.off(() => const EmailImportersCountryWise());
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.map,
-              title: 'Importers on Google Map',
-              onTap: () => Get.back(),
-            ),
-            _DrawerItem(
-              icon: Icons.category,
-              title: 'Search Importer By Product Specification',
-              isSelected: isSearchImporterByProductSpecification,
-              onTap: () {
-                Get.back();
-                Get.off(() => const SearchImporterByProductSpecification());
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.folder,
-              title: 'My Folders',
-              isSelected: isAddFolder,
-
-              onTap: () {
-                Get.back();
-                Get.off(() => const AddFolderScreen());
-              },
-            ),
-            const Divider(color: Colors.white24, height: 1),
-            _DrawerItem(
-              icon: Icons.business_center,
-              title: 'Textile Exporters',
-              isSelected: isTextileExporters,
-
-              onTap: () {
-                Get.back();
-                Get.off(() => const TextileExporters());
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.location_city,
-              title: 'Search Exporters by Cities',
-              isSelected: isSearchExportersByCities,
-              onTap: () {
-                Get.back();
-                Get.off(() => const SearchExportersByCities());
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.folder_outlined,
-              title: 'My Folders',
-              onTap: () => Get.back(),
-            ),
-            _DrawerItem(
-              icon: Icons.search_outlined,
-              title: 'Search Exporter By Product Specification',
-              isSelected: isSearchExporterByProductSpecification,
-              onTap: () {
-                Get.back();
-                Get.off(() => const SearchExporterByProductSpecification());
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.update,
-              title: 'Update Data',
-              isSelected: isUpdateData,
-
-              onTap: () {
-                Get.back();
-                Get.off(() => const UpdateData());
-              },
-            ),
-            _DrawerItem(
-              icon: Icons.logout,
-              title: 'Log Out',
-
-              // isSelected: isLogOut,
-              onTap: () {
-                Get.back();
-                Get.off(() => const LoginPage());
-              },
-            ),
-          ],
+                if (can('15GD'))
+                  _DrawerItem(
+                    icon: Icons.inventory,
+                    title: 'Garment Denim',
+                    isSelected: isGarmentDanim,
+                    onTap: () {
+                      Get.back();
+                      Get.off(() => const GarmentDenim());
+                    },
+                  ),
+                // No dedicated permission code known, keep visible
+                _DrawerItem(
+                  icon: Icons.search,
+                  title: 'Search Denim Importer By Product Specification',
+                  isSelected: isSearchDanim,
+                  onTap: () {
+                    Get.back();
+                    Get.off(() => const SearchDanim());
+                  },
+                ),
+                if (can('6EML'))
+                  _DrawerItem(
+                    icon: Icons.email,
+                    title: 'Email Importers City Wise',
+                    isSelected: isEmailImportersCityWise,
+                    onTap: () {
+                      Get.back();
+                      Get.off(() => const EmailImportersCityWise());
+                    },
+                  ),
+                if (can('6EML'))
+                  _DrawerItem(
+                    icon: Icons.flag,
+                    title: 'Email Importers Country Wise',
+                    isSelected: isEmailImportersCountryWise,
+                    onTap: () {
+                      Get.back();
+                      Get.off(() => const EmailImportersCountryWise());
+                    },
+                  ),
+                if (can('4MPS'))
+                  _DrawerItem(
+                    icon: Icons.map,
+                    title: 'Importers on Google Map',
+                    onTap: () => Get.back(),
+                  ),
+                if (can('9MDDB'))
+                  _DrawerItem(
+                    icon: Icons.category,
+                    title: 'Search Importer By Product Specification',
+                    isSelected: isSearchImporterByProductSpecification,
+                    onTap: () {
+                      Get.back();
+                      Get.off(
+                        () =>
+                            const SearchImporterByProductSpecification(),
+                      );
+                    },
+                  ),
+                if (can('7MB'))
+                  _DrawerItem(
+                    icon: Icons.folder,
+                    title: 'My Folders',
+                    isSelected: isAddFolder,
+                    onTap: () {
+                      Get.back();
+                      Get.off(() => const AddFolderScreen());
+                    },
+                  ),
+                const Divider(color: Colors.white24, height: 1),
+                if (can('8SP'))
+                  _DrawerItem(
+                    icon: Icons.business_center,
+                    title: 'Textile Exporters',
+                    isSelected: isTextileExporters,
+                    onTap: () {
+                      Get.back();
+                      Get.off(() => const TextileExporters());
+                    },
+                  ),
+                if (can('5CTS'))
+                  _DrawerItem(
+                    icon: Icons.location_city,
+                    title: 'Search Exporters by Cities',
+                    isSelected: isSearchExportersByCities,
+                    onTap: () {
+                      Get.back();
+                      Get.off(() => const SearchExportersByCities());
+                    },
+                  ),
+                if (can('7MB'))
+                  _DrawerItem(
+                    icon: Icons.folder_outlined,
+                    title: 'My Folders',
+                    onTap: () => Get.back(),
+                  ),
+                if (can('10CYFDB'))
+                  _DrawerItem(
+                    icon: Icons.search_outlined,
+                    title: 'Search Exporter By Product Specification',
+                    isSelected: isSearchExporterByProductSpecification,
+                    onTap: () {
+                      Get.back();
+                      Get.off(
+                        () =>
+                            const SearchExporterByProductSpecification(),
+                      );
+                    },
+                  ),
+                if (can('13DATA'))
+                  _DrawerItem(
+                    icon: Icons.update,
+                    title: 'Update Data',
+                    isSelected: isUpdateData,
+                    onTap: () {
+                      Get.back();
+                      Get.off(() => const UpdateData());
+                    },
+                  ),
+                _DrawerItem(
+                  icon: Icons.logout,
+                  title: 'Log Out',
+                  onTap: () {
+                    Get.back();
+                    Get.off(() => const LoginPage());
+                  },
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

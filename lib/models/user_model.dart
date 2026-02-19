@@ -19,6 +19,8 @@ class UserModel {
   final String commission;
   final String agentCurrency;
   final String expiry;
+  /// List of permission codes (e.g. 1AB, 14GSK, 15GD) parsed from super_margin / super_margin_detail
+  final List<String> permissionCodes;
 
   UserModel({
     required this.id,
@@ -41,10 +43,49 @@ class UserModel {
     required this.commission,
     required this.agentCurrency,
     required this.expiry,
+    required this.permissionCodes,
   });
 
   // Parse from API response
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    // Parse permission codes from multiple possible sources:
+    // - API login response: "super_margin_detail" (list of {code, name})
+    // - API login response: "super_margin" (comma-separated codes)
+    // - Locally stored JSON: "permission_codes" (list of strings)
+
+    // From stored list (local storage)
+    List<String> codesFromStored = [];
+    if (json['permission_codes'] is List) {
+      codesFromStored = (json['permission_codes'] as List)
+          .map((e) => e.toString())
+          .where((e) => e.isNotEmpty)
+          .toList();
+    }
+
+    // From "super_margin_detail" (API login)
+    List<String> codesFromDetail = [];
+    if (json['super_margin_detail'] is List) {
+      codesFromDetail = (json['super_margin_detail'] as List)
+          .whereType<Map<String, dynamic>>()
+          .map((e) => e['code']?.toString() ?? '')
+          .where((code) => code.isNotEmpty)
+          .toList();
+    }
+
+    // From "super_margin" comma-separated string (API login / legacy)
+    final superMarginRaw = json['super_margin']?.toString() ?? '';
+    final List<String> codesFromString = superMarginRaw
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+
+    // Merge and de-duplicate all sources
+    final mergedCodes = <String>{};
+    mergedCodes.addAll(codesFromStored);
+    mergedCodes.addAll(codesFromDetail);
+    mergedCodes.addAll(codesFromString);
+
     return UserModel(
       id: json['cs_id']?.toString() ?? '',
       gender: json['cs_gender']?.toString() ?? '',
@@ -66,6 +107,7 @@ class UserModel {
       commission: json['commission']?.toString() ?? '',
       agentCurrency: json['agent_currency']?.toString() ?? '',
       expiry: json['cs_expiry']?.toString() ?? '',
+      permissionCodes: mergedCodes.toList(),
     );
   }
 
@@ -92,9 +134,15 @@ class UserModel {
       'commission': commission,
       'agent_currency': agentCurrency,
       'cs_expiry': expiry,
+      'permission_codes': permissionCodes,
     };
   }
 
   // Get full name
   String get fullName => '$firstName $lastName';
+
+  // Helper to check if user has a specific permission code
+  bool hasPermission(String code) {
+    return permissionCodes.contains(code);
+  }
 }
