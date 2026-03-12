@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/views/drawer/Search_Exporters_by_Cities/buyer_model.dart';
-import 'package:textile/views/drawer/Search_Exporters_by_Cities/filter_section.dart';
 import 'package:textile/api_service/api_service.dart';
+import 'package:textile/models/exporter_city_wise_item.dart';
 
 class SearchExportersByCitiesController extends GetxController {
   final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -26,39 +26,24 @@ class SearchExportersByCitiesController extends GetxController {
   Future<void> loadData() async {
     isLoading.value = true;
     try {
-      // Load dummy city data
-      exporters.value = [
-        BuyerModel(
-          serialNumber: 0,
-          city: 'Beijing',
-          numberOfBuyers: 1,
-          country: 'CHINA',
-        ),
-        BuyerModel(
-          serialNumber: 1,
-          city: 'London',
-          numberOfBuyers: 3,
-          country: 'United Kingdom',
-        ),
-        BuyerModel(
-          serialNumber: 2,
-          city: 'Paris',
-          numberOfBuyers: 2,
-          country: 'France',
-        ),
-        BuyerModel(
-          serialNumber: 3,
-          city: 'Berlin',
-          numberOfBuyers: 1,
-          country: 'Germany',
-        ),
-        BuyerModel(
-          serialNumber: 4,
-          city: 'Brussels',
-          numberOfBuyers: 5,
-          country: 'Belgium',
-        ),
-      ];
+      final apiService = ApiService();
+      final apiResponse = await apiService.exporterCityWise();
+
+      if (apiResponse.status == 200 && apiResponse.data != null) {
+        final List<ExporterCityItem> apiItems = apiResponse.data!;
+        exporters.value = apiItems
+            .map(
+              (item) => BuyerModel(
+                serialNumber: item.id,
+                city: item.city,
+                numberOfBuyers: item.noOfSellersCity,
+                country: item.country,
+              ),
+            )
+            .toList();
+      } else {
+        exporters.clear();
+      }
       await fetchCountries();
       applyFilters();
     } finally {

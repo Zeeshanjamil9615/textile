@@ -320,7 +320,11 @@ class CustomDrawer extends StatelessWidget {
                   _DrawerItem(
                     icon: Icons.folder_outlined,
                     title: 'My Folders',
-                    onTap: () => Get.back(),
+                    isSelected: isAddFolder,
+                    onTap: () {
+                      Get.back();
+                      Get.off(() => const AddFolderScreen());
+                    },
                   ),
                 if (can('10CYFDB'))
                   _DrawerItem(

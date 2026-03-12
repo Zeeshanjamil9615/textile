@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:textile/views/auth/login_controller.dart';
+import 'package:textile/views/auth/signup_page.dart';
 import 'package:textile/widgets/colors.dart';
 
 class LoginPage extends StatelessWidget {
@@ -209,6 +210,31 @@ class LoginPage extends StatelessWidget {
                         icon: FontAwesomeIcons.linkedin,
                         color: AppColors.linkedin,
                         onPressed: () => controller.socialLogin('LinkedIn'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Don't Have Your Account yet? ",
+                        style: TextStyle(
+                          color: AppColors.textWhite,
+                          fontSize: 13,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => Get.to(() => const SignupPage()),
+                        child: const Text(
+                          'Sign up',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
                       ),
                     ],
                   ),

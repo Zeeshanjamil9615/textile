@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/api_service/api_service.dart';
 import 'package:textile/api_service/local_storage_service.dart';
+import 'package:textile/views/auth/forgot_password_page.dart';
 import 'package:textile/views/drawer/dashboard/dashboard.dart';
 import 'package:textile/widgets/custom_snackbar.dart';
 
@@ -82,10 +83,7 @@ class LoginController extends GetxController {
   }
 
   void forgotPassword() {
-    CustomSnackbar.info(
-      'Password reset link will be sent to your email',
-      title: 'Forgot Password',
-    );
+    Get.to(() => const ForgotPasswordPage());
   }
 
   void socialLogin(String platform) {

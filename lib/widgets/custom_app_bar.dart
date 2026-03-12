@@ -43,19 +43,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
         // IconButton(icon: const Icon(Icons.shopping_cart, color: Colors.white), onPressed: () {}),
         // IconButton(icon: const Icon(Icons.dark_mode, color: Colors.white), onPressed: () {}),
-        Stack(
-          children: [
-            IconButton(icon: const Icon(Icons.notifications, color: Colors.white), onPressed: () {}),
-            Positioned(
-              right: 8, top: 8,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                child: const Text('3', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ],
-        ),
+       
       ],
     );
   }

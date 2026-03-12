@@ -55,8 +55,7 @@ class _DashboardBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const _Header(),
-                  const SizedBox(height: 14),
+                  // const _Header(),
                   Obx(() {
                     final items = [
                       _KpiData(
@@ -642,11 +641,11 @@ class _TopBrands extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const brands = [
-      ('Ikea', Icons.chair_alt_outlined, Color(0xFFF1C40F)),
-      ('Adidas', Icons.sports_soccer, Color(0xFF111111)),
-      ('ZARA', Icons.storefront_outlined, Color(0xFF95A5A6)),
-      ('H&M', Icons.local_mall_outlined, Color(0xFFE74C3C)),
-      ('Nike', Icons.directions_run, Color(0xFF2D7373)),
+      ('Ikea', 'assets/image/image1.png'),
+      ('Adidas', 'assets/image/image2.png'),
+      ('ZARA', 'assets/image/image3.png'),
+      ('H&M', 'assets/image/image4.png'),
+      ('Nike', 'assets/image/image5.png'),
     ];
 
     return Container(
@@ -682,10 +681,14 @@ class _TopBrands extends StatelessWidget {
                       height: 40,
                       width: 40,
                       decoration: BoxDecoration(
-                        color: b.$3.withOpacity(0.14),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Icon(b.$2, color: b.$3),
+                      clipBehavior: Clip.antiAlias,
+                      child: Image.asset(
+                        b.$2,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported, color: AppColors.textSecondary),
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -694,14 +697,7 @@ class _TopBrands extends StatelessWidget {
                         style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
                       ),
                     ),
-                    TextButton(
-                      onPressed: () => Get.snackbar('Brand', 'Dummy open ${b.$1}'),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.primaryDark,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      child: const Text('View'),
-                    ),
+                    
                   ],
                 ),
               ),
