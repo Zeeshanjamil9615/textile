@@ -352,7 +352,6 @@ class _LabeledField extends StatelessWidget {
     this.keyboardType = TextInputType.text,
     this.maxLines = 1,
   });
-
   @override
   Widget build(BuildContext context) {
     return Column(

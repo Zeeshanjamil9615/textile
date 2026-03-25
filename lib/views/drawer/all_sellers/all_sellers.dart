@@ -125,7 +125,7 @@ class BuyerCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
                   ),
-                  child: const Text('Edit', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                  child: const Text('Open Sellers', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],

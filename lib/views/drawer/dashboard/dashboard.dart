@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:textile/views/drawer/add_folder/add_folder.dart';
 import 'package:textile/views/drawer/dashboard/dashboard_controller.dart';
 import 'package:textile/views/drawer/drawer.dart';
 import 'package:textile/views/drawer/all_sellers/all_sellers.dart';
@@ -76,6 +77,16 @@ class _DashboardBody extends StatelessWidget {
                         loading: controller.isLoadingCounts.value,
                         onView: () => Get.to(() => const allsellers()),
                       ),
+                        _KpiData(
+                        title: 'My Folder',
+                        value: '6',
+                        icon: Icons.folder_open,
+                        iconBg: const Color(0xFFE67E22),
+                        accent: const Color(0xFFE67E22),
+                        loading: controller.isLoadingCounts.value,
+                        onView: () => Get.to(() => const AddFolderScreen()),
+                      ),
+                    
                     ];
                     return _KpiGrid(
                       crossAxisCount: isVeryNarrow ? 1 : (isNarrow ? 2 : 4),

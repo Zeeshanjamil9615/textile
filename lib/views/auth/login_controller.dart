@@ -18,9 +18,8 @@ class LoginController extends GetxController {
 
   @override
   void onInit() {
-    super.onInit();
-    // Pre-fill email for testing (remove in production)
     emailController.text = 'hhq_797@hotmail.com';
+    super.onInit();
   }
 
   @override

@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/api_service/api_service.dart';
@@ -72,12 +74,98 @@ class SignupController extends GetxController {
 
     isSubmitting.value = true;
     try {
-      // TODO: Integrate real signup API when available.
-      await Future.delayed(const Duration(seconds: 1));
+      final dio = Dio();
+
+      final data = json.encode({
+        'csgender': 'Male',
+        'csfname': firstNameController.text.trim(),
+        'cslname': lastNameController.text.trim(),
+        'csemail': emailController.text.trim(),
+        'csphno': cellController.text.trim(),
+        'cscompany': companyNameController.text.trim(),
+        'cscountry': selectedCountry.value,
+        'csadd': officeAddressController.text.trim(),
+        'cscity': cityController.text.trim(),
+        'csntn': ntnController.text.trim(),
+        'csdesignation': designationController.text.trim(),
+      });
+
+      final response = await dio.request(
+        'https://textileanalytics.pk/api/registerRequest',
+        options: Options(
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
+        data: data,
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData;
+        if (response.data is String) {
+          responseData =
+              json.decode(response.data as String) as Map<String, dynamic>;
+        } else if (response.data is Map) {
+          responseData = Map<String, dynamic>.from(
+              response.data as Map<dynamic, dynamic>);
+        } else {
+          throw Exception('Unexpected response format');
+        }
+
+        final statusCode = responseData['status'] as int? ?? 0;
+        final message = responseData['message'] as String? ?? '';
+        final dataJson = responseData['data'] as Map<String, dynamic>?;
+        final registrationStatus = dataJson?['status'] as String? ?? '';
+
+        Get.snackbar(
+          'Register ($statusCode)',
+          registrationStatus.isNotEmpty
+              ? '$message\nStatus: $registrationStatus'
+              : message,
+          snackPosition: SnackPosition.TOP,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          response.statusMessage ?? 'Registration failed',
+          snackPosition: SnackPosition.TOP,
+        );
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
+
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
+      } else if (e.type == DioExceptionType.badResponse) {
+        try {
+          final data = e.response?.data;
+          if (data is Map && data['message'] != null) {
+            errorMessage = data['message'] as String;
+          } else {
+            errorMessage = 'Server error occurred';
+          }
+        } catch (_) {
+          errorMessage = 'Server error occurred';
+        }
+      } else if (e.type == DioExceptionType.cancel) {
+        errorMessage = 'Request cancelled';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+
       Get.snackbar(
-        'Register',
-        'Registration submitted (demo).',
-        snackPosition: SnackPosition.BOTTOM,
+        'Error',
+        errorMessage,
+        snackPosition: SnackPosition.TOP,
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'An unexpected error occurred: ${e.toString()}',
+        snackPosition: SnackPosition.TOP,
       );
     } finally {
       isSubmitting.value = false;

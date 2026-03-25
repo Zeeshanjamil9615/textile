@@ -23,7 +23,7 @@ import 'package:textile/views/drawer/add_folder/add_folder.dart';
 import 'package:textile/views/drawer/add_folder/add_folder_controller.dart';
 import 'package:textile/views/drawer/buyers/buyer_controller.dart';
 import 'package:textile/views/drawer/buyers/buyers.dart';
-import 'package:textile/views/drawer/dashboard/dashboard.dart';    
+import 'package:textile/views/drawer/dashboard/dashboard.dart';
 import 'package:textile/views/drawer/dashboard/dashboard_controller.dart';
 import 'package:textile/views/drawer/garment_denim/garment_denim.dart';
 import 'package:textile/views/drawer/garment_denim/garment_denim_controller.dart';
@@ -352,9 +352,30 @@ class CustomDrawer extends StatelessWidget {
                 _DrawerItem(
                   icon: Icons.logout,
                   title: 'Log Out',
-                  onTap: () {
+                  onTap: () async {
                     Get.back();
-                    Get.off(() => const LoginPage());
+                    final shouldLogout = await Get.dialog<bool>(
+                      AlertDialog(
+                        title: const Text('Logout'),
+                        content: const Text('Are you sure you want to logout?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Get.back(result: false),
+                            child: const Text('No'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => Get.back(result: true),
+                            child: const Text('Yes'),
+                          ),
+                        ],
+                      ),
+                      barrierDismissible: true,
+                    );
+
+                    if (shouldLogout == true) {
+                      await LocalStorageService.clearUserData();
+                      Get.offAll(() => const LoginPage());
+                    }
                   },
                 ),
               ],
@@ -365,7 +386,6 @@ class CustomDrawer extends StatelessWidget {
     );
   }
 }
-
 class _DrawerItem extends StatelessWidget {
   final IconData icon;
   final String title;

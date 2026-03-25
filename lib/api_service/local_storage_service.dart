@@ -38,7 +38,16 @@ class LocalStorageService {
   static Future<bool> isLoggedIn() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      return prefs.getBool(_isLoggedInKey) ?? false;
+      final isLoggedInFlag = prefs.getBool(_isLoggedInKey) ?? false;
+      final userJson = prefs.getString(_userDataKey);
+
+      if (!isLoggedInFlag || userJson == null || userJson.isEmpty) {
+        return false;
+      }
+
+      final userMap = json.decode(userJson) as Map<String, dynamic>;
+      final email = (userMap['cs_email']?.toString() ?? '').trim();
+      return email.isNotEmpty;
     } catch (e) {
       return false;
     }
@@ -49,7 +58,7 @@ class LocalStorageService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_userDataKey);
-      await prefs.setBool(_isLoggedInKey, false);
+      await prefs.remove(_isLoggedInKey);
       return true;
     } catch (e) {
       return false;

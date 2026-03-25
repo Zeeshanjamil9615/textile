@@ -164,37 +164,37 @@ class _EditSellerPageState extends State<EditSellerPage> {
                       _buildTextField('Map', _mapController),
                       _buildTextField('Website', _websiteController),
                       const SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _saving ? null : _save,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryDark,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: _saving
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor:
-                                        AlwaysStoppedAnimation<Color>(Colors.white),
-                                  ),
-                                )
-                              : const Text(
-                                  'Update Importer',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                        ),
-                      ),
+                    //   SizedBox(
+                    //     width: double.infinity,
+                    //     child: ElevatedButton(
+                    //       onPressed: _saving ? null : _save,
+                    //       style: ElevatedButton.styleFrom(
+                    //         backgroundColor: AppColors.primaryDark,
+                    //         foregroundColor: Colors.white,
+                    //         padding: const EdgeInsets.symmetric(vertical: 14),
+                    //         shape: RoundedRectangleBorder(
+                    //           borderRadius: BorderRadius.circular(8),
+                    //         ),
+                    //       ),
+                    //       child: _saving
+                    //           ? const SizedBox(
+                    //               height: 20,
+                    //               width: 20,
+                    //               child: CircularProgressIndicator(
+                    //                 strokeWidth: 2,
+                    //                 valueColor:
+                    //                     AlwaysStoppedAnimation<Color>(Colors.white),
+                    //               ),
+                    //             )
+                    //           : const Text(
+                    //               'Update Importer',
+                    //               style: TextStyle(
+                    //                 fontSize: 16,
+                    //                 fontWeight: FontWeight.bold,
+                    //               ),
+                    //             ),
+                    //     ),
+                    //   ),
                     ],
                   ),
                 ),
@@ -208,6 +208,7 @@ class _EditSellerPageState extends State<EditSellerPage> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
+        readOnly: true,
         controller: controller,
         maxLines: maxLines,
         decoration: InputDecoration(
@@ -221,10 +222,10 @@ class _EditSellerPageState extends State<EditSellerPage> {
           }
           return null;
         },
+        
       ),
     );
   }
-
   Widget _buildCityDropdown() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
