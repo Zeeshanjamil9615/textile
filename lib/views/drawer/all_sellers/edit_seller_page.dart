@@ -215,6 +215,11 @@ class _EditSellerPageState extends State<EditSellerPage> {
           labelText: label,
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
           isDense: true,
+
+
+
+
+          
         ),
         validator: (v) {
           if (label == 'Seller Name' && (v == null || v.trim().isEmpty)) {

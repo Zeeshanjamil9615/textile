@@ -15,6 +15,9 @@ class Dashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(DashboardController());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.refreshDashboardData();
+    });
     return Scaffold(
       key: controller.scaffoldKey,
       appBar: CustomAppBar(onMenuPressed: controller.openDrawer),
@@ -56,7 +59,7 @@ class _DashboardBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // const _Header(),
+                  const _Header(),
                   Obx(() {
                     final items = [
                       _KpiData(

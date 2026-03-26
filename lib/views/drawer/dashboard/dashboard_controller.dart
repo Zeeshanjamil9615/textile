@@ -33,6 +33,11 @@ class DashboardController extends GetxController {
       fetchTopProducts(),
     ]);
   }
+
+  Future<void> refreshDashboardData() async {
+    if (isLoadingCounts.value || isLoadingTopProducts.value) return;
+    await loadDashboardData();
+  }
  
   Future<void> fetchImporterCount() async {
     try {

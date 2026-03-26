@@ -8,15 +8,31 @@ class ImporterItem {
   final int sr;
   final String id;
   final String importerName;
-  final String cityCountry;
-  final String narration;
+  final String email;
+  final String address;
+  final String city;
+  final String country;
+  final String cell;
+  final String latlong;
+  final String? landline;
+  final String? contactPerson;
+  final String? secondEmail;
+  final String? narration;
 
   ImporterItem({
     required this.sr,
     required this.id,
     required this.importerName,
-    required this.cityCountry,
-    required this.narration,
+    required this.email,
+    required this.address,
+    required this.city,
+    required this.country,
+    required this.cell,
+    required this.latlong,
+    this.landline,
+    this.contactPerson,
+    this.secondEmail,
+    this.narration,
   });
 }
 
@@ -31,11 +47,35 @@ class OpenFolderController extends GetxController {
   final importers = <ImporterItem>[].obs;
   final isLoading = false.obs;
   final errorMessage = ''.obs;
+  final countries = <String>[].obs;
 
   @override
   void onInit() {
     super.onInit();
+    fetchCountries();
     fetchFolderDetails();
+  }
+
+  Future<void> fetchCountries() async {
+    try {
+      final apiService = ApiService();
+      final response = await apiService.getCountriesList();
+      if (response.status == 200 && response.data != null) {
+        final list = response.data!.where((c) => c != 'All').toList();
+        countries.value = list;
+      } else {
+        countries.value = ['Select Country'];
+      }
+    } catch (_) {
+      countries.value = ['Select Country'];
+    } finally {
+      if (!countries.contains('Select Country')) {
+        countries.insert(0, 'Select Country');
+      } else {
+        countries.removeWhere((c) => c == 'Select Country');
+        countries.insert(0, 'Select Country');
+      }
+    }
   }
 
   Future<void> fetchFolderDetails() async {
@@ -59,25 +99,24 @@ class OpenFolderController extends GetxController {
         importers.assignAll(
           response.data!.asMap().entries.map((e) {
             final f = e.value;
-            final city = f.city.trim();
-            final country = f.country.trim();
-            final cityCountry = city.isEmpty && country.isEmpty
-                ? '—'
-                : city.isEmpty
-                    ? country
-                    : country.isEmpty
-                        ? city
-                        : '$city / $country';
             return ImporterItem(
               sr: e.key + 1,
               id: f.id,
               importerName: f.name,
-              cityCountry: cityCountry,
-              narration: f.description?.trim().isEmpty ?? true
-                  ? (f.productCode?.trim().isEmpty ?? true
-                      ? '—'
-                      : f.productCode!)
-                  : f.description!,
+              email: f.email,
+              address: f.address,
+              city: f.city,
+              country: f.country,
+              cell: f.cell,
+              latlong: f.latlong,
+              landline: f.landline,
+              contactPerson: f.contactPerson,
+              secondEmail: f.secondEmail,
+              narration: (f.description?.trim().isNotEmpty ?? false)
+                  ? f.description!.trim()
+                  : (f.productCode?.trim().isNotEmpty ?? false)
+                      ? f.productCode!.trim()
+                      : null,
             );
           }),
         );
@@ -93,15 +132,115 @@ class OpenFolderController extends GetxController {
     }
   }
 
+  Future<bool> addOrUpdateBuyerFromForm({
+    String? id,
+    required String importerName,
+    required String country,
+    required String city,
+    required String address,
+    required String email,
+    required String cell,
+    required String latitude,
+    required String longitude,
+  }) async {
+    final user = await LocalStorageService.getUserData();
+    if (user == null || user.id.trim().isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please log in to continue.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    try {
+      isLoading.value = true;
+      final apiService = ApiService();
+      final response = await apiService.addOrUpdateBuyer(
+        id: id,
+        csId: user.id.trim(),
+        csName: user.fullName.trim().isEmpty ? user.email.trim() : user.fullName.trim(),
+        companyName: user.company.trim(),
+        folderId: folderId,
+        importerName: importerName,
+        country: country,
+        city: city,
+        address: address,
+        email: email,
+        cell: cell,
+        latitude: latitude,
+        longitude: longitude,
+      );
+
+      if (response.status == 200) {
+        Get.snackbar(
+          'Success',
+          response.message,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+        await fetchFolderDetails();
+        return true;
+      }
+
+      Get.snackbar(
+        'Error',
+        response.message,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   void addImporter(ImporterItem item) {
     importers.add(
       ImporterItem(
         sr: importers.length + 1,
         id: item.id,
         importerName: item.importerName,
-        cityCountry: item.cityCountry,
+        email: item.email,
+        address: item.address,
+        city: item.city,
+        country: item.country,
+        cell: item.cell,
+        latlong: item.latlong,
+        landline: item.landline,
+        contactPerson: item.contactPerson,
+        secondEmail: item.secondEmail,
         narration: item.narration,
       ),
+    );
+  }
+
+  void updateImporter(int index, ImporterItem updated) {
+    if (index < 0 || index >= importers.length) return;
+    final existing = importers[index];
+    importers[index] = ImporterItem(
+      sr: existing.sr,
+      id: existing.id,
+      importerName: updated.importerName,
+      email: updated.email,
+      address: updated.address,
+      city: updated.city,
+      country: updated.country,
+      cell: updated.cell,
+      latlong: updated.latlong,
+      landline: updated.landline,
+      contactPerson: updated.contactPerson,
+      secondEmail: updated.secondEmail,
+      narration: updated.narration,
     );
   }
 
@@ -302,6 +441,21 @@ class OpenFolderScreen extends StatelessWidget {
                                 const Divider(height: 1),
                             itemBuilder: (context, index) {
                               final item = controller.importers[index];
+                              final city = item.city.trim();
+                              final country = item.country.trim();
+                              final cityCountry = city.isEmpty && country.isEmpty
+                                  ? '—'
+                                  : city.isEmpty
+                                      ? country
+                                      : country.isEmpty
+                                          ? city
+                                          : '$city / $country';
+                              final narrationText =
+                                  (item.narration?.trim().isNotEmpty ?? false)
+                                      ? item.narration!.trim()
+                                      : (item.address.trim().isNotEmpty
+                                          ? item.address.trim()
+                                          : '—');
                               return Padding(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 12, vertical: 10),
@@ -332,7 +486,7 @@ class OpenFolderScreen extends StatelessWidget {
                                         Expanded(
                                           flex: 3,
                                           child: Text(
-                                            item.cityCountry,
+                                            cityCountry,
                                             style: const TextStyle(
                                               fontSize: 12,
                                               color: Colors.black87,
@@ -342,7 +496,7 @@ class OpenFolderScreen extends StatelessWidget {
                                         Expanded(
                                           flex: 3,
                                           child: Text(
-                                            item.narration,
+                                            narrationText,
                                             maxLines: 3,
                                             overflow: TextOverflow.ellipsis,
                                             style: const TextStyle(fontSize: 12),
@@ -386,7 +540,12 @@ class OpenFolderScreen extends StatelessWidget {
                                             ),
                                             IconButton(
                                               onPressed: () {
-                                                // Dummy "Edit" action
+                                                _openEditBuyerSheet(
+                                                  context,
+                                                  controller,
+                                                  index,
+                                                  item,
+                                                );
                                               },
                                               icon: const Icon(
                                                 Icons.edit_outlined,
@@ -425,7 +584,6 @@ class OpenFolderScreen extends StatelessWidget {
     OpenFolderController controller,
   ) {
     final formKey = GlobalKey<FormState>();
-    String country = 'Select Country';
     final importerNameController = TextEditingController();
     final latitudeController = TextEditingController();
     final longitudeController = TextEditingController();
@@ -433,6 +591,11 @@ class OpenFolderScreen extends StatelessWidget {
     final addressController = TextEditingController();
     final emailController = TextEditingController();
     final contactController = TextEditingController();
+    final landlineController = TextEditingController();
+    final contactPersonController = TextEditingController();
+    final secondEmailController = TextEditingController();
+    final narrationController = TextEditingController();
+    String selectedCountry = 'Select Country';
 
     showModalBottomSheet(
       context: context,
@@ -441,201 +604,490 @@ class OpenFolderScreen extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          ),
-          child: Padding(
-            padding: EdgeInsets.only(
-              left: 16,
-              right: 16,
-              top: 16,
-              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-            ),
-            child: Form(
-              key: formKey,
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 16,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+                ),
+                child: Form(
+                  key: formKey,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Expanded(
-                          child: Text(
-                            'Add into Existing Folder or Create New Folder',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                'Add into Existing Folder or Create New Folder',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
+                            IconButton(
+                              splashRadius: 18,
+                              onPressed: () => Get.back(),
+                              icon: const Icon(Icons.close),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Obx(
+                          () => DropdownButtonFormField<String>(
+                            value: controller.countries.contains(selectedCountry)
+                                ? selectedCountry
+                                : 'Select Country',
+                            decoration: const InputDecoration(
+                              labelText: 'Country',
+                              border: OutlineInputBorder(),
+                            ),
+                            items: controller.countries
+                                .map(
+                                  (c) => DropdownMenuItem<String>(
+                                    value: c,
+                                    child: Text(c),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedCountry = value ?? 'Select Country';
+                              });
+                            },
                           ),
                         ),
-                        IconButton(
-                          splashRadius: 18,
-                          onPressed: () => Get.back(),
-                          icon: const Icon(Icons.close),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: importerNameController,
+                          decoration: const InputDecoration(
+                            labelText: 'Buyer Name',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Required'
+                              : null,
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: emailController,
+                          decoration: const InputDecoration(
+                            labelText: 'Buyer Email (Optional)',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: addressController,
+                          decoration: const InputDecoration(
+                            labelText: 'Address (Optional)',
+                            border: OutlineInputBorder(),
+                          ),
+                          maxLines: 2,
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: latitudeController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Latitude (Optional)',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: TextFormField(
+                                controller: longitudeController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Longitude (Optional)',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: cityController,
+                                decoration: const InputDecoration(
+                                  labelText: 'City (Optional)',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: contactController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Cell (Optional)',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: TextFormField(
+                                controller: landlineController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Landline (Optional)',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: contactPersonController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Contact Person (Optional)',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: TextFormField(
+                                controller: secondEmailController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Second Email (Optional)',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: narrationController,
+                          decoration: const InputDecoration(
+                            labelText: 'Narration (Optional)',
+                            border: OutlineInputBorder(),
+                          ),
+                          maxLines: 2,
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TextButton(
+                              onPressed: () => Get.back(),
+                              child: const Text('Close'),
+                            ),
+                            const SizedBox(width: 8),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF003366),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                  vertical: 10,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              onPressed: () {
+                                if (formKey.currentState?.validate() ??
+                                    false) {
+                                  final city = cityController.text.trim();
+                                  final lat = latitudeController.text.trim();
+                                  final lng = longitudeController.text.trim();
+
+                                  controller
+                                      .addOrUpdateBuyerFromForm(
+                                        importerName: importerNameController.text
+                                            .trim(),
+                                        country: selectedCountry ==
+                                                'Select Country'
+                                            ? ''
+                                            : selectedCountry,
+                                        city: city,
+                                        address: addressController.text.trim(),
+                                        email: emailController.text.trim(),
+                                        cell: contactController.text.trim(),
+                                        latitude: lat,
+                                        longitude: lng,
+                                      )
+                                      .then((ok) {
+                                    if (ok) Get.back();
+                                  });
+                                }
+                              },
+                              child: const Text(
+                                'Add Importer',
+                                style: TextStyle(color: AppColors.textWhite),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: country,
-                    decoration: const InputDecoration(
-                      labelText: 'Country',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'Select Country',
-                        child: Text('Select Country'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'UK',
-                        child: Text('United Kingdom'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'France',
-                        child: Text('France'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'Germany',
-                        child: Text('Germany'),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      country = value ?? 'Select Country';
-                    },
                   ),
-                    const SizedBox(height: 12),
-                  TextFormField(
-                    controller: importerNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Importer Name',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) =>
-                        value == null || value.isEmpty ? 'Required' : null,
-                  ),
-                    const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: latitudeController,
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _openEditBuyerSheet(
+    BuildContext context,
+    OpenFolderController controller,
+    int index,
+    ImporterItem item,
+  ) {
+    final formKey = GlobalKey<FormState>();
+
+    final buyerNameController = TextEditingController(text: item.importerName);
+    final buyerEmailController = TextEditingController(text: item.email);
+    final addressController = TextEditingController(text: item.address);
+    final cityController = TextEditingController(text: item.city);
+    final cellController = TextEditingController(text: item.cell);
+    final landlineController = TextEditingController(text: item.landline ?? '');
+    final contactPersonController =
+        TextEditingController(text: item.contactPerson ?? '');
+    final secondEmailController =
+        TextEditingController(text: item.secondEmail ?? '');
+    final narrationController =
+        TextEditingController(text: item.narration ?? '');
+
+    final countryController = TextEditingController(text: item.country);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 16,
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+                ),
+                child: Form(
+                  key: formKey,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                'Edit My Buyer Details',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              splashRadius: 18,
+                              onPressed: () => Get.back(),
+                              icon: const Icon(Icons.close),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: buyerNameController,
                           decoration: const InputDecoration(
-                            labelText: 'Latitude (Optional)',
+                            labelText: 'Buyer Name',
+                            border: OutlineInputBorder(),
+                          ),
+                          validator: (v) =>
+                              v == null || v.trim().isEmpty ? 'Required' : null,
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: buyerEmailController,
+                          decoration: const InputDecoration(
+                            labelText: 'Buyer Email (Optional)',
                             border: OutlineInputBorder(),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextFormField(
-                          controller: longitudeController,
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: addressController,
                           decoration: const InputDecoration(
-                            labelText: 'Longitude (Optional)',
+                            labelText: 'Address (Optional)',
                             border: OutlineInputBorder(),
                           ),
+                          maxLines: 2,
                         ),
-                      ),
-                    ],
-                  ),
-                    const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
+                        const SizedBox(height: 12),
+                        TextFormField(
                           controller: cityController,
                           decoration: const InputDecoration(
                             labelText: 'City (Optional)',
                             border: OutlineInputBorder(),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextFormField(
-                          controller: addressController,
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: countryController,
                           decoration: const InputDecoration(
-                            labelText: 'Address (Optional)',
+                            labelText: 'Country (Optional)',
                             border: OutlineInputBorder(),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                    const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
-                          controller: emailController,
-                          decoration: const InputDecoration(
-                            labelText: 'Email (Optional)',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextFormField(
-                          controller: contactController,
-                          decoration: const InputDecoration(
-                            labelText: 'Contact Number (Optional)',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () => Get.back(),
-                          child: const Text('Close'),
-                        ),
-                        const SizedBox(width: 8),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF003366),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 18, vertical: 10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          onPressed: () {
-                            if (formKey.currentState?.validate() ?? false) {
-                              controller.addImporter(
-                                ImporterItem(
-                                  sr: 0,
-                                  id: '',
-                                  importerName:
-                                      importerNameController.text.trim(),
-                                  cityCountry:
-                                      '${cityController.text.trim().isEmpty ? 'City' : cityController.text.trim()} / $country',
-                                  narration:
-                                      addressController.text.trim().isEmpty
-                                          ? 'New importer'
-                                          : addressController.text.trim(),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: cellController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Cell (Optional)',
+                                  border: OutlineInputBorder(),
                                 ),
-                              );
-                              Get.back();
-                            }
-                          },
-                          child: const Text('Add Importer',style: TextStyle(color: AppColors.textWhite),),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: TextFormField(
+                                controller: landlineController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Landline (Optional)',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: contactPersonController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Contact Person (Optional)',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: TextFormField(
+                                controller: secondEmailController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Second Email (Optional)',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        TextFormField(
+                          controller: narrationController,
+                          decoration: const InputDecoration(
+                            labelText: 'Narration (Optional)',
+                            border: OutlineInputBorder(),
+                          ),
+                          maxLines: 2,
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TextButton(
+                              onPressed: () => Get.back(),
+                              child: const Text('Close'),
+                            ),
+                            const SizedBox(width: 8),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFFCC3333),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 18,
+                                  vertical: 10,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              onPressed: () {
+                                if (formKey.currentState?.validate() ?? false) {
+                                  // Try to parse lat/long from stored value: "lat,long"
+                                  final latlong = item.latlong.trim();
+                                  final parts = latlong.split(',');
+                                  final lat = parts.isNotEmpty ? parts[0].trim() : '';
+                                  final lng = parts.length > 1 ? parts[1].trim() : '';
+
+                                  controller
+                                      .addOrUpdateBuyerFromForm(
+                                        id: item.id,
+                                        importerName: buyerNameController.text
+                                            .trim(),
+                                        country: countryController.text.trim(),
+                                        city: cityController.text.trim(),
+                                        address: addressController.text.trim(),
+                                        email: buyerEmailController.text.trim(),
+                                        cell: cellController.text.trim(),
+                                        latitude: lat,
+                                        longitude: lng,
+                                      )
+                                      .then((ok) {
+                                    if (ok) Get.back();
+                                  });
+                                }
+                              },
+                              child: const Text(
+                                'Update My Buyer',
+                                style: TextStyle(color: AppColors.textWhite),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );

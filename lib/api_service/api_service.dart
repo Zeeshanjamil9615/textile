@@ -193,6 +193,160 @@ class ApiService {
     }
   }
 
+  Future<ApiResponse<void>> addOrUpdateBuyer({
+    String? id,
+    required String csId,
+    required String csName,
+    required String companyName,
+    required String folderId,
+    required String importerName,
+    required String country,
+    required String city,
+    required String address,
+    required String email,
+    required String cell,
+    required String latitude,
+    required String longitude,
+  }) async {
+    try {
+      final payload = <String, dynamic>{
+        if (id != null && id.trim().isNotEmpty) 'id': id.trim(),
+        'cs_id': csId,
+        'cs_name': csName,
+        'company_name': companyName,
+        'folder_id': folderId,
+        'importer_name': importerName,
+        'country': country,
+        'city': city,
+        'address': address,
+        'email': email,
+        'cell': cell,
+        'latitude': latitude,
+        'longitude': longitude,
+      };
+
+      final response = await _dio.post(
+        'addOrUpdateBuyer',
+        data: payload,
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData;
+        if (response.data is String) {
+          responseData =
+              json.decode(response.data as String) as Map<String, dynamic>;
+        } else if (response.data is Map) {
+          responseData = Map<String, dynamic>.from(response.data as Map);
+        } else {
+          throw Exception('Unexpected response format');
+        }
+
+        return ApiResponse<void>.fromJson(responseData, null);
+      }
+
+      return ApiResponse<void>(
+        status: response.statusCode ?? 0,
+        message: response.statusMessage ?? 'Unknown error',
+      );
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
+
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
+      } else if (e.type == DioExceptionType.badResponse) {
+        if (e.response?.data is Map && (e.response?.data as Map)['message'] != null) {
+          errorMessage = (e.response?.data as Map)['message']?.toString() ?? 'Server error occurred';
+        } else {
+          errorMessage = 'Server error occurred';
+        }
+      } else if (e.type == DioExceptionType.cancel) {
+        errorMessage = 'Request cancelled';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+
+      return ApiResponse<void>(
+        status: e.response?.statusCode ?? 0,
+        message: errorMessage,
+      );
+    } catch (e) {
+      return ApiResponse<void>(
+        status: 0,
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
+    }
+  }
+
+  Future<ApiResponse<void>> forgotPassword({
+    required String email,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        'email': email,
+      });
+
+      final response = await _dio.post(
+        'forgotPassword',
+        data: formData,
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData;
+
+        if (response.data is String) {
+          responseData =
+              json.decode(response.data as String) as Map<String, dynamic>;
+        } else if (response.data is Map) {
+          responseData = Map<String, dynamic>.from(response.data as Map);
+        } else {
+          throw Exception('Unexpected response format');
+        }
+
+        return ApiResponse<void>.fromJson(responseData, null);
+      }
+
+      return ApiResponse<void>(
+        status: response.statusCode ?? 0,
+        message: response.statusMessage ?? 'Unknown error',
+      );
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
+
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
+      } else if (e.type == DioExceptionType.badResponse) {
+        if (e.response?.data is Map &&
+            (e.response?.data as Map)['message'] != null) {
+          errorMessage = (e.response?.data as Map)['message']?.toString() ??
+              'Server error occurred';
+        } else {
+          errorMessage = 'Server error occurred';
+        }
+      } else if (e.type == DioExceptionType.cancel) {
+        errorMessage = 'Request cancelled';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+
+      return ApiResponse<void>(
+        status: e.response?.statusCode ?? 0,
+        message: errorMessage,
+      );
+    } catch (e) {
+      return ApiResponse<void>(
+        status: 0,
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
+    }
+  }
+
   // Get product categories list with full models API request
   Future<ApiResponse<List<ProductCategoryModel>>> getProductCategoriesListWithIds() async {
     try {
