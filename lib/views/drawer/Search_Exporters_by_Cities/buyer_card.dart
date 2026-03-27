@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:textile/widgets/colors.dart';
 import 'package:textile/views/drawer/Search_Exporters_by_Cities/buyer_model.dart';
+import 'package:get/get.dart';
+import 'package:textile/views/drawer/Search_Exporters_by_Cities/city_sellers_page.dart';
 class BuyerCard extends StatelessWidget {
   final BuyerModel buyer;
   final ScrollController? scrollController;
@@ -183,7 +185,7 @@ class BuyerCard extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton.icon(
                     onPressed: () {
-                      // TODO: Navigate to sellers list for this city
+                      Get.to(() => CitySellersPage(city: buyer.city));
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryDark,

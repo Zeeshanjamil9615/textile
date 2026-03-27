@@ -48,67 +48,58 @@ class _updatedataListPageState extends State<updatedataListPage> {
           Obx(() => Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             color: Colors.white,
-            child: Row(
-              children: [
-                const Text('Show ', style: TextStyle(fontSize: 14)),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: DropdownButton<int>(
-                    value: controller.entriesPerPage.value,
-                    underline: const SizedBox(),
-                    items: [10, 25, 50, 100].map((val) {
-                      return DropdownMenuItem(value: val, child: Text(val.toString()));
-                    }).toList(),
-                    onChanged: controller.updateEntriesPerPage,
-                  ),
+            child: TextField(
+              onChanged: controller.updateCityFilter,
+              decoration: InputDecoration(
+                hintText: 'Search...',
+                isDense: true,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
                 ),
-                const Text(' entries', style: TextStyle(fontSize: 14)),
-                const Spacer(),
-                // Search field
-                SizedBox(
-                  width: 150,
-                  child: TextField(
-                    onChanged: controller.updateCityFilter,
-                    decoration: InputDecoration(
-                      hintText: 'Search...',
-                      isDense: true,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: BorderSide(color: Colors.grey.shade300),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: const BorderSide(color: Color(0xFF4A9B9B), width: 2),
-                      ),
-                    ),
-                  ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
                 ),
-              ],
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  borderSide: const BorderSide(color: Color(0xFF4A9B9B), width: 2),
+                ),
+              ),
             ),
           )),
           Expanded(
-            child: Obx(() => ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              itemCount: controller.filteredBuyers.length,
-              itemBuilder: (context, index) {
-                return BuyerCard(
-                  key: ValueKey(controller.filteredBuyers[index].serialNumber),
-                  buyer: controller.filteredBuyers[index],
-                  scrollController: _scrollController,
-                  index: index,
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(
+                  child: CircularProgressIndicator(),
                 );
-              },
-            )),
+              }
+
+              if (controller.filteredBuyers.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'No data found',
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16),
+                itemCount: controller.filteredBuyers.length,
+                itemBuilder: (context, index) {
+                  return BuyerCard(
+                    key: ValueKey(controller.filteredBuyers[index].serialNumber),
+                    buyer: controller.filteredBuyers[index],
+                    scrollController: _scrollController,
+                    index: index,
+                  );
+                },
+              );
+            }),
           ),
         ],
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/api_service/api_service.dart';
 import 'package:textile/api_service/local_storage_service.dart';
+import 'package:textile/widgets/custom_snackbar.dart';
 
 class FolderItem {
   final int sr;
@@ -69,25 +70,70 @@ class AddFolderController extends GetxController {
     }
   }
 
-  void addFolder({
+  Future<bool> addFolder({
+    required String firstName,
+    required String lastName,
     required String folderName,
     required String description,
-  }) {
-    final nextSr = folders.length + 1;
-    folders.add(
-      FolderItem(
-        sr: nextSr,
-        folderId: '',
+  }) async {
+    final user = await LocalStorageService.getUserData();
+    if (user == null || user.id.trim().isEmpty) {
+      CustomSnackbar.error('Please log in to continue.');
+      return false;
+    }
+
+    try {
+      isLoading.value = true;
+      final apiService = ApiService();
+      final response = await apiService.createFolder(
+        csId: user.id.trim(),
+        companyName: user.company.trim(),
+        csFname: firstName,
+        csLname: lastName,
         folderName: folderName,
-        description: description,
-        imageUrl: '',
-      ),
-    );
+        folderDesc: description,
+      );
+
+      if (response.status == 200) {
+        CustomSnackbar.success(response.message);
+        await fetchFolders();
+        return true;
+      }
+
+      CustomSnackbar.error(response.message);
+      return false;
+    } catch (_) {
+      CustomSnackbar.error('Failed to create folder.');
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  void deleteFolder(int index) {
-    if (index >= 0 && index < folders.length) {
-      folders.removeAt(index);
+  Future<void> deleteFolder(int index) async {
+    if (index < 0 || index >= folders.length) return;
+
+    final folder = folders[index];
+    if (folder.folderId.trim().isEmpty) {
+      CustomSnackbar.error('Invalid folder id.');
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      final apiService = ApiService();
+      final response = await apiService.deleteFolder(id: folder.folderId.trim());
+
+      if (response.status == 200) {
+        CustomSnackbar.success(response.message);
+        await fetchFolders();
+      } else {
+        CustomSnackbar.error(response.message);
+      }
+    } catch (_) {
+      CustomSnackbar.error('Failed to delete folder.');
+    } finally {
+      isLoading.value = false;
     }
   }
   void openDrawer() {

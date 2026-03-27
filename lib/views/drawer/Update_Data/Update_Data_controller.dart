@@ -22,153 +22,46 @@ class UpdateDataController extends GetxController {
     loadData();
   }
 
-  void loadData() async {
-    // Load dummy city data matching the web interface
-    buyers.value = [
-      BuyerModel(
-        serialNumber: 0,
-        city: 'Beijing',
-        numberOfBuyers: 1,
-        country: 'CHINA',
-      ),
-      BuyerModel(
-        serialNumber: 1,
-        city: 'AA Almere',
-        numberOfBuyers: 1,
-        country: 'Netherlands',
-      ),
-      BuyerModel(
-        serialNumber: 2,
-        city: 'AL Amersfoort',
-        numberOfBuyers: 1,
-        country: 'Netherlands',
-      ),
-      BuyerModel(
-        serialNumber: 3,
-        city: 'Álava',
-        numberOfBuyers: 1,
-        country: 'Spain',
-      ),
-      BuyerModel(
-        serialNumber: 4,
-        city: 'Albino BG',
-        numberOfBuyers: 1,
-        country: 'Italy',
-      ),
-      BuyerModel(
-        serialNumber: 5,
-        city: 'Alicante',
-        numberOfBuyers: 1,
-        country: 'Spain',
-      ),
-      BuyerModel(
-        serialNumber: 6,
-        city: 'Athina',
-        numberOfBuyers: 1,
-        country: 'Greece',
-      ),
-      BuyerModel(
-        serialNumber: 7,
-        city: 'Baška',
-        numberOfBuyers: 1,
-        country: 'Spain',
-      ),
-      BuyerModel(
-        serialNumber: 8,
-        city: 'Biella BI',
-        numberOfBuyers: 1,
-        country: 'Italy',
-      ),
-      BuyerModel(
-        serialNumber: 9,
-        city: 'Blumenau - SC',
-        numberOfBuyers: 1,
-        country: 'Brazil',
-      ),
-      BuyerModel(
-        serialNumber: 10,
-        city: 'Branch, TX',
-        numberOfBuyers: 1,
-        country: 'United States',
-      ),
-      BuyerModel(
-        serialNumber: 11,
-        city: 'Bulgaria',
-        numberOfBuyers: 1,
-        country: 'Greece',
-      ),
-      BuyerModel(
-        serialNumber: 12,
-        city: 'London',
-        numberOfBuyers: 3,
-        country: 'United Kingdom',
-      ),
-      BuyerModel(
-        serialNumber: 13,
-        city: 'Paris',
-        numberOfBuyers: 2,
-        country: 'France',
-      ),
-      BuyerModel(
-        serialNumber: 14,
-        city: 'Berlin',
-        numberOfBuyers: 1,
-        country: 'Germany',
-      ),
-      BuyerModel(
-        serialNumber: 15,
-        city: 'Brussels',
-        numberOfBuyers: 5,
-        country: 'Belgium',
-      ),
-      BuyerModel(
-        serialNumber: 16,
-        city: 'Amsterdam',
-        numberOfBuyers: 2,
-        country: 'Netherlands',
-      ),
-      BuyerModel(
-        serialNumber: 17,
-        city: 'Madrid',
-        numberOfBuyers: 4,
-        country: 'Spain',
-      ),
-      BuyerModel(
-        serialNumber: 18,
-        city: 'Rome',
-        numberOfBuyers: 2,
-        country: 'Italy',
-      ),
-      BuyerModel(
-        serialNumber: 19,
-        city: 'Milan',
-        numberOfBuyers: 3,
-        country: 'Italy',
-      ),
-    ];
-
-    // Fetch countries from API
-    await fetchCountries();
-    applyFilters();
+  Future<void> loadData() async {
+    await fetchCountryStats();
   }
 
-  Future<void> fetchCountries() async {
+  Future<void> fetchCountryStats() async {
     try {
       isLoading.value = true;
       final apiService = ApiService();
-      final response = await apiService.getCountriesList();
+      final response = await apiService.getCountryStats();
 
       if (response.status == 200 && response.data != null) {
-        countries.value = response.data!;
+        buyers.value = response.data!
+            .asMap()
+            .entries
+            .map(
+              (entry) => BuyerModel(
+                serialNumber: entry.key + 1,
+                city: entry.value.city,
+                numberOfBuyers: entry.value.totalBuyers,
+                country: entry.value.country,
+              ),
+            )
+            .toList();
+        final uniqueCountries = buyers
+            .map((b) => b.country)
+            .where((c) => c.trim().isNotEmpty)
+            .toSet()
+            .toList()
+          ..sort();
+        countries.value = ['All', ...uniqueCountries];
       } else {
-        // Fallback to default if API fails
+        buyers.clear();
         countries.value = ['All'];
       }
     } catch (e) {
-      // Fallback to default if error occurs
+      buyers.clear();
       countries.value = ['All'];
     } finally {
       isLoading.value = false;
+      applyFilters();
     }
   }
 

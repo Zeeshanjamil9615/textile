@@ -244,9 +244,50 @@ class OpenFolderController extends GetxController {
     );
   }
 
-  void deleteImporter(int index) {
-    if (index >= 0 && index < importers.length) {
-      importers.removeAt(index);
+  Future<void> deleteImporter(int index) async {
+    if (index < 0 || index >= importers.length) return;
+    final importer = importers[index];
+    if (importer.id.trim().isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Invalid importer id.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      final apiService = ApiService();
+      final response =
+          await apiService.deleteImporter(id: importer.id.trim());
+
+      if (response.status == 200) {
+        Get.snackbar(
+          'Success',
+          response.message,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+        await fetchFolderDetails();
+      } else {
+        Get.snackbar(
+          'Error',
+          response.message,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to delete importer.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
     }
   }
 }
@@ -528,8 +569,8 @@ class OpenFolderScreen extends StatelessWidget {
                                         Row(
                                           children: [
                                             IconButton(
-                                              onPressed: () {
-                                                controller
+                                              onPressed: () async {
+                                                await controller
                                                     .deleteImporter(index);
                                               },
                                               icon: const Icon(          

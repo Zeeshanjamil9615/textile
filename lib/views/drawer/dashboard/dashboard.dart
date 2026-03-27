@@ -59,7 +59,6 @@ class _DashboardBody extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const _Header(),
                   Obx(() {
                     final items = [
                       _KpiData(
@@ -125,66 +124,7 @@ class _DashboardBody extends StatelessWidget {
     );
   }
 }
-
-class _Header extends StatelessWidget {
-  const _Header();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: const [
-          BoxShadow(color: Color(0x14000000), blurRadius: 18, offset: Offset(0, 10)),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            height: 44,
-            width: 44,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.dashboard_outlined, color: AppColors.primaryDark),
-          ),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Dashboard',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                ),
-                SizedBox(height: 2),
-                Text(
-                  'Overview of importers, exporters, countries and brands.',
-                  style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-          FilledButton.icon(
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primaryDark,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            onPressed: () => Get.snackbar('Report', 'Dummy report action'),
-            icon: const Icon(Icons.description_outlined, size: 18),
-            label: const Text('View Report'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
+    
 class _KpiData {
   final String title;
   final String value;
@@ -658,8 +598,8 @@ class _TopBrands extends StatelessWidget {
       ('Ikea', 'assets/image/image1.png'),
       ('Adidas', 'assets/image/image2.png'),
       ('ZARA', 'assets/image/image3.png'),
-      ('H&M', 'assets/image/image4.png'),
-      ('Nike', 'assets/image/image5.png'),
+      ('Marks & Spencer', 'assets/image/image4.png'),
+      ('JCPenney', 'assets/image/image5.png'),
     ];
 
     return Container(

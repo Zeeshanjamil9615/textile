@@ -179,8 +179,8 @@ class AddFolderScreen extends StatelessWidget {
                                       ),
                                     ),
                                     TextButton.icon(
-                                      onPressed: () {
-                                        controller.deleteFolder(index);
+                                      onPressed: () async {
+                                        await controller.deleteFolder(index);
                                       },
                                       icon: const Icon(
                                         Icons.delete_outline,
@@ -389,30 +389,52 @@ class _AddNewFolderFormState extends State<_AddNewFolderForm> {
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2D7373),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                child: Obx(
+                  () => ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2D7373),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 3,
                     ),
-                    elevation: 3,
-                  ),
-                  onPressed: () {
-                    if (_formKey.currentState?.validate() ?? false) {
-                      controller.addFolder(
-                        folderName: _folderNameController.text.trim(),
-                        description:
-                            _folderDescriptionController.text.trim().isEmpty
-                                ? 'No description'
-                                : _folderDescriptionController.text.trim(),
-                      );
-                      Get.back();
-                    }
-                  },
-                  child: const Text(
-                    'Create Folder',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600,color: AppColors.textWhite),
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : () async {
+                            if (_formKey.currentState?.validate() ?? false) {
+                              final ok = await controller.addFolder(
+                                firstName: _firstNameController.text.trim(),
+                                lastName: _lastNameController.text.trim(),
+                                folderName: _folderNameController.text.trim(),
+                                description: _folderDescriptionController.text
+                                        .trim()
+                                        .isEmpty
+                                    ? 'No description'
+                                    : _folderDescriptionController.text.trim(),
+                              );
+                              if (ok) {
+                                Get.back();
+                              }
+                            }
+                          },
+                    child: controller.isLoading.value
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.textWhite,
+                            ),
+                          )
+                        : const Text(
+                            'Create Folder',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textWhite,
+                            ),
+                          ),
                   ),
                 ),
               ),

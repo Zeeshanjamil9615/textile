@@ -219,7 +219,7 @@ class _EditSellerPageState extends State<EditSellerPage> {
 
 
 
-          
+
         ),
         validator: (v) {
           if (label == 'Seller Name' && (v == null || v.trim().isEmpty)) {
