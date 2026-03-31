@@ -305,11 +305,30 @@ class CitySellersPage extends StatelessWidget {
                                         ),
                                       ),
                                       onPressed: () {
-                                        _showListDialog(
-                                          context,
-                                          title: 'Category Details',
-                                          items: s.categories,
-                                        );
+                                        () async {
+                                          final importer = s.importer.trim();
+                                          final api = ApiService();
+                                          final resp =
+                                              await api.getExporterData(
+                                            importer: importer,
+                                          );
+
+                                          if (resp.status == 200 &&
+                                              resp.data != null) {
+                                            _showListDialog(
+                                              context,
+                                              title: 'Category Details',
+                                              items: resp.data!.products,
+                                            );
+                                          } else {
+                                            Get.snackbar(
+                                              'Error',
+                                              resp.message,
+                                              backgroundColor: Colors.red,
+                                              colorText: Colors.white,
+                                            );
+                                          }
+                                        }();
                                       },
                                       child: const Text('Show Categories'),
                                     ),
@@ -328,16 +347,30 @@ class CitySellersPage extends StatelessWidget {
                                         ),
                                       ),
                                       onPressed: () {
-                                        final countries = s.exporterCountries.isEmpty
-                                            ? (s.country.trim().isEmpty
-                                                ? <String>[]
-                                                : <String>[s.country.trim()])
-                                            : s.exporterCountries;
-                                        _showListDialog(
-                                          context,
-                                          title: 'Exporter Countries',
-                                          items: countries,
-                                        );
+                                        () async {
+                                          final importer = s.importer.trim();
+                                          final api = ApiService();
+                                          final resp =
+                                              await api.getExporterData(
+                                            importer: importer,
+                                          );
+
+                                          if (resp.status == 200 &&
+                                              resp.data != null) {
+                                            _showListDialog(
+                                              context,
+                                              title: 'Exporter Countries',
+                                              items: resp.data!.countries,
+                                            );
+                                          } else {
+                                            Get.snackbar(
+                                              'Error',
+                                              resp.message,
+                                              backgroundColor: Colors.red,
+                                              colorText: Colors.white,
+                                            );
+                                          }
+                                        }();
                                       },
                                       child: const Text('Show Countries'),
                                     ),

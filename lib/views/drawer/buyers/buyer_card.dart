@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/views/drawer/buyers/buyer_controller.dart';
 import 'package:textile/views/drawer/textile_importers/buyer_model.dart';
-import 'package:textile/views/drawer/textile_importers/textile_importers_controller.dart';
 import 'package:textile/widgets/folder_selection_bottom_sheet.dart';
 import 'package:textile/views/drawer/add_folder/add_folder_controller.dart';
 
@@ -35,8 +33,6 @@ class BuyerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<BuyersController>();
-    
     return GestureDetector(
       onTap: () => _scrollToCard(context),
       child: Card(
@@ -74,11 +70,15 @@ class BuyerCard extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Ensure AddFolderController is initialized
                     if (!Get.isRegistered<AddFolderController>()) {
                       Get.put(AddFolderController());
                     }
-                    showFolderSelectionBottomSheet(context);
+                  showFolderSelectionBottomSheet(
+                    context,
+                    importerName: buyer.importerName,
+                    product: '',
+                    buyerType: 'BuyerList',
+                  );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2D7373),
@@ -96,23 +96,14 @@ class BuyerCard extends StatelessWidget {
     );
   }
   
-  Color _getRankingColor(String ranking) {
-    switch (ranking.toLowerCase()) {
-      case 'high': return Colors.green;
-      case 'medium': return Colors.orange;
-      case 'low': return Colors.red;
-      default: return Colors.grey;
-    }
-  }
 }
 
 class _DetailRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  final Color? valueColor;
   
-  const _DetailRow({required this.icon, required this.label, required this.value, this.valueColor});
+  const _DetailRow({required this.icon, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +113,7 @@ class _DetailRow extends StatelessWidget {
         const SizedBox(width: 8),
         Text(label + ': ', style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500)),
         Expanded(
-          child: Text(value, style: TextStyle(fontSize: 13, color: valueColor ?? Colors.black87, fontWeight: FontWeight.w600)),
+          child: Text(value, style: const TextStyle(fontSize: 13, color: Colors.black87, fontWeight: FontWeight.w600)),
         ),
       ],
     );

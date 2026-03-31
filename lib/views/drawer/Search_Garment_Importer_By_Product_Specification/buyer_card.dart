@@ -81,7 +81,12 @@ class BuyerCard extends StatelessWidget {
                     if (!Get.isRegistered<AddFolderController>()) {
                       Get.put(AddFolderController());
                     }
-                    showFolderSelectionBottomSheet(context);
+                    showFolderSelectionBottomSheet(
+                      context,
+                      importerName: buyer.importer,
+                      product: buyer.description,
+                      buyerType: 'GarmentByProduct',
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2D7373),
@@ -104,9 +109,8 @@ class _DetailRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  final Color? valueColor;
-
-  const _DetailRow({required this.icon, required this.label, required this.value, this.valueColor});
+  
+  const _DetailRow({required this.icon, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +126,7 @@ class _DetailRow extends StatelessWidget {
         Expanded(
           child: Text(
             value,
-            style: TextStyle(fontSize: 13, color: valueColor ?? Colors.black87, fontWeight: FontWeight.w600),
+            style: const TextStyle(fontSize: 13, color: Colors.black87, fontWeight: FontWeight.w600),
           ),
         ),
       ],

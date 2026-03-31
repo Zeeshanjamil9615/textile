@@ -35,6 +35,7 @@ class _allsellersState extends State<allsellers> {
     );
   }
 }
+ 
 
 class BuyerCard extends StatelessWidget {
   final BuyerModel buyer;

@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/api_service/api_service.dart';
 import 'package:textile/api_service/local_storage_service.dart';
 import 'package:textile/models/buyer_details_response.dart';
+import 'package:textile/models/seller_details_model.dart';
 
 class BuyerProfileController extends GetxController {
   final String buyerName;
@@ -11,7 +11,10 @@ class BuyerProfileController extends GetxController {
 
   final isLoading = true.obs;
   final details = Rxn<BuyerDetailsResponse>();
+  final sellerDetails = Rxn<SellerDetails>();
   final errorMessage = ''.obs;
+
+  static const String _sellerExportingCode = '7xaz4';
 
   @override
   void onInit() {
@@ -20,34 +23,56 @@ class BuyerProfileController extends GetxController {
   }
 
   Future<void> fetchDetails() async {
+    isLoading.value = true;
+    errorMessage.value = '';
+    details.value = null;
+    sellerDetails.value = null;
+
+    final user = await LocalStorageService.getUserData();
+    final importing = user?.id ?? '';
+    final apiService = ApiService();
+
+    bool buyerOk = false;
     try {
-      isLoading.value = true;
-      errorMessage.value = '';
-      final user = await LocalStorageService.getUserData();
-      final importing = user?.id ?? '';
-      final apiService = ApiService();
-      final response = await apiService.getBuyerDetails(
+      final buyerResponse = await apiService.getBuyerDetails(
         buyer: buyerName,
         importing: importing,
         blatlong: '',
       );
-      if (response.status == 200 && response.data != null) {
-        details.value = response.data!;
-      } else {
-        details.value = null;
-        errorMessage.value = response.message.isNotEmpty ? response.message : 'Failed to load details';
+      if (buyerResponse.status == 200 && buyerResponse.data != null) {
+        details.value = buyerResponse.data;
+        buyerOk = true;
       }
-    } catch (e) {
-      details.value = null;
-      errorMessage.value = 'Failed to load: ${e.toString()}';
-    } finally {
-      isLoading.value = false;
+    } catch (_) {
+      buyerOk = false;
     }
-  }
 
-  BuyerProfile get profile => details.value!.buyerProfile;
-  BuyerWorth get worth => details.value!.buyerWorth;
-  List<String> get suppliers => details.value!.suppliers;
-  List<String> get productCategories => details.value!.productCategories;
-  List<BuyerTransactionItem> get transactions => details.value!.transactions;
+    if (buyerOk) {
+      isLoading.value = false;
+      return;
+    }
+
+    bool sellerOk = false;
+    try {
+      final sellerResponse = await apiService.getSellerDetails(
+        seller: buyerName.trim(),
+        exporting: _sellerExportingCode,
+        blatlong: '',
+      );
+      if (sellerResponse.status == 200 && sellerResponse.data != null) {
+        sellerDetails.value = sellerResponse.data;
+        sellerOk = true;
+      }
+    } catch (_) {
+      sellerOk = false;
+    }
+
+    if (!sellerOk) {
+      details.value = null;
+      sellerDetails.value = null;
+      errorMessage.value = 'Data not found';
+    }
+
+    isLoading.value = false;
+  }
 }

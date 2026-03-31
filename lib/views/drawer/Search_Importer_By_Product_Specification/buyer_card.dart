@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/models/filtered_denim_list_response.dart';
-import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/Search_Importer_By_Product_Specification_controller.dart';
 import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/buyer_model.dart';
 import 'package:textile/widgets/folder_selection_bottom_sheet.dart';
 import 'package:textile/views/drawer/add_folder/add_folder_controller.dart';
@@ -90,11 +89,15 @@ class BuyerCard extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Ensure AddFolderController is initialized
                     if (!Get.isRegistered<AddFolderController>()) {
                       Get.put(AddFolderController());
                     }
-                    showFolderSelectionBottomSheet(context);
+                    showFolderSelectionBottomSheet(
+                      context,
+                      importerName: buyer.importerName,
+                      product: buyer.productCategory,
+                      buyerType: 'ImporterByProduct',
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2D7373),
@@ -117,31 +120,17 @@ class BuyerCard extends StatelessWidget {
     );
   }
 
-  Color _getRankingColor(String ranking) {
-    switch (ranking.toLowerCase()) {
-      case 'high':
-        return Colors.green;
-      case 'medium':
-        return Colors.orange;
-      case 'low':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
 }
 
 class _DetailRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  final Color? valueColor;
 
   const _DetailRow({
     required this.icon,
     required this.label,
     required this.value,
-    this.valueColor,
   });
 
   @override
@@ -163,7 +152,7 @@ class _DetailRow extends StatelessWidget {
             value,
             style: TextStyle(
               fontSize: 13,
-              color: valueColor ?? Colors.black87,
+                color: Colors.black87,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -245,7 +234,12 @@ class MadeupRecordCard extends StatelessWidget {
                   if (!Get.isRegistered<AddFolderController>()) {
                     Get.put(AddFolderController());
                   }
-                  showFolderSelectionBottomSheet(context);
+                  showFolderSelectionBottomSheet(
+                    context,
+                    importerName: item.importer,
+                    product: item.description,
+                    buyerType: 'ImporterByProductMadeup',
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2D7373),

@@ -92,11 +92,15 @@ class BuyerCard extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Ensure AddFolderController is initialized
                     if (!Get.isRegistered<AddFolderController>()) {
                       Get.put(AddFolderController());
                     }
-                    showFolderSelectionBottomSheet(context);
+                  showFolderSelectionBottomSheet(
+                    context,
+                    importerName: buyer.importerName,
+                    product: buyer.productCategory,
+                    buyerType: 'BuyerProductWise',
+                  );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2D7373),

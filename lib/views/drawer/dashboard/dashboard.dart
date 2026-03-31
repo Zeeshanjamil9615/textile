@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:textile/views/drawer/Search_Exporters_by_Cities/Search_Exporters_by_Cities.dart';
 import 'package:textile/views/drawer/add_folder/add_folder.dart';
 import 'package:textile/views/drawer/dashboard/dashboard_controller.dart';
 import 'package:textile/views/drawer/drawer.dart';
@@ -77,7 +78,7 @@ class _DashboardBody extends StatelessWidget {
                         iconBg: const Color(0xFFE67E22),
                         accent: const Color(0xFFE67E22),
                         loading: controller.isLoadingCounts.value,
-                        onView: () => Get.to(() => const allsellers()),
+                        onView: () => Get.to(() => const SearchExportersByCities()),
                       ),
                         _KpiData(
                         title: 'My Folder',

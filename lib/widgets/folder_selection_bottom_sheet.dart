@@ -3,9 +3,16 @@ import 'package:get/get.dart';
 import 'package:textile/views/drawer/add_folder/add_folder.dart';
 import 'package:textile/views/drawer/add_folder/add_folder_controller.dart';
 import 'package:textile/views/drawer/add_folder/open_folder.dart';
+import 'package:textile/api_service/api_service.dart';
+import 'package:textile/api_service/local_storage_service.dart';
 import 'package:textile/widgets/colors.dart';
 
-void showFolderSelectionBottomSheet(BuildContext context) {
+void showFolderSelectionBottomSheet(
+  BuildContext context, {
+  required String importerName,
+  String product = '',
+  String buyerType = '',
+}) {
   // Ensure AddFolderController is initialized
   if (!Get.isRegistered<AddFolderController>()) {
     Get.put(AddFolderController());
@@ -69,9 +76,54 @@ void showFolderSelectionBottomSheet(BuildContext context) {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  onTap: () {
+                  onTap: () async {
                     Navigator.pop(context);
-                    Get.to(() => OpenFolderScreen(folderName: folder.folderName, folderId: '',));
+
+                    final user = await LocalStorageService.getUserData();
+                    if (user == null || user.id.trim().isEmpty) {
+                      Get.snackbar(
+                        'Error',
+                        'Please log in first.',
+                        backgroundColor: Colors.red,
+                        colorText: Colors.white,
+                      );
+                      return;
+                    }
+
+                    final api = ApiService();
+                    final resp = await api.addBuyerToFolder(
+                      userId: user.id.trim(),
+                      userName: user.fullName.trim().isEmpty
+                          ? user.email.trim()
+                          : user.fullName.trim(),
+                      userCompany: user.company.trim(),
+                      importerName: importerName,
+                      folderId: folder.folderId,
+                      product: product,
+                      buyerType: buyerType,
+                    );
+
+                    if (resp.status == 200) {
+                      Get.snackbar(
+                        'Success',
+                        resp.message,
+                        backgroundColor: Colors.green,
+                        colorText: Colors.white,
+                      );
+                      Get.to(
+                        () => OpenFolderScreen(
+                          folderName: folder.folderName,
+                          folderId: folder.folderId,
+                        ),
+                      );
+                    } else {
+                      Get.snackbar(
+                        'Info',
+                        resp.message,
+                        backgroundColor: Colors.orange,
+                        colorText: Colors.white,
+                      );
+                    }
                   },
                 );
               },

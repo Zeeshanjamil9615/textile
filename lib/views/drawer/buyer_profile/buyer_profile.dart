@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/models/buyer_details_response.dart';
+import 'package:textile/models/seller_details_model.dart';
 import 'package:textile/views/drawer/buyer_profile/buyer_profile_controller.dart';
 import 'package:textile/views/drawer/drawer.dart';
 import 'package:textile/widgets/custom_app_bar.dart';
+import 'package:textile/widgets/folder_selection_bottom_sheet.dart';
 
 class BuyerProfilePage extends StatefulWidget {
   const BuyerProfilePage({Key? key}) : super(key: key);
@@ -37,7 +39,12 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
             child: CircularProgressIndicator(color: Color(0xFF4A9B9B)),
           );
         }
-        if (controller.errorMessage.value.isNotEmpty) {
+        final d = controller.details.value;
+        final seller = controller.sellerDetails.value;
+
+        if (controller.errorMessage.value.isNotEmpty &&
+            d == null &&
+            seller == null) {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -63,32 +70,102 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
             ),
           );
         }
-        final d = controller.details.value;
-        if (d == null) return const SizedBox.shrink();
 
-        return RefreshIndicator(
-          onRefresh: () => controller.fetchDetails(),
-          color: const Color(0xFF4A9B9B),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _ProfileSection(profile: d.buyerProfile, worth: d.buyerWorth),
-                const SizedBox(height: 20),
-                _SuppliersSection(suppliers: d.suppliers),
-                const SizedBox(height: 20),
+        if (d != null) {
+          return RefreshIndicator(
+            onRefresh: () => controller.fetchDetails(),
+            color: const Color(0xFF4A9B9B),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _ProfileSection(profile: d.buyerProfile, worth: d.buyerWorth),
+                  const SizedBox(height: 20),
+                  _SuppliersSection(suppliers: d.suppliers),
+                  const SizedBox(height: 20),
                 _ProductCategoriesSection(categories: d.productCategories),
                 const SizedBox(height: 20),
-                _AddBuyerButton(),
-                const SizedBox(height: 24),
-                _TransactionsSection(transactions: d.transactions),
-              ],
+                _AddBuyerButton(buyerName: d.buyerProfile.name),
+                  const SizedBox(height: 24),
+                  _TransactionsSection(transactions: d.transactions),
+                ],
+              ),
             ),
-          ),
-        );
+          );
+        }
+
+        if (seller != null) {
+          return RefreshIndicator(
+            onRefresh: () => controller.fetchDetails(),
+            color: const Color(0xFF4A9B9B),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              child: _SellerDetailsCard(seller: seller),
+            ),
+          );
+        }
+
+        return const SizedBox.shrink();
       }),
+    );
+  }
+}
+
+class _SellerDetailsCard extends StatelessWidget {
+  final SellerDetails seller;
+
+  const _SellerDetailsCard({required this.seller});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              seller.importer.isEmpty ? 'Seller' : seller.importer,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFF2D7373),
+                  ),
+            ),
+            const SizedBox(height: 12),
+            _ProfileRow(
+              label: 'Address',
+              value: seller.address.isEmpty ? 'NA' : seller.address,
+            ),
+            _ProfileRow(
+              label: 'Email',
+              value: seller.email.isEmpty ? 'NA' : seller.email,
+            ),
+            _ProfileRow(
+              label: 'City',
+              value: seller.city.isEmpty ? 'NA' : seller.city,
+            ),
+            _ProfileRow(
+              label: 'Country',
+              value: seller.country.isEmpty ? 'NA' : seller.country,
+            ),
+            _ProfileRow(
+              label: 'Contact',
+              value: seller.contactNumber.isEmpty ? 'NA' : seller.contactNumber,
+            ),
+            _ProfileRow(
+              label: 'Website',
+              value: seller.website.isEmpty ? 'NA' : seller.website,
+            ),
+            if (seller.latlong.isNotEmpty)
+              _ProfileRow(label: 'Map', value: seller.latlong),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -259,13 +336,20 @@ class _ProductCategoriesSection extends StatelessWidget {
 }
 
 class _AddBuyerButton extends StatelessWidget {
+  final String buyerName;
+
+  const _AddBuyerButton({required this.buyerName});
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: () {
-          // TODO: Add to folder flow if needed
+          showFolderSelectionBottomSheet(
+            context,
+            importerName: buyerName,
+          );
         },
         icon: const Icon(Icons.add, size: 20),
         label: const Text('Add Buyer', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),

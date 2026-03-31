@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/models/textile_exporters_list_response.dart';
-import 'package:textile/views/drawer/textile_Exporters/textile_Exporters_controller.dart';
 import 'package:textile/widgets/folder_selection_bottom_sheet.dart';
 import 'package:textile/views/drawer/add_folder/add_folder_controller.dart';
 
@@ -72,7 +71,12 @@ class ExporterCard extends StatelessWidget {
                   if (!Get.isRegistered<AddFolderController>()) {
                     Get.put(AddFolderController());
                   }
-                  showFolderSelectionBottomSheet(context);
+                  showFolderSelectionBottomSheet(
+                    context,
+                    importerName: item.exporter,
+                    product: item.pct,
+                    buyerType: 'TextileExporter',
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2D7373),
@@ -97,13 +101,11 @@ class _DetailRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  final Color? valueColor;
 
   const _DetailRow({
     required this.icon,
     required this.label,
     required this.value,
-    this.valueColor,
   });
 
   @override
@@ -122,7 +124,7 @@ class _DetailRow extends StatelessWidget {
             value,
             style: TextStyle(
                 fontSize: 13,
-                color: valueColor ?? Colors.black87,
+                color: Colors.black87,
                 fontWeight: FontWeight.w600),
           ),
         ),
