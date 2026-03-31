@@ -106,6 +106,45 @@ class CitySellersPage extends StatelessWidget {
     );
   }
 
+  Future<void> _showExporterDataDialog(
+    BuildContext context, {
+    required String importer,
+    required bool showCountries,
+  }) async {
+    final api = ApiService();
+
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    final resp = await api.getExporterData(importer: importer);
+
+    // Close loader
+    Navigator.of(context, rootNavigator: true).pop();
+
+    if (resp.status == 200 && resp.data != null) {
+      final data = resp.data!;
+      final items = showCountries ? data.countries : data.products;
+      _showListDialog(
+        context,
+        title: showCountries ? 'Exporter Countries' : 'Category Details',
+        items: items,
+      );
+    } else {
+      Get.snackbar(
+        'Error',
+        resp.message,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<CitySellersController>(
@@ -305,30 +344,11 @@ class CitySellersPage extends StatelessWidget {
                                         ),
                                       ),
                                       onPressed: () {
-                                        () async {
-                                          final importer = s.importer.trim();
-                                          final api = ApiService();
-                                          final resp =
-                                              await api.getExporterData(
-                                            importer: importer,
-                                          );
-
-                                          if (resp.status == 200 &&
-                                              resp.data != null) {
-                                            _showListDialog(
-                                              context,
-                                              title: 'Category Details',
-                                              items: resp.data!.products,
-                                            );
-                                          } else {
-                                            Get.snackbar(
-                                              'Error',
-                                              resp.message,
-                                              backgroundColor: Colors.red,
-                                              colorText: Colors.white,
-                                            );
-                                          }
-                                        }();
+                                        _showExporterDataDialog(
+                                          context,
+                                          importer: s.importer.trim(),
+                                          showCountries: false,
+                                        );
                                       },
                                       child: const Text('Show Categories'),
                                     ),
@@ -347,30 +367,11 @@ class CitySellersPage extends StatelessWidget {
                                         ),
                                       ),
                                       onPressed: () {
-                                        () async {
-                                          final importer = s.importer.trim();
-                                          final api = ApiService();
-                                          final resp =
-                                              await api.getExporterData(
-                                            importer: importer,
-                                          );
-
-                                          if (resp.status == 200 &&
-                                              resp.data != null) {
-                                            _showListDialog(
-                                              context,
-                                              title: 'Exporter Countries',
-                                              items: resp.data!.countries,
-                                            );
-                                          } else {
-                                            Get.snackbar(
-                                              'Error',
-                                              resp.message,
-                                              backgroundColor: Colors.red,
-                                              colorText: Colors.white,
-                                            );
-                                          }
-                                        }();
+                                        _showExporterDataDialog(
+                                          context,
+                                          importer: s.importer.trim(),
+                                          showCountries: true,
+                                        );
                                       },
                                       child: const Text('Show Countries'),
                                     ),
