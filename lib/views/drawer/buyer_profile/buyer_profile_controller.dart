@@ -39,6 +39,8 @@ class BuyerProfileController extends GetxController {
         importing: importing,
         blatlong: '',
       );
+      print('Buyer details API full response: $buyerResponse');
+      print('Buyer details API data: ${buyerResponse.data}');
       if (buyerResponse.status == 200 && buyerResponse.data != null) {
         details.value = buyerResponse.data;
         buyerOk = true;
@@ -59,6 +61,8 @@ class BuyerProfileController extends GetxController {
         exporting: _sellerExportingCode,
         blatlong: '',
       );
+      print('Seller details API full response: $sellerResponse');
+      print('Seller details API data: ${sellerResponse.data}');
       if (sellerResponse.status == 200 && sellerResponse.data != null) {
         sellerDetails.value = sellerResponse.data;
         sellerOk = true;

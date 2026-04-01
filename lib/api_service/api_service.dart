@@ -2181,6 +2181,9 @@ class ApiService {
           throw Exception('Unexpected response format');
         }
 
+        // Debug: print full raw parsed response for large data inspection
+        print('getBuyerDetails parsed response: $responseData');
+
         final status = responseData['status'] as int? ?? 0;
         final message = responseData['message'] as String? ?? '';
         final details = BuyerDetailsResponse.fromJson(responseData);
@@ -2324,6 +2327,9 @@ class ApiService {
         } else {
           throw Exception('Unexpected response format');
         }
+
+        // Debug: print full raw parsed response for large data inspection
+        print('getSellerDetails parsed response: $responseData');
 
         final status = responseData['status'] as int? ?? 0;
         final message = responseData['message'] as String? ?? '';

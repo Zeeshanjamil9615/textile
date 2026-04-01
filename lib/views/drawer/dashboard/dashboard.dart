@@ -641,7 +641,7 @@ class _TopBrands extends StatelessWidget {
                       clipBehavior: Clip.antiAlias,
                       child: Image.asset(
                         b.$2,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.fill,
                         errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported, color: AppColors.textSecondary),
                       ),
                     ),

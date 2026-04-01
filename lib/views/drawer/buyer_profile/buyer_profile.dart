@@ -103,7 +103,20 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),
-              child: _SellerDetailsCard(seller: seller),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _SellerProfileSection(seller: seller),
+                  const SizedBox(height: 20),
+                  _SellerBuyersSection(buyers: seller.buyersList),
+                  const SizedBox(height: 20),
+                  _ProductCategoriesSection(categories: seller.productCategories),
+                  const SizedBox(height: 20),
+                  _SellerCountriesSection(countries: seller.sellingCountries),
+                  const SizedBox(height: 24),
+                  _SellerTransactionsSection(transactions: seller.transactions),
+                ],
+              ),
             ),
           );
         }
@@ -114,13 +127,14 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
   }
 }
 
-class _SellerDetailsCard extends StatelessWidget {
+class _SellerProfileSection extends StatelessWidget {
   final SellerDetails seller;
 
-  const _SellerDetailsCard({required this.seller});
+  const _SellerProfileSection({required this.seller});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -131,10 +145,10 @@ class _SellerDetailsCard extends StatelessWidget {
           children: [
             Text(
               seller.importer.isEmpty ? 'Seller' : seller.importer,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF2D7373),
-                  ),
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF2D7373),
+              ),
             ),
             const SizedBox(height: 12),
             _ProfileRow(
@@ -161,6 +175,12 @@ class _SellerDetailsCard extends StatelessWidget {
               label: 'Website',
               value: seller.website.isEmpty ? 'NA' : seller.website,
             ),
+            if (seller.formattedTotalValue.isNotEmpty)
+              _ProfileRow(
+                label: 'Seller\'s Worth',
+                value: seller.formattedTotalValue,
+                valueColor: Colors.green,
+              ),
             if (seller.latlong.isNotEmpty)
               _ProfileRow(label: 'Map', value: seller.latlong),
           ],
@@ -335,6 +355,42 @@ class _ProductCategoriesSection extends StatelessWidget {
   }
 }
 
+class _SellerCountriesSection extends StatelessWidget {
+  final List<String> countries;
+
+  const _SellerCountriesSection({required this.countries});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Selling Countries',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF2D7373),
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (countries.isEmpty)
+          const Text('No countries', style: TextStyle(color: Colors.grey, fontSize: 13))
+        else
+          ...countries.asMap().entries.map(
+                (e) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    '${e.key + 1}) ${e.value}',
+                    style: const TextStyle(fontSize: 13, color: Colors.black87),
+                  ),
+                ),
+              ),
+      ],
+    );
+  }
+}
+
 class _AddBuyerButton extends StatelessWidget {
   final String buyerName;
 
@@ -461,6 +517,270 @@ class _TransactionsSection extends StatelessWidget {
                           Text(
                             t.valueFc,
                             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.green),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+      ],
+    );
+  }
+}
+
+class _SellerBuyersSection extends StatelessWidget {
+  final List<SellerBuyerItem> buyers;
+
+  const _SellerBuyersSection({required this.buyers});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Buyer(s)',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF2D7373),
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (buyers.isEmpty)
+          const Text('No buyers', style: TextStyle(color: Colors.grey, fontSize: 13))
+        else
+          ...buyers.asMap().entries.map(
+                (e) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4A9B9B).withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${e.key + 1}) ${e.value.importer}',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF2D7373),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF4A9B9B).withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      e.value.country.trim(),
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: Color(0xFF2D7373),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Flexible(
+                                    child: Text(
+                                      e.value.productCategory,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.black87,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            showFolderSelectionBottomSheet(
+                              context,
+                              importerName: e.value.importer,
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF2D7373),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          child: const Text('Add Buyer'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+      ],
+    );
+  }
+}
+
+class _SellerTransactionsSection extends StatelessWidget {
+  final List<SellerTransactionItem> transactions;
+
+  const _SellerTransactionsSection({required this.transactions});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Text(
+              'Transaction History',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2D7373),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFF4A9B9B).withOpacity(0.15),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                '${transactions.length} records',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF2D7373),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (transactions.isEmpty)
+          const Text('No transactions', style: TextStyle(color: Colors.grey, fontSize: 13))
+        else
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: transactions.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 10),
+            itemBuilder: (context, index) {
+              final t = transactions[index];
+              return Card(
+                elevation: 1,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF4A9B9B).withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              '#${t.id}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF2D7373),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            t.date,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        t.importer,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (t.description.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          t.description,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          const Text(
+                            'Qty: ',
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                          Text(
+                            t.quantity,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          const Text(
+                            'Value: ',
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                          Text(
+                            t.valueFc,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.green,
+                            ),
                           ),
                         ],
                       ),
