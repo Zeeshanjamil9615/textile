@@ -82,7 +82,7 @@ class _DashboardBody extends StatelessWidget {
                       ),
                         _KpiData(
                         title: 'My Folder',
-                        value: '6',
+                        value: controller.folderCount.value.toString(),
                         icon: Icons.folder_open,
                         iconBg: const Color(0xFFE67E22),
                         accent: const Color(0xFFE67E22),

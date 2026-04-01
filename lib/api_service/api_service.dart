@@ -1124,6 +1124,78 @@ class ApiService {
     }
   }
 
+  /// Dashboard: count folders for current user (My Folder card).
+  Future<ApiResponse<int>> getFoldersCount({required String userId}) async {
+    try {
+      final response = await _dio.post(
+        'countFolders',
+        data: json.encode({'user_id': userId}),
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData;
+        if (response.data is String) {
+          responseData =
+              json.decode(response.data as String) as Map<String, dynamic>;
+        } else if (response.data is Map) {
+          responseData = response.data as Map<String, dynamic>;
+        } else {
+          throw Exception('Unexpected response format');
+        }
+
+        final status = responseData['status'] as int? ?? 0;
+        final message = responseData['message'] as String? ?? '';
+        final dataJson = responseData['data'] as Map<String, dynamic>?;
+        final totalCountStr = dataJson?['totalCount']?.toString() ?? '0';
+        final totalCount = int.tryParse(totalCountStr) ?? 0;
+
+        return ApiResponse<int>(
+          status: status,
+          message: message,
+          data: totalCount,
+        );
+      } else {
+        return ApiResponse<int>(
+          status: response.statusCode ?? 0,
+          message: response.statusMessage ?? 'Unknown error',
+        );
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
+      } else if (e.type == DioExceptionType.badResponse) {
+        if (e.response?.data is Map &&
+            (e.response?.data as Map)['message'] != null) {
+          errorMessage =
+              (e.response?.data as Map)['message']?.toString() ??
+                  'Server error occurred';
+        } else {
+          errorMessage = 'Server error occurred';
+        }
+      } else if (e.type == DioExceptionType.cancel) {
+        errorMessage = 'Request cancelled';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+
+      return ApiResponse<int>(
+        status: e.response?.statusCode ?? 0,
+        message: errorMessage,
+      );
+    } catch (e) {
+      return ApiResponse<int>(
+        status: 0,
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
+    }
+  }
+
   // Get all filtered denim data API request
   Future<ApiResponse<GarmentDenimResponse>> getAllFilteredDenimData({
     required String filterCountry,

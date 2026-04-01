@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/api_service/api_service.dart';
 import 'package:textile/models/top_product_model.dart';
+import 'package:textile/api_service/local_storage_service.dart';
 import 'package:textile/views/drawer/Buyer_Product_Wise/Buyer_Product_Wise.dart';
 import 'package:textile/views/drawer/Buyer_Product_Wise/Buyer_Product_Wise_controller.dart';
 
@@ -10,6 +11,7 @@ class DashboardController extends GetxController {
 
   final importerCount = 0.obs;
   final exporterCount = 0.obs;
+  final folderCount = 0.obs;
   final topProducts = <TopProduct>[].obs;
   final isLoadingCounts = false.obs;
   final isLoadingTopProducts = false.obs;
@@ -30,6 +32,7 @@ class DashboardController extends GetxController {
     await Future.wait([
       fetchImporterCount(),
       fetchExporterCount(),
+      fetchFolderCount(),
       fetchTopProducts(),
     ]);
   }
@@ -63,6 +66,29 @@ class DashboardController extends GetxController {
       final res = await api.getTextileExportersCount();
       if (res.status == 200 && res.data != null) {
         exporterCount.value = res.data?.totalCount ?? 0;
+      } else {
+        errorMessage.value = res.message;
+      }
+    } catch (e) {
+      errorMessage.value = e.toString();
+    } finally {
+      isLoadingCounts.value = false;
+    }
+  }
+
+  Future<void> fetchFolderCount() async {
+    try {
+      isLoadingCounts.value = true;
+      final user = await LocalStorageService.getUserData();
+      final userId = user?.id ?? '';
+      if (userId.isEmpty) {
+        folderCount.value = 0;
+        return;
+      }
+      final api = ApiService();
+      final res = await api.getFoldersCount(userId: userId);
+      if (res.status == 200 && res.data != null) {
+        folderCount.value = res.data!;
       } else {
         errorMessage.value = res.message;
       }
