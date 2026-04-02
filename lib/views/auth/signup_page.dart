@@ -11,12 +11,22 @@ class SignupPage extends StatelessWidget {
     final controller = Get.put(SignupController());
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: LayoutBuilder(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.primary,
+              AppColors.primaryDark,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+              child: LayoutBuilder(
                 builder: (context, constraints) {
                   final maxWidth = constraints.maxWidth;
                   final isWide = maxWidth > 800;
@@ -24,158 +34,142 @@ class SignupPage extends StatelessWidget {
                   return Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 980),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color(0x19000000),
-                              blurRadius: 18,
-                              offset: Offset(0, 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SizedBox(
+                            height: 74,
+                            child: Image.asset(
+                              'assets/logos/logo.png',
+                              fit: BoxFit.contain,
                             ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Header
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 12,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryDark,
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(10),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Textile Analytics',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 0.3,
+                              height: 1.1,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Create your account to continue',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              color: Colors.white70,
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+
+                          // Shared white card (same style as login)
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.96),
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x24000000),
+                                  blurRadius: 26,
+                                  offset: Offset(0, 14),
                                 ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  const Text(
-                                    'Register now',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Flexible(
-                                    child: Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Wrap(
-                                        spacing: 4,
-                                        runSpacing: 2,
-                                        alignment: WrapAlignment.end,
-                                        children: [
-                                          const Text(
-                                            'Sign up at Textile Analytics! Already a member?',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 12,
-                                            ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                                  child: Row(
+                                    children: [
+                                      const Expanded(
+                                        child: Text(
+                                          'Sign up',
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w900,
+                                            color: Color(0xFF0F172A),
                                           ),
-                                          GestureDetector(
-                                            onTap: () => Get.back(),
-                                            child: const Text(
-                                              'Sign In Here',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 12,
-                                                decoration:
-                                                    TextDecoration.underline,
-                                                fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () => Get.back(),
+                                        style: TextButton.styleFrom(
+                                          foregroundColor: AppColors.primaryDark,
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                        ),
+                                        child: const Text(
+                                          'Sign in',
+                                          style: TextStyle(fontWeight: FontWeight.w800),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                                  child: isWide
+                                      ? Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Expanded(child: _PersonalDetailsForm(controller: controller)),
+                                            const SizedBox(width: 24),
+                                            Expanded(child: _CompanyDetailsForm(controller: controller)),
+                                          ],
+                                        )
+                                      : Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            _PersonalDetailsForm(controller: controller),
+                                            const SizedBox(height: 24),
+                                            _CompanyDetailsForm(controller: controller),
+                                          ],
+                                        ),
+                                ),
+                                const Divider(height: 0),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                                  child: Obx(
+                                    () => SizedBox(
+                                      width: double.infinity,
+                                      child: ElevatedButton(
+                                        onPressed: controller.isSubmitting.value ? null : controller.submit,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppColors.primaryDark,
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(vertical: 14),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(14),
+                                          ),
+                                          elevation: 0,
+                                        ),
+                                        child: controller.isSubmitting.value
+                                            ? const SizedBox(
+                                                height: 20,
+                                                width: 20,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  color: Colors.white,
+                                                ),
+                                              )
+                                            : const Text(
+                                                'Create account',
+                                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                               ),
-                                            ),
-                                          ),
-                                        ],
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20.0, vertical: 18),
-                              child: isWide
-                                  ? Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        // Personal details (left column)
-                                        Expanded(
-                                          child: _PersonalDetailsForm(
-                                              controller: controller),
-                                        ),
-                                        const SizedBox(width: 24),
-                                        // Company details (right column)
-                                        Expanded(
-                                          child: _CompanyDetailsForm(
-                                              controller: controller),
-                                        ),
-                                      ],
-                                    )
-                                  : Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        _PersonalDetailsForm(
-                                            controller: controller),
-                                        const SizedBox(height: 24),
-                                        _CompanyDetailsForm(
-                                            controller: controller),
-                                      ],
-                                    ),
-                            ),
-                            const Divider(height: 0),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 16,
-                              ),
-                              child: Obx(
-                                () => SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    onPressed: controller.isSubmitting.value
-                                        ? null
-                                        : controller.submit,
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppColors.primaryDark,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 14),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                    ),
-                                    child: controller.isSubmitting.value
-                                        ? const SizedBox(
-                                            height: 20,
-                                            width: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              color: Colors.white,
-                                            ),
-                                          )
-                                        : const Text(
-                                            'REGISTER',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   );
@@ -184,7 +178,7 @@ class SignupPage extends StatelessWidget {
             ),
           ),
         ),
-      
+      ),
     );
   }
 }
@@ -302,8 +296,16 @@ class _CompanyDetailsForm extends StatelessWidget {
               filled: true,
               fillColor: const Color(0xFFF8F9FA),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(4),
-                borderSide: BorderSide.none,
+                borderRadius: BorderRadius.circular(14),
+                borderSide: const BorderSide(color: Color(0xFFE9EEF2)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: const BorderSide(color: Color(0xFFE9EEF2)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: const BorderSide(color: AppColors.primaryDark, width: 1.2),
               ),
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -378,8 +380,16 @@ class _LabeledField extends StatelessWidget {
             filled: true,
             fillColor: const Color(0xFFF8F9FA),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(4),
-              borderSide: BorderSide.none,
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: Color(0xFFE9EEF2)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: Color(0xFFE9EEF2)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: const BorderSide(color: AppColors.primaryDark, width: 1.2),
             ),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
