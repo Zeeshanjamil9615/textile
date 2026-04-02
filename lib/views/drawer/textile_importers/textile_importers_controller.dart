@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:textile/models/textile_importers_buyer_model.dart';
 import 'package:textile/models/product_category_model.dart';
 import 'package:textile/views/drawer/textile_importers/buyer_model.dart';
 import 'package:textile/views/drawer/textile_importers/filter_section.dart';
@@ -28,6 +27,7 @@ class TextileImportersController extends GetxController {
   final hasLoadedData = false.obs; // Track if data has been loaded at least once
   final hasShownInitialFilterSheet = false
       .obs; // Prevent auto-opening the filter sheet on every rebuild
+  final forceOpenFilterSheetOnce = false.obs;
 
   @override
   void onInit() {
@@ -44,6 +44,19 @@ class TextileImportersController extends GetxController {
   
   // Method to open filter sheet if data hasn't been loaded yet
   void openFilterSheetIfNeeded(BuildContext context) {
+    if (forceOpenFilterSheetOnce.value && !isFilterSheetOpen.value) {
+      forceOpenFilterSheetOnce.value = false;
+      hasShownInitialFilterSheet.value = true;
+      showFilterBottomSheet(context);
+      return;
+    }
+
+    // If we're arriving via dashboard navigation (country/category pre-selected),
+    // don't auto-open the filter sheet.
+    final hasProgrammaticFilter =
+        selectedCountry.value != 'All' || selectedProductCategory.value != 'All';
+    if (hasProgrammaticFilter) return;
+
     if (!hasLoadedData.value &&
         !isFilterSheetOpen.value &&
         !hasShownInitialFilterSheet.value) {
@@ -235,6 +248,29 @@ class TextileImportersController extends GetxController {
       orElse: () => ProductCategoryModel(id: pctId, name: pctName, condition: ''),
     );
     selectedProductCategory.value = match.name;
+
+    // Prevent auto-opening the filter sheet since we're programmatically applying filters
+    hasShownInitialFilterSheet.value = true;
+
+    await fetchBuyersData();
+  }
+
+  /// Used by dashboard/top countries navigation to pre-select a country and fetch data.
+  Future<void> applyCountryAndFetch({
+    required String country,
+  }) async {
+    // Ensure dropdown data is available
+    if (countries.isEmpty) {
+      await fetchCountries();
+    }
+    if (productCategoriesWithIds.isEmpty) {
+      await fetchProductCategories();
+    }
+
+    selectedCountry.value = country;
+    selectedProductCategory.value = 'All';
+    selectedProductCategoryId.value = 'All';
+    selectedBuyerRanking.value = 'All';
 
     // Prevent auto-opening the filter sheet since we're programmatically applying filters
     hasShownInitialFilterSheet.value = true;

@@ -33,10 +33,12 @@ class LoginPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Logo and Title
-                  const Icon(
-                    Icons.analytics_outlined,
-                    size: 80,
-                    color: AppColors.textWhite,
+                  SizedBox(
+                    height: 80,
+                    child: Image.asset(
+                      'assets/logos/logo.png',
+                      fit: BoxFit.contain,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   
@@ -63,7 +65,7 @@ class LoginPage extends StatelessWidget {
                   const SizedBox(height: 12),
                   
                   const Text(
-                    'Sign in with your data that you entered during your registration',
+                    'Sign in with the email and password you used during registration.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
@@ -218,7 +220,7 @@ class LoginPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        "Don't Have Your Account yet? ",
+                        "Don't have an account yet? ",
                         style: TextStyle(
                           color: AppColors.textWhite,
                           fontSize: 13,

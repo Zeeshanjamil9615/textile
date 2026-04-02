@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:textile/api_service/api_service.dart';
 import 'package:textile/models/exporter_city_seller_item.dart';
 import 'package:textile/views/drawer/buyer_profile/buyer_profile.dart';
+import 'package:textile/api_service/local_storage_service.dart';
+import 'package:textile/widgets/custom_snackbar.dart';
 import 'package:textile/widgets/colors.dart';
 
 class CitySellersController extends GetxController {
@@ -225,7 +227,17 @@ class CitySellersPage extends StatelessWidget {
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: GestureDetector(
-                                      onTap: () {
+                                      onTap: () async {
+                                        final user = await LocalStorageService.getUserData();
+                                        final canViewSellers =
+                                            user?.hasPermission('8SP') ?? false;
+                                        if (!canViewSellers) {
+                                          CustomSnackbar.warning(
+                                            'Your account does not have access to seller details.',
+                                            title: 'Access restricted',
+                                          );
+                                          return;
+                                        }
                                         Get.to(
                                           () => const BuyerProfilePage(),
                                           arguments: s.importer,

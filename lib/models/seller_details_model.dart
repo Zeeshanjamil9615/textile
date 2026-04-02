@@ -12,8 +12,11 @@ class SellerDetails {
 
   // Extra fields from getSellerDetails response
   final String formattedTotalValue;
+  /// Raw PKR total from API (e.g. 10061523) for display alongside formatted string.
+  final String totalValuePkr;
   final List<SellerBuyerItem> buyersList;
   final List<String> productCategories;
+  final List<SellerProductCategoryRow> productCategoryRows;
   final List<String> sellingCountries;
   final List<SellerTransactionItem> transactions;
 
@@ -29,8 +32,10 @@ class SellerDetails {
     required this.website,
     required this.recordFound,
     this.formattedTotalValue = '',
+    this.totalValuePkr = '',
     this.buyersList = const [],
     this.productCategories = const [],
+    this.productCategoryRows = const [],
     this.sellingCountries = const [],
     this.transactions = const [],
   });
@@ -65,6 +70,9 @@ class SellerDetails {
       formattedTotalValue: sellerInfo['formatted_total_value']?.toString() ??
           json['formatted_total_value']?.toString() ??
           '',
+      totalValuePkr: sellerInfo['total_value_pkr']?.toString() ??
+          json['total_value_pkr']?.toString() ??
+          '',
       buyersList: buyersRaw is List
           ? buyersRaw
               .whereType<Map>()
@@ -76,6 +84,12 @@ class SellerDetails {
               .map((e) => (e is Map ? e['category_name']?.toString() : e?.toString()) ?? '')
               .where((e) => e.trim().isNotEmpty)
               .map((e) => e.trim())
+              .toList()
+          : const [],
+      productCategoryRows: productCategoriesRaw is List
+          ? productCategoriesRaw
+              .whereType<Map>()
+              .map((e) => SellerProductCategoryRow.fromJson(Map<String, dynamic>.from(e)))
               .toList()
           : const [],
       sellingCountries: sellingCountriesRaw is List
@@ -118,6 +132,23 @@ class SellerBuyerItem {
   }
 }
 
+class SellerProductCategoryRow {
+  final String categoryName;
+  final String pctCode;
+
+  SellerProductCategoryRow({
+    required this.categoryName,
+    required this.pctCode,
+  });
+
+  factory SellerProductCategoryRow.fromJson(Map<String, dynamic> json) {
+    return SellerProductCategoryRow(
+      categoryName: (json['category_name']?.toString() ?? '').trim(),
+      pctCode: (json['pct_code']?.toString() ?? '').trim(),
+    );
+  }
+}
+
 class SellerTransactionItem {
   final String id;
   final String date;
@@ -128,6 +159,8 @@ class SellerTransactionItem {
   final String quantity;
   final String valueFc;
   final String pctCode;
+  final String currencyCode;
+  final String currencyName;
 
   SellerTransactionItem({
     required this.id,
@@ -139,6 +172,8 @@ class SellerTransactionItem {
     required this.quantity,
     required this.valueFc,
     required this.pctCode,
+    this.currencyCode = '',
+    this.currencyName = '',
   });
 
   factory SellerTransactionItem.fromJson(Map<String, dynamic> json) {
@@ -152,6 +187,8 @@ class SellerTransactionItem {
       quantity: (json['quantity']?.toString() ?? '').trim(),
       valueFc: (json['value_fc']?.toString() ?? '').trim(),
       pctCode: (json['pct_code']?.toString() ?? '').trim(),
+      currencyCode: (json['currency_code']?.toString() ?? '').trim(),
+      currencyName: (json['currency_name']?.toString() ?? '').trim(),
     );
   }
 }

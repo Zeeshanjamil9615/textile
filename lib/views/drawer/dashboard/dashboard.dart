@@ -6,8 +6,9 @@ import 'package:textile/views/drawer/Search_Exporters_by_Cities/Search_Exporters
 import 'package:textile/views/drawer/add_folder/add_folder.dart';
 import 'package:textile/views/drawer/dashboard/dashboard_controller.dart';
 import 'package:textile/views/drawer/drawer.dart';
-import 'package:textile/views/drawer/all_sellers/all_sellers.dart';
+import 'package:textile/views/drawer/dashboard/top_brand_buyers/top_brand_buyers_page.dart';
 import 'package:textile/views/drawer/textile_importers/textile_importers.dart';
+import 'package:textile/views/drawer/textile_importers/textile_importers_controller.dart';
 import 'package:textile/widgets/colors.dart';
 import 'package:textile/widgets/custom_app_bar.dart';
 
@@ -498,8 +499,11 @@ class _MapCardState extends State<_MapCard> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
-            onPressed: () => Get.snackbar('Map', 'Dummy open map'),
-            child: const Text('Open Map Search'),
+            onPressed: () => Get.snackbar(
+              'Coming soon',
+              'Interactive map search will be available in a future update.',
+            ),
+            child: const Text('Preview Map'),
           ),
         ],
       ),
@@ -550,35 +554,52 @@ class _TopCountries extends StatelessWidget {
               itemBuilder: (context, index) {
                 final item = countries[index];
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
-                    color: AppColors.inputBackground,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE9EEF2)),
                   ),
-                  child: Row(
-                    children: [
-                      Container(
-                        height: 34,
-                        width: 44,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: const Color(0xFFE9EEF2)),
-                        ),
-                        child: Text(item.$1, style: const TextStyle(fontSize: 18)),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () async {
+                      final ctrl = Get.put(TextileImportersController());
+                      ctrl.selectedCountry.value = item.$2;
+                      // Open filter sheet on the importers screen, but don't load data yet.
+                      ctrl.forceOpenFilterSheetOnce.value = true;
+                      ctrl.hasShownInitialFilterSheet.value = false;
+                      ctrl.isLoading.value = false;
+                      Get.to(() => const TextileImporters());
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: AppColors.inputBackground,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFE9EEF2)),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          item.$2,
-                          style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                      child: Row(
+                        children: [
+                          Container(
+                            height: 34,
+                            width: 44,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: const Color(0xFFE9EEF2)),
+                            ),
+                            child: Text(item.$1, style: const TextStyle(fontSize: 18)),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              item.$2,
+                              style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+                        ],
                       ),
-                      const Icon(Icons.chevron_right, color: AppColors.textSecondary),
-                    ],
+                    ),
                   ),
                 );
               },
@@ -596,11 +617,12 @@ class _TopBrands extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const brands = [
-      ('Ikea', 'assets/image/image1.png'),
-      ('Adidas', 'assets/image/image2.png'),
-      ('ZARA', 'assets/image/image3.png'),
-      ('Marks & Spencer', 'assets/image/image4.png'),
-      ('JCPenney', 'assets/image/image5.png'),
+      // (displayName, logoPath, apiBrandValue)
+      ('Ikea', 'assets/image/image1.png', 'Ikea'),
+      ('Adidas', 'assets/image/image2.png', 'Adidas'),
+      ('ZARA', 'assets/image/image3.png', 'Zara'),
+      ('Marks & Spencer', 'assets/image/image4.png', 'Marks and spencer'),
+      ('JCPenney', 'assets/image/image5.png', 'JC PENEY'),
     ];
 
     return Container(
@@ -623,37 +645,46 @@ class _TopBrands extends StatelessWidget {
           ...brands.map(
             (b) => Padding(
               padding: const EdgeInsets.only(bottom: 10),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE9EEF2)),
+              child: InkWell(
+                onTap: () => Get.to(
+                  () => TopBrandBuyersPage(
+                    brandName: b.$1,
+                    apiBrandValue: b.$3,
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      height: 40,
-                      width: 40,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: Image.asset(
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE9EEF2)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 40,
+                        width: 40,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: Image.asset(
                         b.$2,
-                        fit: BoxFit.fill,
-                        errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported, color: AppColors.textSecondary),
+                          fit: BoxFit.fill,
+                          errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported, color: AppColors.textSecondary),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        b.$1,
-                        style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          b.$1,
+                          style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                        ),
                       ),
-                    ),
-                    
-                  ],
+                      const Icon(Icons.chevron_right, color: AppColors.textSecondary),
+                    ],
+                  ),
                 ),
               ),
             ),

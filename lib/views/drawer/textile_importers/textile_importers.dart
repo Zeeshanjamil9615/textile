@@ -21,7 +21,9 @@ class _TextileImportersState extends State<TextileImporters> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(TextileImportersController());
+    final controller = Get.isRegistered<TextileImportersController>()
+        ? Get.find<TextileImportersController>()
+        : Get.put(TextileImportersController());
 
     return Scaffold(
       key: controller.scaffoldKey,
