@@ -77,6 +77,12 @@ class BuyerProfileController extends GetxController {
       errorMessage.value = 'Data not found';
     }
 
+
+
+
+
+
+
     isLoading.value = false;
   }
 }

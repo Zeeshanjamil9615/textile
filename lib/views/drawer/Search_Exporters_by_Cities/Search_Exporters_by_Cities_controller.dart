@@ -17,6 +17,22 @@ class SearchExportersByCitiesController extends GetxController {
 
   final isLoading = false.obs;
 
+  String _capitalizeFirst(String value) {
+    final s = value.trim();
+    if (s.isEmpty) return s;
+    return s[0].toUpperCase() + s.substring(1);
+  }
+
+  bool _isRealCity(String value) {
+    final s = value.trim().toLowerCase();
+    if (s.isEmpty) return false;
+    // API sometimes includes placeholder rows like "Select City" / "All".
+    if (s == 'select city') return false;
+    if (s == 'all') return false;
+    if (s == 'all cities') return false;
+    return true;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -32,10 +48,11 @@ class SearchExportersByCitiesController extends GetxController {
       if (apiResponse.status == 200 && apiResponse.data != null) {
         final List<ExporterCityItem> apiItems = apiResponse.data!;
         exporters.value = apiItems
+            .where((item) => _isRealCity(item.city))
             .map(
               (item) => BuyerModel(
                 serialNumber: item.id,
-                city: item.city,
+                city: _capitalizeFirst(item.city),
                 numberOfBuyers: item.noOfSellersCity,
                 country: item.country,
               ),
@@ -67,7 +84,7 @@ class SearchExportersByCitiesController extends GetxController {
   }
 
   void applyFilters() {
-    filteredExporters.value = exporters.where((exporter) {
+    final list = exporters.where((exporter) {
       bool matchesCountry =
           selectedCountry.value == 'All' ||
           exporter.country == selectedCountry.value;
@@ -76,6 +93,15 @@ class SearchExportersByCitiesController extends GetxController {
           exporter.city.toLowerCase().contains(cityFilter.value.toLowerCase());
       return matchesCountry && matchesCity;
     }).toList();
+
+    // High-to-low by exporter/seller count, then by city name.
+    list.sort((a, b) {
+      final byCount = b.numberOfBuyers.compareTo(a.numberOfBuyers);
+      if (byCount != 0) return byCount;
+      return a.city.toLowerCase().compareTo(b.city.toLowerCase());
+    });
+
+    filteredExporters.value = list;
   }
 
   void updateCountryFilter(String? value) {

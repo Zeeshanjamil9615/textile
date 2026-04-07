@@ -33,7 +33,7 @@ class _searchExportersByCitiesListPageState extends State<searchExportersByCitie
               Container(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
                 color: Colors.white,
-                child: const Text('Sellers Cities',
+                child: const Text('Exporters Cities',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               ),
           Obx(() => Container(

@@ -30,8 +30,8 @@ class _BuyerProfilePageState extends State<BuyerProfilePage> {
 
     return Scaffold(
       key: _scaffoldKey,
-      appBar: const CustomAppBar(
-        title: 'DETAIL PAGE',
+      appBar: CustomAppBar(
+        title: buyerName.trim().isEmpty ? 'DETAIL PAGE' : buyerName.trim(),
         showBack: true,
       ),
       backgroundColor: const Color(0xFFF4F6F9),
@@ -802,7 +802,7 @@ class _TransactionsSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'History',
+                    'Entries',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -1119,7 +1119,7 @@ class _SellerTransactionsSection extends StatelessWidget {
         Row(
           children: [
             const Text(
-              'History',
+              'Entries',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

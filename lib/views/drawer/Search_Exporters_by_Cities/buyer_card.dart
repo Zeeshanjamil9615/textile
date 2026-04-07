@@ -125,15 +125,15 @@ class BuyerCard extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Country:',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
+                    // const Text(
+                    //   'Country:',
+                    //   style: TextStyle(
+                    //     fontSize: 14,
+                    //     fontWeight: FontWeight.w600,
+                    //     color: AppColors.textSecondary,
+                    //   ),
+                    // ),
+                    // const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         buyer.country,
@@ -152,7 +152,7 @@ class BuyerCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'No. of Sellers:',
+                      'No. of Exporters:',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -161,19 +161,12 @@ class BuyerCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryLight.withOpacity(0.15),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          '${buyer.numberOfBuyers} ${buyer.numberOfBuyers == 1 ? 'Seller' : 'Sellers'}',
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
+                      child:         Text(
+                        '${buyer.numberOfBuyers} ${buyer.numberOfBuyers == 1 ? 'Seller' : 'Sellers'}',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
                         ),
                       ),
                     ),

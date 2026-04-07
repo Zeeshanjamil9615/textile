@@ -50,8 +50,7 @@ class CustomDrawer extends StatelessWidget {
     final isTextileImporters =
         currentRoute.contains('TextileImporters') ||
         (Get.isRegistered<TextileImportersController>());
-    final isBuyers =
-        currentRoute.contains('Buyers') || Get.isRegistered<BuyersController>();
+   
          final isBuyerProductWise =
         currentRoute.contains('BuyerProductWise') || Get.isRegistered<BuyerProductWiseController>();
     final isGarmentSocksKnitted =
@@ -182,16 +181,7 @@ class CustomDrawer extends StatelessWidget {
                       Get.off(() => const TextileImporters());
                     },
                   ),
-                if (can('1AB'))
-                  _DrawerItem(
-                    icon: Icons.people,
-                    title: 'Buyers',
-                    isSelected: isBuyers,
-                    onTap: () {
-                      Get.back();
-                      Get.off(() => const Buyers());
-                    },
-                  ),
+                
                 if (can('9MDDB'))
                   _DrawerItem(
                     icon: Icons.checkroom,

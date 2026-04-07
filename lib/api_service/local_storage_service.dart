@@ -18,7 +18,6 @@ class LocalStorageService {
       return false;
     }
   }
-
   // Get user data from local storage
   static Future<UserModel?> getUserData() async {
     try {
@@ -33,7 +32,6 @@ class LocalStorageService {
       return null;
     }
   }
-
   // Check if user is logged in
   static Future<bool> isLoggedIn() async {
     try {
