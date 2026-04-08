@@ -17,7 +17,7 @@ class CountriesResponse {
     return CountriesResponse(
       status: json['status'] as int? ?? 0,
       message: json['message']?.toString() ?? '',
-      totalRecords: json['total_records'] as int? ?? 0,
+      totalRecords: (json['total_countries'] ?? json['total_records']) as int? ?? 0,
       data:
           (json['data'] as List<dynamic>?)
               ?.map(

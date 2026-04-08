@@ -33,8 +33,9 @@ import 'package:textile/views/drawer/search_danim/search_danim.dart';
 import 'package:textile/views/drawer/search_danim/search_danim_controller.dart';
 import 'package:textile/views/drawer/textile_Exporters/textile_Exporters.dart';
 import 'package:textile/views/drawer/textile_Exporters/textile_Exporters_controller.dart';
-import 'package:textile/views/drawer/textile_importers/textile_importers.dart';
 import 'package:textile/views/drawer/textile_importers/textile_importers_controller.dart';
+import 'package:textile/views/drawer/textile_importers/textile_importers_hub.dart';
+import 'package:textile/views/drawer/textile_importers/textile_importers_hub_controller.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({Key? key}) : super(key: key);
@@ -49,7 +50,8 @@ class CustomDrawer extends StatelessWidget {
         Get.isRegistered<DashboardController>();
     final isTextileImporters =
         currentRoute.contains('TextileImporters') ||
-        (Get.isRegistered<TextileImportersController>());
+        Get.isRegistered<TextileImportersHubController>() ||
+        Get.isRegistered<TextileImportersController>();
    
          final isBuyerProductWise =
         currentRoute.contains('BuyerProductWise') || Get.isRegistered<BuyerProductWiseController>();
@@ -178,14 +180,24 @@ class CustomDrawer extends StatelessWidget {
                     isSelected: isTextileImporters,
                     onTap: () {
                       Get.back();
-                      Get.off(() => const TextileImporters());
+                      Get.off(() => const TextileImportersHub());
                     },
                   ),
+
+
+
+
+
+
+
+
+
+                  
                 
                 if (can('9MDDB'))
                   _DrawerItem(
                     icon: Icons.checkroom,
-                    title: 'Buyer Product Wise',
+                    title: 'Importers Product Wise',
                     isSelected: isBuyerProductWise,
                     onTap: () {
                       Get.back();

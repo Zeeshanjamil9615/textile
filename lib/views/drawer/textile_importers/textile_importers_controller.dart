@@ -22,7 +22,12 @@ class TextileImportersController extends GetxController {
   final productCategoriesWithIds = <ProductCategoryModel>[].obs;
   final buyerRankings = <String>[].obs;
 
-  final isLoading = false.obs;
+  /// Used for fetching the importer list (main API call).
+  final isLoadingBuyers = false.obs;
+
+  /// Used for loading dropdown data (countries/categories) without affecting the main loader.
+  final isLoadingFilters = false.obs;
+
   final isFilterSheetOpen = false.obs;
   final hasLoadedData = false.obs; // Track if data has been loaded at least once
   final hasShownInitialFilterSheet = false
@@ -67,7 +72,7 @@ class TextileImportersController extends GetxController {
 
   Future<void> fetchCountries() async {
     try {
-      isLoading.value = true;
+      isLoadingFilters.value = true;
       final apiService = ApiService();
       final response = await apiService.getCountriesList();
 
@@ -79,13 +84,13 @@ class TextileImportersController extends GetxController {
     } catch (e) {
       countries.value = ['All'];
     } finally {
-      isLoading.value = false;
+      isLoadingFilters.value = false;
     }
   }
 
   Future<void> fetchProductCategories() async {
     try {
-      isLoading.value = true;
+      isLoadingFilters.value = true;
       final apiService = ApiService();
       final response = await apiService.getProductCategoriesListWithIds();
 
@@ -111,13 +116,13 @@ class TextileImportersController extends GetxController {
         selectedProductCategory.value = 'All';
         selectedProductCategoryId.value = 'All';
       }
-      isLoading.value = false;
+      isLoadingFilters.value = false;
     }
   }
 
   Future<void> fetchBuyersData() async {
     try {
-      isLoading.value = true;
+      isLoadingBuyers.value = true;
       
       // Get the category ID - if "All" is selected, use "All", otherwise get the ID
       String pctId = 'All';
@@ -178,14 +183,14 @@ class TextileImportersController extends GetxController {
         colorText: Colors.white,
       );
     } finally {
-      isLoading.value = false;
+      isLoadingBuyers.value = false;
     }
   }
 
   /// Called from the filter bottom sheet "Apply" button to trigger the API
   /// and close the sheet once data is loaded.
   Future<void> applyFilterAndFetch(BuildContext context) async {
-    if (isLoading.value) return;
+    if (isLoadingBuyers.value) return;
 
     await fetchBuyersData();
 

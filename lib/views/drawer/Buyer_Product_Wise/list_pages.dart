@@ -203,13 +203,7 @@ class _ChipPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (onClose != null) ...[
-            GestureDetector(
-              onTap: onClose,
-              child: const Icon(Icons.close, color: Colors.white, size: 16),
-            ),
-            const SizedBox(width: 6),
-          ],
+         
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 180),
             child: Text(

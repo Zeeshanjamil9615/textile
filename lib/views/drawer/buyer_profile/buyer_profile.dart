@@ -861,7 +861,7 @@ class _TransactionsSection extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              '#${t.id}',
+                              '${ t.date}',
                               style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -869,11 +869,7 @@ class _TransactionsSection extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            t.date,
-                            style: const TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
+                          
                             const Spacer(),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -886,7 +882,11 @@ class _TransactionsSection extends StatelessWidget {
                               ),
                               child: _TxMini(
                                     label: 'Quantity',
-                                    value: t.qty.isEmpty ? '—' : t.qty,
+                                    value: t.qty.isEmpty
+                                        ? '—'
+                                        : (double.tryParse(t.qty) != null
+                                            ? double.tryParse(t.qty)!.toStringAsFixed(0)
+                                            : t.qty),
                                     alignEnd: true,
                                   ),
                             ),
@@ -1181,7 +1181,7 @@ class _SellerTransactionsSection extends StatelessWidget {
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              '#${t.id}',
+                              '${t.date}',
                               style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
@@ -1189,14 +1189,7 @@ class _SellerTransactionsSection extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          Text(
-                            t.date,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
+                         
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -1276,17 +1269,7 @@ class _SellerTransactionsSection extends StatelessWidget {
                           ],
                         ),
                       ),
-                      if (t.pctCode.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          'PCT ${t.pctCode}',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF2D7373),
-                          ),
-                        ),
-                      ],
+                     
                     ],
                   ),
                 ),

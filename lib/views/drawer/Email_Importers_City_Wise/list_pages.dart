@@ -51,44 +51,8 @@ class _CitywiseListPageState extends State<CitywiseListPage> {
             color: Colors.white,
             child: Row(
               children: [
-                const Text('Show ', style: TextStyle(fontSize: 14)),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: DropdownButton<int>(
-                    value: controller.entriesPerPage.value,
-                    underline: const SizedBox(),
-                    items: [10, 25, 50, 100].map((val) {
-                      return DropdownMenuItem(value: val, child: Text(val.toString()));
-                    }).toList(),
-                    onChanged: controller.updateEntriesPerPage,
-                  ),
-                ),
-                const Text(' entries', style: TextStyle(fontSize: 14)),
-                const Spacer(),
-                Flexible(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF4A9B9B),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      'Showing ${controller.filteredBuyers.length} Records',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
+                
                 SizedBox(
-                  width: 150,
                   child: TextField(
                     onChanged: controller.updateCityFilter,
                     decoration: InputDecoration(

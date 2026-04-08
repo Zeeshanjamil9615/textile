@@ -47,7 +47,7 @@ class _SearchGarmentImporterByProductSpecificationListPageState
                 Expanded(
                   child: TextField(
                     decoration: InputDecoration(
-                      filled: true,
+                      filled: true,  
                       fillColor: const Color(0xFFF8F9FA),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(4),
@@ -72,79 +72,7 @@ class _SearchGarmentImporterByProductSpecificationListPageState
               ],
             ),
           ),
-          Obx(() => Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            color: Colors.white,
-            child: Row(
-              children: [
-                const Text('Show ', style: TextStyle(fontSize: 14)),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(4), 
-                  ),
-                  child: DropdownButton<int>(
-                    value: controller.entriesPerPage.value,
-                    underline: const SizedBox(),
-                    items: [10, 25, 50, 100].map((val) {
-                      return DropdownMenuItem(value: val, child: Text(val.toString()));
-                    }).toList(),
-                    onChanged: controller.updateEntriesPerPage,
-                  ),
-                ),
-                const Text(' entries', style: TextStyle(fontSize: 14)),
-                const Spacer(),
-                Flexible(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF4A9B9B),                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text('Showing ' + controller.filteredBuyers.length.toString() + ' Records',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ),
-                Container(),
-                if (controller.selectedCountry.value != 'All') ...[
-                  const SizedBox(width: 8),
-                  Flexible(
-                    child: GestureDetector(
-                      onTap: controller.clearCountryFilter,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF4A9B9B),
-                          borderRadius: BorderRadius.circular(4),
-                        ),  
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.close, color: Colors.white, size: 16),
-                            const SizedBox(width: 4),
-                            Flexible(
-                              child: Text(
-                                'FROM ${controller.selectedCountry.value}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          )),
+          
           Expanded(
             child: Obx(() => ListView.builder(
               controller: _scrollController,

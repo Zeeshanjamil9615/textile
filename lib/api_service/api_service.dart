@@ -28,6 +28,7 @@ import 'package:textile/models/country_stats_response.dart';
 import 'package:textile/models/exporter_city_seller_item.dart';
 import 'package:textile/models/exporter_data_response.dart';
 import 'package:textile/models/brand_buyer_item.dart';
+import 'package:textile/models/country_model.dart';
 
 class ApiService {
   // Base URL for the API
@@ -191,6 +192,62 @@ class ApiService {
       );
     } catch (e) {
       return ApiResponse<List<String>>(
+        status: 0,
+        message: 'An unexpected error occurred: ${e.toString()}',
+      );
+    }
+  }
+
+  /// Same endpoint as [getCountriesList], returns full country rows (totals, flags, regions).
+  Future<ApiResponse<List<CountryModel>>> getCountriesWithTotals() async {
+    try {
+      final response = await _dio.post('getCountriesList');
+
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData;
+
+        if (response.data is String) {
+          responseData =
+              json.decode(response.data as String) as Map<String, dynamic>;
+        } else if (response.data is Map) {
+          responseData = response.data as Map<String, dynamic>;
+        } else {
+          throw Exception('Unexpected response format');
+        }
+
+        final countriesResponse = CountriesResponse.fromJson(responseData);
+        return ApiResponse<List<CountryModel>>(
+          status: countriesResponse.status,
+          message: countriesResponse.message,
+          data: countriesResponse.data,
+        );
+      }
+
+      return ApiResponse<List<CountryModel>>(
+        status: response.statusCode ?? 0,
+        message: response.statusMessage ?? 'Unknown error',
+      );
+    } on DioException catch (e) {
+      String errorMessage = 'Network error occurred';
+
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        errorMessage =
+            'Connection timeout. Please check your internet connection.';
+      } else if (e.type == DioExceptionType.badResponse) {
+        errorMessage = e.response?.data['message'] ?? 'Server error occurred';
+      } else if (e.type == DioExceptionType.cancel) {
+        errorMessage = 'Request cancelled';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'No internet connection';
+      }
+
+      return ApiResponse<List<CountryModel>>(
+        status: e.response?.statusCode ?? 0,
+        message: errorMessage,
+      );
+    } catch (e) {
+      return ApiResponse<List<CountryModel>>(
         status: 0,
         message: 'An unexpected error occurred: ${e.toString()}',
       );

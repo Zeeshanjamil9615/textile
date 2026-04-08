@@ -114,7 +114,7 @@ class FilterSection extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
-              child: Obx(() => controller.isLoading.value
+              child: Obx(() => controller.isLoadingBuyers.value
                   ? const SizedBox(
                       height: 20,
                       width: 20,

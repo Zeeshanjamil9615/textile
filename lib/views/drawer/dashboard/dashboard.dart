@@ -565,7 +565,8 @@ class _TopCountries extends StatelessWidget {
                       // Open filter sheet on the importers screen, but don't load data yet.
                       ctrl.forceOpenFilterSheetOnce.value = true;
                       ctrl.hasShownInitialFilterSheet.value = false;
-                      ctrl.isLoading.value = false;
+                      ctrl.isLoadingBuyers.value = false;
+                      ctrl.isLoadingFilters.value = false;
                       Get.to(() => const TextileImporters());
                     },
                     child: Container(
