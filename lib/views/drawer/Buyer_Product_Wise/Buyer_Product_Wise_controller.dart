@@ -27,6 +27,8 @@ class BuyerProductWiseController extends GetxController {
   final hasLoadedData = false.obs; // Track if data has been loaded at least once
   final hasShownInitialFilterSheet = false
       .obs; // Prevent auto-opening the filter sheet on every rebuild
+  final showList = false.obs; // categories grid -> list view
+  final categorySearch = ''.obs;
 
   @override
   void onInit() {
@@ -227,6 +229,32 @@ class BuyerProductWiseController extends GetxController {
     hasShownInitialFilterSheet.value = true;
 
     await fetchBuyersData();
+  }
+
+  List<ProductCategoryModel> get filteredCategories {
+    final q = categorySearch.value.trim().toLowerCase();
+    final all = productCategoriesWithIds;
+    if (q.isEmpty) return all;
+    return all
+        .where((c) => c.name.toLowerCase().contains(q))
+        .toList(growable: false);
+  }
+
+  Future<void> openCategory(ProductCategoryModel c) async {
+    // Show list + loader immediately, then fetch.
+    showList.value = true;
+    isLoading.value = true;
+    try {
+      await applyCategoryAndFetch(pctId: c.id, pctName: c.name);
+    } finally {
+      // fetchBuyersData() also toggles isLoading, but this guarantees we don't
+      // flash an empty state before the async call starts.
+      isLoading.value = false;
+    }
+  }
+
+  void backToCategories() {
+    showList.value = false;
   }
 
   void updateBuyerRankingFilter(String? value) {
