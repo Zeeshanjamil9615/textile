@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/views/drawer/Email_Importers_Country_Wise/buyer_card.dart';
 import 'package:textile/views/drawer/Email_Importers_Country_Wise/Email_Importers_Country_Wise_controller.dart';
+import 'package:textile/widgets/filter_empty_state.dart';
 
 class CountrywiseListPage extends StatefulWidget {
   const CountrywiseListPage({Key? key}) : super(key: key);
@@ -114,23 +115,30 @@ class _CountrywiseListPageState extends State<CountrywiseListPage> {
                     ),
                   )),
               Expanded(
-                child: Obx(() => RefreshIndicator(
-                      onRefresh: () => controller.fetchCountryWiseData(showLoading: true),
-                      child: ListView.builder(
-                        controller: _scrollController,
-                        padding: const EdgeInsets.all(16),
-                        itemCount: controller.filteredBuyers.length,
-                        itemBuilder: (context, index) {
-                          return BuyerCard(
-                            key: ValueKey(
-                                controller.filteredBuyers[index].serialNumber),
-                            buyer: controller.filteredBuyers[index],
-                            scrollController: _scrollController,
-                            index: index,
-                          );
-                        },
-                      ),
-                    )),
+                child: Obx(() {
+                  if (!controller.isLoading.value &&
+                      controller.filteredBuyers.isEmpty) {
+                    return const FilterEmptyState(hasLoadedData: true);
+                  }
+                  return RefreshIndicator(
+                    onRefresh: () =>
+                        controller.fetchCountryWiseData(showLoading: true),
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: controller.filteredBuyers.length,
+                      itemBuilder: (context, index) {
+                        return BuyerCard(
+                          key: ValueKey(
+                              controller.filteredBuyers[index].serialNumber),
+                          buyer: controller.filteredBuyers[index],
+                          scrollController: _scrollController,
+                          index: index,
+                        );
+                      },
+                    ),
+                  );
+                }),
               ),
             ],
           ),

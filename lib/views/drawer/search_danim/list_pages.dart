@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:textile/views/drawer/search_danim/buyer_card.dart';
 import 'package:textile/views/drawer/search_danim/search_danim_controller.dart';
 import 'package:textile/widgets/colors.dart';
+import 'package:textile/widgets/filter_empty_state.dart';
 
 class SearchdanimListPage extends StatefulWidget {
   const SearchdanimListPage({Key? key}) : super(key: key);
@@ -77,20 +78,27 @@ class _SearchdanimListPageState extends State<SearchdanimListPage> {
                
                 Expanded(
                   child: Obx(
-                    () => ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(16),
-                      itemCount: controller.filteredDenimList.length,
-                      itemBuilder: (context, index) {
-                        final item =
-                            controller.filteredDenimList[index];
-                        return DenimCard(
-                          key: ValueKey('${item.importer}_$index'),
-                          item: item,
-                          index: index,
+                    () {
+                      if (controller.filteredDenimList.isEmpty && !loading) {
+                        return FilterEmptyState(
+                          hasLoadedData: controller.hasLoadedData.value,
                         );
-                      },
-                    ),
+                      }
+                      return ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.all(16),
+                        itemCount: controller.filteredDenimList.length,
+                        itemBuilder: (context, index) {
+                          final item =
+                              controller.filteredDenimList[index];
+                          return DenimCard(
+                            key: ValueKey('${item.importer}_$index'),
+                            item: item,
+                            index: index,
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
               ],

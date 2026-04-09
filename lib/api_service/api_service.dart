@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:textile/models/api_response.dart';
 import 'package:textile/models/user_model.dart';
@@ -550,6 +552,32 @@ class ApiService {
     }
   }
 
+  Future<Response> _jsonCreateFolder({
+    required String csId,
+    required String companyName,
+    required String csFname,
+    required String csLname,
+    required String folderName,
+    required String folderDesc,
+  }) async {
+    final payload = {
+      'cs_id': csId,
+      'company_name': companyName,
+      'csfname': csFname,
+      'cslname': csLname,
+      'foldername': folderName,
+      'folderdesc': folderDesc,
+      'image': 'image',
+    };
+    return _dio.post(
+      'createFolder',
+      data: json.encode(payload),
+      options: Options(
+        headers: {'Content-Type': 'application/json'},
+      ),
+    );
+  }
+
   Future<ApiResponse<void>> createFolder({
     required String csId,
     required String companyName,
@@ -557,26 +585,53 @@ class ApiService {
     required String csLname,
     required String folderName,
     required String folderDesc,
-    String image = 'image',
+
+    /// Local file path from gallery/camera; sent as multipart `image` when set.
+    String? imageFilePath,
   }) async {
     try {
-      final payload = {
-        'cs_id': csId,
-        'company_name': companyName,
-        'csfname': csFname,
-        'cslname': csLname,
-        'foldername': folderName,
-        'folderdesc': folderDesc,
-        'image': image,
-      };
+      Response response;
 
-      final response = await _dio.post(
-        'createFolder',
-        data: json.encode(payload),
-        options: Options(
-          headers: {'Content-Type': 'application/json'},
-        ),
-      );
+      if (imageFilePath != null && imageFilePath.trim().isNotEmpty) {
+        final file = File(imageFilePath);
+        if (await file.exists()) {
+          final name = imageFilePath.split(RegExp(r'[\\/]')).last;
+          final formData = FormData.fromMap({
+            'cs_id': csId,
+            'company_name': companyName,
+            'csfname': csFname,
+            'cslname': csLname,
+            'foldername': folderName,
+            'folderdesc': folderDesc,
+            'image': await MultipartFile.fromFile(
+              file.path,
+              filename: name.isEmpty ? 'image.jpg' : name,
+            ),
+          });
+          response = await _dio.post(
+            'createFolder',
+            data: formData,
+          );
+        } else {
+          response = await _jsonCreateFolder(
+            csId: csId,
+            companyName: companyName,
+            csFname: csFname,
+            csLname: csLname,
+            folderName: folderName,
+            folderDesc: folderDesc,
+          );
+        }
+      } else {
+        response = await _jsonCreateFolder(
+          csId: csId,
+          companyName: companyName,
+          csFname: csFname,
+          csLname: csLname,
+          folderName: folderName,
+          folderDesc: folderDesc,
+        );
+      }
 
       if (response.statusCode == 200) {
         Map<String, dynamic> responseData;

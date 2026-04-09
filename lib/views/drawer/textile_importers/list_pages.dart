@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:textile/views/drawer/textile_importers/buyer_card.dart';
 import 'package:textile/views/drawer/textile_importers/textile_importers_controller.dart';
 import 'package:textile/widgets/colors.dart';
+import 'package:textile/widgets/filter_empty_state.dart';
 
 class impotersListPage extends StatefulWidget {
   const impotersListPage({Key? key}) : super(key: key);
@@ -79,23 +80,27 @@ class _impotersListPageState extends State<impotersListPage> {
               ],
             ),
           ),
-         
-                const SizedBox(width: 8),
-                
           Expanded(
-            child: Obx(() => ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              itemCount: controller.filteredExporters.length,
-              itemBuilder: (context, index) {
-                return BuyerCard(
-                  key: ValueKey(controller.filteredExporters[index].id),
-                  buyer: controller.filteredExporters[index],
-                  scrollController: _scrollController,
-                  index: index,
+            child: Obx(() {
+              if (controller.filteredExporters.isEmpty && !loading) {
+                return FilterEmptyState(
+                  hasLoadedData: controller.hasLoadedData.value,
                 );
-              },
-            )),
+              }
+              return ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16),
+                itemCount: controller.filteredExporters.length,
+                itemBuilder: (context, index) {
+                  return BuyerCard(
+                    key: ValueKey(controller.filteredExporters[index].id),
+                    buyer: controller.filteredExporters[index],
+                    scrollController: _scrollController,
+                    index: index,
+                  );
+                },
+              );
+            }),
           ),
         ],
       )),

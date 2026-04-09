@@ -19,6 +19,7 @@ class SearchDanimController extends GetxController {
   final isLoading = false.obs;
   final isFilterSheetOpen = false.obs;
   final hasShownInitialFilterSheet = false.obs;
+  final hasLoadedData = false.obs;
 
   @override
   void onInit() {
@@ -90,6 +91,7 @@ class SearchDanimController extends GetxController {
       if (response.status == 200 && response.data != null) {
         denimList.value = response.data!;
         applyFilters();
+        hasLoadedData.value = true;
         Get.snackbar(
           'Success',
           'Loaded ${denimList.length} records',

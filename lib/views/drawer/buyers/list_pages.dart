@@ -6,6 +6,7 @@ import 'package:textile/views/drawer/buyers/buyer_controller.dart';
 import 'package:textile/views/drawer/buyers/filter_section.dart';
 import 'package:textile/views/drawer/textile_importers/textile_importers_controller.dart';
 import 'package:textile/widgets/colors.dart';
+import 'package:textile/widgets/filter_empty_state.dart';
 
 class BuyersListPage extends StatefulWidget {
   const BuyersListPage({Key? key}) : super(key: key);
@@ -146,19 +147,24 @@ class _BuyersListPageState extends State<BuyersListPage> {
             ),
           )),
           Expanded(
-            child: Obx(() => ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              itemCount: controller.filteredBuyers.length,
-              itemBuilder: (context, index) {
-                return BuyerCard(
-                  key: ValueKey(controller.filteredBuyers[index].id),
-                  buyer: controller.filteredBuyers[index],
-                  scrollController: _scrollController,
-                  index: index,
-                );
-              },
-            )),
+            child: Obx(() {
+              if (controller.filteredBuyers.isEmpty && !loading) {
+                return const FilterEmptyState(hasLoadedData: true);
+              }
+              return ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16),
+                itemCount: controller.filteredBuyers.length,
+                itemBuilder: (context, index) {
+                  return BuyerCard(
+                    key: ValueKey(controller.filteredBuyers[index].id),
+                    buyer: controller.filteredBuyers[index],
+                    scrollController: _scrollController,
+                    index: index,
+                  );
+                },
+              );
+            }),
           ),
         ],
       )),

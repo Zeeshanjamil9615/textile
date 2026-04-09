@@ -75,6 +75,7 @@ class AddFolderController extends GetxController {
     required String lastName,
     required String folderName,
     required String description,
+    String? imageFilePath,
   }) async {
     final user = await LocalStorageService.getUserData();
     if (user == null || user.id.trim().isEmpty) {
@@ -92,6 +93,7 @@ class AddFolderController extends GetxController {
         csLname: lastName,
         folderName: folderName,
         folderDesc: description,
+        imageFilePath: imageFilePath,
       );
 
       if (response.status == 200) {

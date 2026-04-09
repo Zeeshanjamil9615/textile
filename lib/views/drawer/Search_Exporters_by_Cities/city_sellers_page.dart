@@ -6,6 +6,7 @@ import 'package:textile/views/drawer/buyer_profile/buyer_profile.dart';
 import 'package:textile/api_service/local_storage_service.dart';
 import 'package:textile/widgets/custom_snackbar.dart';
 import 'package:textile/widgets/colors.dart';
+import 'package:textile/widgets/filter_empty_state.dart';
 
 class CitySellersController extends GetxController {
   final String city;
@@ -185,7 +186,11 @@ class CitySellersPage extends StatelessWidget {
                     return const Center(child: CircularProgressIndicator());
                   }
                   if (controller.filteredSellers.isEmpty) {
-                    return const Center(child: Text('No sellers found'));
+                    return const FilterEmptyState(
+                      hasLoadedData: true,
+                      messageNoResults:
+                          'No sellers match your search. Try another keyword.',
+                    );
                   }
                   return ListView.builder(
                     padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),

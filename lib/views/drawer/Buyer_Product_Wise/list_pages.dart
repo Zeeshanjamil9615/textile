@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:textile/views/drawer/Buyer_Product_Wise/Buyer_Product_Wise_controller.dart';
 import 'package:textile/views/drawer/Buyer_Product_Wise/buyer_card.dart';
 import 'package:textile/widgets/colors.dart';
+import 'package:textile/widgets/filter_empty_state.dart';
 
 class buyerproductwiseListPage extends StatefulWidget {
   const buyerproductwiseListPage({Key? key}) : super(key: key);
@@ -133,27 +134,8 @@ class _buyerproductwiseListPageState extends State<buyerproductwiseListPage> {
                   child: Obx(
                     () {
                       if (controller.filteredExporters.isEmpty && !controller.isLoading.value) {
-                        return Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.filter_list,
-                                size: 64,
-                                color: Colors.grey[400],
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                controller.hasLoadedData.value
-                                    ? 'No data found'
-                                    : 'Select filters and click Apply to load data',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
+                        return FilterEmptyState(
+                          hasLoadedData: controller.hasLoadedData.value,
                         );
                       }
                       return ListView.builder(

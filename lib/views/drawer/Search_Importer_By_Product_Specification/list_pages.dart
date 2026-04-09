@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/Search_Importer_By_Product_Specification_controller.dart';
 import 'package:textile/views/drawer/Search_Importer_By_Product_Specification/buyer_card.dart';
 import 'package:textile/widgets/colors.dart';
+import 'package:textile/widgets/filter_empty_state.dart';
 
 class SearchImporterByProductSpecificationListPage extends StatefulWidget {
   const SearchImporterByProductSpecificationListPage({Key? key})
@@ -85,20 +86,27 @@ class _SearchImporterByProductSpecificationListPageState
                 
                 Expanded(
                   child: Obx(
-                    () => ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(16),
-                      itemCount: controller.filteredRecordList.length,
-                      itemBuilder: (context, index) {
-                        final item =
-                            controller.filteredRecordList[index];
-                        return MadeupRecordCard(
-                          key: ValueKey('${item.importer}_$index'),
-                          item: item,
-                          index: index,
+                    () {
+                      if (controller.filteredRecordList.isEmpty && !loading) {
+                        return FilterEmptyState(
+                          hasLoadedData: controller.hasLoadedData.value,
                         );
-                      },
-                    ),
+                      }
+                      return ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.all(16),
+                        itemCount: controller.filteredRecordList.length,
+                        itemBuilder: (context, index) {
+                          final item =
+                              controller.filteredRecordList[index];
+                          return MadeupRecordCard(
+                            key: ValueKey('${item.importer}_$index'),
+                            item: item,
+                            index: index,
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
               ],

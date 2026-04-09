@@ -9,6 +9,7 @@ import 'package:textile/views/drawer/drawer.dart';
 import 'package:textile/views/drawer/dashboard/top_brand_buyers/top_brand_buyers_page.dart';
 import 'package:textile/views/drawer/textile_importers/textile_importers.dart';
 import 'package:textile/views/drawer/textile_importers/textile_importers_controller.dart';
+import 'package:textile/views/drawer/textile_importers/textile_importers_hub.dart';
 import 'package:textile/widgets/colors.dart';
 import 'package:textile/widgets/custom_app_bar.dart';
 
@@ -70,7 +71,7 @@ class _DashboardBody extends StatelessWidget {
                         iconBg: const Color(0xFF2D7373),
                         accent: const Color(0xFF2D7373),
                         loading: controller.isLoadingCounts.value,
-                        onView: () => Get.to(() => const TextileImporters()),
+                        onView: () => Get.to(() => const TextileImportersHub()),
                       ),
                       _KpiData(
                         title: 'Textile Exporters',

@@ -23,6 +23,7 @@ class TextileExportersController extends GetxController {
   final isLoading = false.obs;
   final isFilterSheetOpen = false.obs;
   final hasShownInitialFilterSheet = false.obs;
+  final hasLoadedData = false.obs;
 
   @override
   void onInit() {
@@ -113,6 +114,7 @@ class TextileExportersController extends GetxController {
       if (response.status == 200 && response.data != null) {
         exporters.value = response.data!;
         applyFilters();
+        hasLoadedData.value = true;
         Get.snackbar(
           'Success',
           'Loaded ${exporters.length} records',

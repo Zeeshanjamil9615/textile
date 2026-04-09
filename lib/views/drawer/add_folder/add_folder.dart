@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:textile/api_service/local_storage_service.dart';
 import 'package:textile/views/drawer/add_folder/add_folder_controller.dart';
 import 'package:textile/views/drawer/add_folder/open_folder.dart';
 import 'package:textile/views/drawer/drawer.dart';
@@ -223,10 +227,39 @@ class _AddNewFolderForm extends StatefulWidget {
 
 class _AddNewFolderFormState extends State<_AddNewFolderForm> {
   final _formKey = GlobalKey<FormState>();
-  final _firstNameController = TextEditingController(text: 'Hassan');
-  final _lastNameController = TextEditingController(text: 'Qasim');
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _folderNameController = TextEditingController();
   final _folderDescriptionController = TextEditingController();
+  final _imagePicker = ImagePicker();
+  String? _pickedImagePath;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLoggedInUserNames();
+  }
+
+  Future<void> _loadLoggedInUserNames() async {
+    final user = await LocalStorageService.getUserData();
+    if (!mounted) return;
+    if (user != null) {
+      _firstNameController.text = user.firstName.trim();
+      _lastNameController.text = user.lastName.trim();
+      setState(() {});
+    }
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    final x = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+    if (!mounted) return;
+    if (x != null) {
+      setState(() => _pickedImagePath = x.path);
+    }
+  }
 
   @override
   void dispose() {
@@ -374,12 +407,26 @@ class _AddNewFolderFormState extends State<_AddNewFolderForm> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            onPressed: () {
-                              // Dummy picker - no real image handling for now
-                            },
+                            onPressed: _pickImageFromGallery,
                             icon: const Icon(Icons.image_outlined),
-                            label: const Text('Choose file'),
+                            label: Text(
+                              _pickedImagePath == null
+                                  ? 'Choose from gallery'
+                                  : 'Change image',
+                            ),
                           ),
+                          if (_pickedImagePath != null) ...[
+                            const SizedBox(height: 12),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.file(
+                                File(_pickedImagePath!),
+                                height: 120,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -412,6 +459,7 @@ class _AddNewFolderFormState extends State<_AddNewFolderForm> {
                                         .isEmpty
                                     ? 'No description'
                                     : _folderDescriptionController.text.trim(),
+                                imageFilePath: _pickedImagePath,
                               );
                               if (ok) {
                                 Get.back();

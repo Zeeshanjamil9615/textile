@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:textile/views/drawer/Search_Exporter_By_Product_Specification/Search_Exporter_By_Product_Specification_controller.dart';
 import 'package:textile/views/drawer/Search_Exporter_By_Product_Specification/buyer_card.dart';
 import 'package:textile/widgets/colors.dart';
+import 'package:textile/widgets/filter_empty_state.dart';
 
 class SearchExporterByProductSpecificationListPage extends StatefulWidget {
   const SearchExporterByProductSpecificationListPage({Key? key})
@@ -126,19 +127,26 @@ class _SearchExporterByProductSpecificationListPageState
                 ),
                 Expanded(
                   child: Obx(
-                    () => ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(16),
-                      itemCount: controller.filteredExporters.length,
-                      itemBuilder: (context, index) {
-                        return BuyerCard(
-                          key: ValueKey(controller.filteredExporters[index].sr),
-                          buyer: controller.filteredExporters[index],
-                          scrollController: _scrollController,
-                          index: index,
+                    () {
+                      if (controller.filteredExporters.isEmpty && !loading) {
+                        return FilterEmptyState(
+                          hasLoadedData: controller.hasLoadedData.value,
                         );
-                      },
-                    ),
+                      }
+                      return ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.all(16),
+                        itemCount: controller.filteredExporters.length,
+                        itemBuilder: (context, index) {
+                          return BuyerCard(
+                            key: ValueKey(controller.filteredExporters[index].sr),
+                            buyer: controller.filteredExporters[index],
+                            scrollController: _scrollController,
+                            index: index,
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
               ],

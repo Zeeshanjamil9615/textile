@@ -23,6 +23,7 @@ class GarmentDenimController extends GetxController {
   final isLoading = false.obs;
   final totalRecords = 0.obs;
   final shouldAutoOpenFilter = true.obs; // Flag to auto-open filter on first load
+  final hasLoadedData = false.obs;
 
   @override
   void onInit() {
@@ -96,6 +97,7 @@ class GarmentDenimController extends GetxController {
         buyers.value = response.data!.data;
         totalRecords.value = response.data!.totalRecords;
         applyFilters();
+        hasLoadedData.value = true;
       } else {
         Get.snackbar(
           'Error',

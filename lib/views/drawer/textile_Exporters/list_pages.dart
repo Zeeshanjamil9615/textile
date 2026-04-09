@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:textile/views/drawer/textile_Exporters/textile_Exporters_controller.dart';
 import 'package:textile/views/drawer/textile_Exporters/buyer_card.dart';
 import 'package:textile/widgets/colors.dart';
+import 'package:textile/widgets/filter_empty_state.dart';
 
 class ExportersListPage extends StatefulWidget {
   const ExportersListPage({Key? key}) : super(key: key);
@@ -165,20 +166,27 @@ class _ExportersListPageState extends State<ExportersListPage> {
                 ),
                 Expanded(
                   child: Obx(
-                    () => ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(16),
-                      itemCount: controller.filteredExporters.length,
-                      itemBuilder: (context, index) {
-                        final item =
-                            controller.filteredExporters[index];
-                        return ExporterCard(
-                          key: ValueKey('${item.id}_$index'),
-                          item: item,
-                          index: index,
+                    () {
+                      if (controller.filteredExporters.isEmpty && !loading) {
+                        return FilterEmptyState(
+                          hasLoadedData: controller.hasLoadedData.value,
                         );
-                      },
-                    ),
+                      }
+                      return ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.all(16),
+                        itemCount: controller.filteredExporters.length,
+                        itemBuilder: (context, index) {
+                          final item =
+                              controller.filteredExporters[index];
+                          return ExporterCard(
+                            key: ValueKey('${item.id}_$index'),
+                            item: item,
+                            index: index,
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
               ],

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:textile/views/drawer/garment_denim/garment_denim_controller.dart';
 import 'package:textile/views/drawer/garment_denim/buyer_card.dart';
 import 'package:textile/widgets/colors.dart';
+import 'package:textile/widgets/filter_empty_state.dart';
 
 class GarmnetDENIMListPage extends StatefulWidget {
   const GarmnetDENIMListPage({Key? key}) : super(key: key);
@@ -139,33 +140,8 @@ class _GarmnetDENIMListPageState extends State<GarmnetDENIMListPage> {
                 Expanded(
                   child: Obx(() {
                     if (controller.filteredBuyers.isEmpty && !loading) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.inbox,
-                              size: 64,
-                              color: Colors.grey[400],
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No data available',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Apply filters to load data',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[500],
-                              ),
-                            ),
-                          ],
-                        ),
+                      return FilterEmptyState(
+                        hasLoadedData: controller.hasLoadedData.value,
                       );
                     }
                     return ListView.builder(

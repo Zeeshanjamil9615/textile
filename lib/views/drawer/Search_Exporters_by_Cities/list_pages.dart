@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/views/drawer/Search_Exporters_by_Cities/Search_Exporters_by_Cities_controller.dart';
 import 'package:textile/views/drawer/Search_Exporters_by_Cities/buyer_card.dart';
+import 'package:textile/widgets/filter_empty_state.dart';
 
 class searchExportersByCitiesListPage extends StatefulWidget {
   const searchExportersByCitiesListPage({Key? key}) : super(key: key);
@@ -86,19 +87,26 @@ class _searchExportersByCitiesListPageState extends State<searchExportersByCitie
             ),
           )),
           Expanded(
-            child: Obx(() => ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              itemCount: controller.filteredExporters.length,
-              itemBuilder: (context, index) {
-                return BuyerCard(
-                  key: ValueKey(controller.filteredExporters[index].serialNumber),
-                  buyer: controller.filteredExporters[index],
-                  scrollController: _scrollController,
-                  index: index,
-                );
-              },
-            )),
+            child: Obx(() {
+              if (!controller.isLoading.value &&
+                  controller.filteredExporters.isEmpty) {
+                return const FilterEmptyState(hasLoadedData: true);
+              }
+              return ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16),
+                itemCount: controller.filteredExporters.length,
+                itemBuilder: (context, index) {
+                  return BuyerCard(
+                    key: ValueKey(
+                        controller.filteredExporters[index].serialNumber),
+                    buyer: controller.filteredExporters[index],
+                    scrollController: _scrollController,
+                    index: index,
+                  );
+                },
+              );
+            }),
           ),
             ],
           ),

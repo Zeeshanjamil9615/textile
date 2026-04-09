@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:textile/api_service/api_service.dart';
 import 'package:textile/api_service/local_storage_service.dart';
 import 'package:textile/widgets/colors.dart';
+import 'package:textile/widgets/filter_empty_state.dart';
+import 'package:textile/views/web/google_search_webview.dart';
 
 class ImporterItem {
   final int sr;
@@ -45,6 +47,7 @@ class OpenFolderController extends GetxController {
   });
 
   final importers = <ImporterItem>[].obs;
+  // (removed) filtered/pagination state for table UI
   final isLoading = false.obs;
   final errorMessage = ''.obs;
   final countries = <String>[].obs;
@@ -302,6 +305,38 @@ class OpenFolderScreen extends StatelessWidget {
     required this.folderId,
   }) : super(key: key);
 
+  static String _buildGoogleSearchUrl({
+    required String importerName,
+    required String country,
+  }) {
+    final parts = <String>[
+      importerName.trim(),
+      country.trim(),
+    ].where((e) => e.isNotEmpty).toList();
+
+    final query = parts.isEmpty ? importerName.trim() : parts.join(' ');
+    final encoded = Uri.encodeQueryComponent(query.isEmpty ? ' ' : query);
+    return 'https://www.google.com/search?q=$encoded';
+  }
+
+  static void _openGoogleSearchInApp(
+    BuildContext context, {
+    required String importerName,
+    required String country,
+  }) {
+    final url = _buildGoogleSearchUrl(
+      importerName: importerName,
+      country: country,
+    );
+    final title =
+        importerName.trim().isEmpty ? 'Google Search' : importerName.trim();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => GoogleSearchWebViewPage(url: url, title: title),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<OpenFolderController>(
@@ -422,44 +457,31 @@ class OpenFolderScreen extends StatelessWidget {
                             ),
                           ),
                           child: Row(
-                            children: const [
-                              Expanded(
-                                flex: 1,
+                            children: [
+                              const Expanded(
                                 child: Text(
-                                  'Sr#',
+                                  'Importers',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14.5,
                                   ),
                                 ),
                               ),
-                              Expanded(
-                                flex: 3,
-                                child: Text(
-                                  'Importer Name\nCell',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+                              Obx(
+                                () => Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.12),
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 3,
-                                child: Text(
-                                  'City\nCountry',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 3,
-                                child: Text(
-                                  'Narration',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+                                  child: Text(
+                                    '${controller.importers.length}',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -474,135 +496,156 @@ class OpenFolderScreen extends StatelessWidget {
                                 child: Center(child: CircularProgressIndicator()),
                               );
                             }
+                            if (controller.importers.isEmpty) {
+                              return const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 28),
+                                child: FilterEmptyState(
+                                  hasLoadedData: true,
+                                  messageNoResults:
+                                      'No importers in this folder yet. Tap “Add Importer” to add one.',
+                                ),
+                              );
+                            }
                             return ListView.separated(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: controller.importers.length,
-                            separatorBuilder: (_, __) =>
-                                const Divider(height: 1),
-                            itemBuilder: (context, index) {
-                              final item = controller.importers[index];
-                              final city = item.city.trim();
-                              final country = item.country.trim();
-                              final cityCountry = city.isEmpty && country.isEmpty
-                                  ? '—'
-                                  : city.isEmpty
-                                      ? country
-                                      : country.isEmpty
-                                          ? city
-                                          : '$city / $country';
-                              final narrationText =
-                                  (item.narration?.trim().isNotEmpty ?? false)
-                                      ? item.narration!.trim()
-                                      : (item.address.trim().isNotEmpty
-                                          ? item.address.trim()
-                                          : '—');
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 10),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Expanded(
-                                          flex: 1,
-                                          child: Text(
+                              separatorBuilder: (_, __) =>
+                                  const Divider(height: 1),
+                              itemBuilder: (context, index) {
+                                final item = controller.importers[index];
+                                final city = item.city.trim();
+                                final country = item.country.trim();
+                                final cityCountry =
+                                    city.isEmpty && country.isEmpty
+                                        ? '—'
+                                        : city.isEmpty
+                                            ? country
+                                            : country.isEmpty
+                                                ? city
+                                                : '$city / $country';
+                                final narrationText =
+                                    (item.narration?.trim().isNotEmpty ?? false)
+                                        ? item.narration!.trim()
+                                        : (item.address.trim().isNotEmpty
+                                            ? item.address.trim()
+                                            : '—');
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 10),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
                                             '${item.sr}',
                                             style: const TextStyle(
                                               fontWeight: FontWeight.w500,
                                             ),
                                           ),
-                                        ),
-                                        Expanded(
-                                          flex: 3,
-                                          child: Text(
-                                            item.importerName,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex: 3,
-                                          child: Text(
-                                            cityCountry,
-                                            style: const TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.black87,
-                                            ),
-                                          ),
-                                        ),
-                                        Expanded(
-                                          flex: 3,
-                                          child: Text(
-                                            narrationText,
-                                            maxLines: 3,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(fontSize: 12),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor:
-                                                const Color(0xFF2D7373),
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 16, vertical: 8),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                          ),
-                                          onPressed: () {
-                                            // Dummy "Search Site" action
-                                          },
-                                          child: const Text('Search Site',style: TextStyle(color: AppColors.textWhite),),
-                                        ),
-                                        Row(
-                                          children: [
-                                            IconButton(
-                                              onPressed: () async {
-                                                await controller
-                                                    .deleteImporter(index);
-                                              },
-                                              icon: const Icon(          
-                                                Icons.delete_outline,
-                                                color: Colors.redAccent,
-                                                size: 20,
+                                      const SizedBox(width: 8),
+                                          
+                                          Expanded(
+                                            flex: 3,
+                                            child: Text(
+                                              item.importerName,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w600,
                                               ),
                                             ),
-                                            IconButton(
-                                              onPressed: () {
-                                                _openEditBuyerSheet(
-                                                  context,
-                                                  controller,
-                                                  index,
-                                                  item,
-                                                );
-                                              },
-                                              icon: const Icon(
-                                                Icons.edit_outlined,
-                                                color: Colors.blueAccent,
-                                                size: 20,
+                                          ),
+                                          
+                                        ],
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [Expanded(
+                                            flex: 3,
+                                            child: Text(
+                                              cityCountry,
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.black87,
                                               ),
                                             ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          );
+                                          ),
+                                          Expanded(
+                                            flex: 3,
+                                            child: Text(
+                                              narrationText,
+                                              maxLines: 3,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(fontSize: 12),
+                                            ),
+                                          ),],),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  const Color(0xFF2D7373),
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 16, vertical: 8),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                            ),
+                                            onPressed: () {
+                                              _openGoogleSearchInApp(
+                                                context,
+                                                importerName: item.importerName,
+                                                country: item.country,
+                                              );
+                                            },
+                                            child: const Text(
+                                              'Search Site',
+                                              style: TextStyle(
+                                                color: AppColors.textWhite,
+                                              ),
+                                            ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              IconButton(
+                                                onPressed: () async {
+                                                  await controller
+                                                      .deleteImporter(index);
+                                                },
+                                                icon: const Icon(
+                                                  Icons.delete_outline,
+                                                  color: Colors.redAccent,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                              IconButton(
+                                                onPressed: () {
+                                                  _openEditBuyerSheet(
+                                                    context,
+                                                    controller,
+                                                    index,
+                                                    item,
+                                                  );
+                                                },
+                                                icon: const Icon(
+                                                  Icons.edit_outlined,
+                                                  color: Colors.blueAccent,
+                                                  size: 20,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            );
                         },
                       ),
 
@@ -1133,6 +1176,10 @@ class OpenFolderScreen extends StatelessWidget {
       },
     );
   }
+
+  // (removed) _pill helper for card/table UI
 }
+
+// (removed) _MetaChip: no longer used after table redesign
 
 

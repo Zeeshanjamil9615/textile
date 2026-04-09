@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:textile/views/drawer/Search_Garment_Importer_By_Product_Specification/buyer_card.dart';
 import 'package:textile/views/drawer/Search_Garment_Importer_By_Product_Specification/search_garment_controller.dart';
 import 'package:textile/widgets/colors.dart';
+import 'package:textile/widgets/filter_empty_state.dart';
 
 class SearchGarmentImporterByProductSpecificationListPage extends StatefulWidget {
   const SearchGarmentImporterByProductSpecificationListPage({Key? key}) : super(key: key);
@@ -74,19 +75,26 @@ class _SearchGarmentImporterByProductSpecificationListPageState
           ),
           
           Expanded(
-            child: Obx(() => ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(16),
-              itemCount: controller.filteredBuyers.length,
-              itemBuilder: (context, index) {
-                return BuyerCard(
-                  key: ValueKey(controller.filteredBuyers[index].id),
-                  buyer: controller.filteredBuyers[index],
-                  scrollController: _scrollController,
-                  index: index,
+            child: Obx(() {
+              if (controller.filteredBuyers.isEmpty && !loading) {
+                return FilterEmptyState(
+                  hasLoadedData: controller.hasLoadedData.value,
                 );
-              },
-            )),
+              }
+              return ListView.builder(
+                controller: _scrollController,
+                padding: const EdgeInsets.all(16),
+                itemCount: controller.filteredBuyers.length,
+                itemBuilder: (context, index) {
+                  return BuyerCard(
+                    key: ValueKey(controller.filteredBuyers[index].id),
+                    buyer: controller.filteredBuyers[index],
+                    scrollController: _scrollController,
+                    index: index,
+                  );
+                },
+              );
+            }),
           ),
         ],
       )),

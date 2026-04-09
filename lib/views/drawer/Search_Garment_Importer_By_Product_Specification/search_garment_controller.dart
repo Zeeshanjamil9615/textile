@@ -19,6 +19,7 @@ class SearchGarmentImporterByProductSpecificationController
   final isLoading = false.obs;
   final isFilterSheetOpen = false.obs;
   final hasShownInitialFilterSheet = false.obs;
+  final hasLoadedData = false.obs;
 
   @override
   void onInit() {
@@ -84,6 +85,7 @@ class SearchGarmentImporterByProductSpecificationController
       if (response.status == 200 && response.data != null) {
         buyers.value = response.data!;
         applyFilters();
+        hasLoadedData.value = true;
       } else {
         buyers.clear();
         filteredBuyers.clear();

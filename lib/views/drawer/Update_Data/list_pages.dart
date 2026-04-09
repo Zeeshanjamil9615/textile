@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:textile/views/drawer/Update_Data/buyer_card.dart';
 import 'package:textile/views/drawer/Update_Data/Update_Data_controller.dart';
+import 'package:textile/widgets/filter_empty_state.dart';
 
 class updatedataListPage extends StatefulWidget {
   const updatedataListPage({Key? key}) : super(key: key);
@@ -78,12 +79,7 @@ class _updatedataListPageState extends State<updatedataListPage> {
               }
 
               if (controller.filteredBuyers.isEmpty) {
-                return const Center(
-                  child: Text(
-                    'No data found',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                );
+                return const FilterEmptyState(hasLoadedData: true);
               }
 
               return ListView.builder(

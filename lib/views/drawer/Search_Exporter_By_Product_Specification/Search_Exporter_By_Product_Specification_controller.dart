@@ -24,6 +24,7 @@ class SearchExporterByProductSpecificationController extends GetxController {
   final isLoading = false.obs;
   final isFilterSheetOpen = false.obs;
   final hasShownInitialFilterSheet = false.obs;
+  final hasLoadedData = false.obs;
 
   @override
   void onInit() {
@@ -122,6 +123,7 @@ class SearchExporterByProductSpecificationController extends GetxController {
                 ))
             .toList();
         applyFilters();
+        hasLoadedData.value = true;
       } else {
         exporters.clear();
         filteredExporters.clear();

@@ -24,6 +24,7 @@ class SearchImporterByProductSpecificationController extends GetxController {
   final isLoading = false.obs;
   final isFilterSheetOpen = false.obs;
   final hasShownInitialFilterSheet = false.obs;
+  final hasLoadedData = false.obs;
 
   @override
   void onInit() {
@@ -114,6 +115,7 @@ class SearchImporterByProductSpecificationController extends GetxController {
       if (response.status == 200 && response.data != null) {
         recordList.value = response.data!;
         applyFilters();
+        hasLoadedData.value = true;
         Get.snackbar(
           'Success',
           'Loaded ${recordList.length} records',

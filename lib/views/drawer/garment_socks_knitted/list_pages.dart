@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:textile/views/drawer/garment_socks_knitted/buyer_card.dart';
 import 'package:textile/views/drawer/garment_socks_knitted/garment_socks_knitted_controller.dart';
 import 'package:textile/widgets/colors.dart';
+import 'package:textile/widgets/filter_empty_state.dart';
 
 class GarmentSocksKnittedListPage extends StatefulWidget {
   const GarmentSocksKnittedListPage({Key? key}) : super(key: key);
@@ -77,27 +78,8 @@ class _GarmentSocksKnittedListPageState extends State<GarmentSocksKnittedListPag
             child: Obx(
               () {
                 if (controller.filteredBuyers.isEmpty && !controller.isLoading.value) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.filter_list,
-                          size: 64,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          controller.hasLoadedData.value
-                              ? 'No data found'
-                              : 'Select filters and click Apply to load data',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
+                  return FilterEmptyState(
+                    hasLoadedData: controller.hasLoadedData.value,
                   );
                 }
                 return ListView.builder(
