@@ -95,7 +95,6 @@ class AddFolderController extends GetxController {
         folderDesc: description,
         imageFilePath: imageFilePath,
       );
-
       if (response.status == 200) {
         CustomSnackbar.success(response.message);
         await fetchFolders();
